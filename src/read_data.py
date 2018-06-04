@@ -9,6 +9,7 @@ from nltk.tokenize import word_tokenize
 from nltk.corpus import twitter_samples
 from nltk.twitter.common import json2csv
 from langdetect import detect, lang_detect_exception
+from random import randint
 
 
 class CorpusType(Enum):
@@ -17,6 +18,8 @@ class CorpusType(Enum):
     SEPHORA = 'sephora'
     COHA = 'coha'
     TWITTER = 'twitter'
+    WIKITEXT = 'wikitext'
+    ONEBILLION = '1-billion'
 
 
 def clean_and_tokenize(sentence):
@@ -111,24 +114,41 @@ def read_single_tweets(path):
         input_tweets = twitter_samples.abspath(os.path.abspath(path))
         output_tweets = os.path.join(os.path.dirname(path) + '_text', os.path.basename(path) + '.csv')
         os.makedirs(os.path.dirname(output_tweets), exist_ok=True)
-        with open(input_tweets) as fp:
-            json2csv(fp, output_tweets, ['text'])
-        with open(output_tweets, 'r') as fp:
-            reader = csv.DictReader(fp)
-            for row in reader:
-                try:
-                    tweet = row['text']
-                    if detect(tweet) == 'en':
-                        word_list.append(clean_and_tokenize(tweet))
-                except lang_detect_exception.LangDetectException:
-                    continue
+        try:
+            with open(input_tweets) as fp:
+                json2csv(fp, output_tweets, ['text'])
+            with open(output_tweets, 'r') as fp:
+                reader = csv.DictReader(fp)
+                for row in reader:
+                    try:
+                        tweet = row['text']
+                        if detect(tweet) == 'en':
+                            word_list.append(clean_and_tokenize(tweet))
+                    except lang_detect_exception.LangDetectException:
+                        continue
+        except:
+            print(path)
     return word_list
+
+
+def read_single_wikitext(path):
+    word_list = []
+    if os.path.isfile(path):
+        print(path)
+        with open(path, 'r') as fp:
+            for line in fp:
+                word_list.append(clean_and_tokenize(line))
+    return word_list
+
+
+def read_single_onebillion(path):
+    return read_single_wikitext(path)
 
 
 def read_all_files(path, corpus_type):
     if os.path.isdir(path):
         for root, dirs, files in os.walk(path):
-            print("Processing %s" % root)
+            # print("Processing %s" % root)
             for file in files:
                 file_full_path = os.path.join(root, file)
                 dump_file_path = os.path.join('../data/%s-wordlist-all' % corpus_type.value,
@@ -144,35 +164,42 @@ def read_all_files(path, corpus_type):
                     word_list = read_single_sephora(path=file_full_path)
                 elif corpus_type == CorpusType.TWITTER:
                     word_list = read_single_tweets(path=file_full_path)
+                elif corpus_type == CorpusType.WIKITEXT:
+                    word_list = read_single_wikitext(path=file_full_path)
+                elif corpus_type == CorpusType.ONEBILLION:
+                    word_list = read_single_onebillion(path=file_full_path)
                 else:
                     raise Exception("wrong file type")
                 with open(dump_file_path, 'wb') as fp:
                     pickle.dump(word_list, fp)
 
 
-def read_all_wordlist(path):
+def read_all_wordlist(path, sample_rate=1):
     word_matrix = []
     print('Path %s' % path)
     if os.path.isdir(path):
         for root, dirs, files in os.walk(path):
             for file in files:
-                file_full_path = os.path.join(root, file)
-                print('Parsing %s' % file_full_path)
-                with open(file_full_path, 'rb') as fp:
-                    word_list = pickle.load(fp)
-                    word_matrix.extend(word_list)
+                if randint(0, 9) < 10 * sample_rate:
+                    file_full_path = os.path.join(root, file)
+                    print('Parsing %s' % file_full_path)
+                    with open(file_full_path, 'rb') as fp:
+                        word_list = pickle.load(fp)
+                        word_matrix.extend(word_list)
     return word_matrix
 
 
 if __name__ == '__main__':
 
-    global_corpus_type = CorpusType.GITHUB
+    global_corpus_type = CorpusType.TWITTER
 
     corpus_path = {CorpusType.GITHUB: '../data/github',
                    CorpusType.WIKIPEDIA: '../data/wikipedia/content',
                    CorpusType.COHA: '../data/coha',
                    CorpusType.SEPHORA: '../data/sephora',
-                   CorpusType.TWITTER: '../data/twitter/part-00'
+                   CorpusType.TWITTER: '../data/twitter/part-05',
+                   CorpusType.WIKITEXT: '../data/wikitext',
+                   CorpusType.ONEBILLION: '../data/onebillion'
                    }
 
     read_all_files(path=corpus_path.get(global_corpus_type), corpus_type=global_corpus_type)
