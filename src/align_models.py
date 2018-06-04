@@ -1,7 +1,7 @@
 from gensim.models.word2vec import Word2Vec
 from read_data import CorpusType
 import numpy as np
-from tempfile import TemporaryFile
+import os
 
 
 # from https://stackoverflow.com/questions/21030391/how-to-normalize-array-numpy
@@ -39,8 +39,14 @@ if __name__ == '__main__':
     model_base = '../models/embedding/%s/%s'
     model_name = 'word2vec_base_300'
     tw_model = Word2Vec.load(model_base % (CorpusType.TWITTER, model_name))
-    # gh_model = Word2Vec.load(model_base % (CorpusType.GITHUB, model_name))
+    gh_model = Word2Vec.load(model_base % (CorpusType.GITHUB, model_name))
     wk_model = Word2Vec.load(model_base % (CorpusType.WIKITEXT, model_name))
+
+    transform_base = '../models/transform'
+    os.makedirs(transform_base, exist_ok=True)
+
     w = align_space(tw_model, wk_model)
-    outfile = TemporaryFile()
-    np.save(outfile, w)
+    np.save(os.path.join(transform_base, 'tw_wk'), w)
+
+    w = align_space(gh_model, wk_model)
+    np.save(os.path.join(transform_base, 'gh_wk'), w)
