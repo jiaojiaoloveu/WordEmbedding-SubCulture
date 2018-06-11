@@ -2,24 +2,13 @@ import os
 import re
 import pickle
 import csv
-from enum import Enum
 from bs4 import BeautifulSoup
 from tinydb import TinyDB
 from nltk.tokenize import word_tokenize
 from nltk.corpus import twitter_samples
 from nltk.twitter.common import json2csv
 from langdetect import detect, lang_detect_exception
-from random import randint
-
-
-class CorpusType(Enum):
-    GITHUB = 'github'
-    WIKIPEDIA = 'wikipedia'
-    SEPHORA = 'sephora'
-    COHA = 'coha'
-    TWITTER = 'twitter'
-    WIKITEXT = 'wikitext'
-    ONEBILLION = '1-billion'
+from corpus_type import CorpusType
 
 
 def clean_and_tokenize(sentence):
@@ -174,18 +163,17 @@ def read_all_files(path, corpus_type):
                     pickle.dump(word_list, fp)
 
 
-def read_all_wordlist(path, sample_rate=1):
+def read_all_wordlist(path):
     word_matrix = []
     print('Path %s' % path)
     if os.path.isdir(path):
         for root, dirs, files in os.walk(path):
             for file in files:
-                if randint(0, 9) < 10 * sample_rate:
-                    file_full_path = os.path.join(root, file)
-                    print('Parsing %s' % file_full_path)
-                    with open(file_full_path, 'rb') as fp:
-                        word_list = pickle.load(fp)
-                        word_matrix.extend(word_list)
+                file_full_path = os.path.join(root, file)
+                print('Parsing %s' % file_full_path)
+                with open(file_full_path, 'rb') as fp:
+                    word_list = pickle.load(fp)
+                    word_matrix.extend(word_list)
     return word_matrix
 
 

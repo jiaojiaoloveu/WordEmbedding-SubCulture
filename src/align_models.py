@@ -1,5 +1,5 @@
 from gensim.models.word2vec import Word2Vec
-from read_data import CorpusType
+from corpus_type import CorpusType
 import numpy as np
 import os
 

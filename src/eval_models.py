@@ -1,5 +1,5 @@
 import os
-from read_data import CorpusType
+from corpus_type import CorpusType
 from gensim.models.word2vec import Word2Vec
 
 if __name__ == '__main__':
