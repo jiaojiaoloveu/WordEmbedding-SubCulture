@@ -25,7 +25,7 @@ if __name__ == '__main__':
 
     for word in words_list:
         for pos in words_list_pos.keys():
-            if word in set(w.name().split('.', 1) for w in wn.synsets(word, pos=pos)):
+            if word in set(w.name().split('.', 1)[0] for w in wn.synsets(word, pos=pos)):
                 words_list_pos[pos].append(word)
 
     for pos in words_list_pos.keys():
