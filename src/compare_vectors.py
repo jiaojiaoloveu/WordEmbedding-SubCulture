@@ -32,7 +32,7 @@ if __name__ == '__main__':
     gh_cmp_base_path = '../result/gh_wk'
     os.makedirs(gh_cmp_base_path, exist_ok=True)
     al_cmp_base_path = '../result/tw_gh_wk'
-    os.makedirs(gh_cmp_base_path, exist_ok=True)
+    os.makedirs(al_cmp_base_path, exist_ok=True)
 
     for pos in pos_list:
         with open('../result/wk_tw_gh_wordlist/%s' % pos, 'r') as fp:
