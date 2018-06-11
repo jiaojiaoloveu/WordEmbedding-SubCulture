@@ -9,13 +9,18 @@ from nltk.corpus import twitter_samples
 from nltk.twitter.common import json2csv
 from langdetect import detect, lang_detect_exception
 from corpus_type import CorpusType
+from nltk.stem import WordNetLemmatizer
+from nltk.corpus import wordnet as wn
+
+
+wordnet_lemmatizer = WordNetLemmatizer()
 
 
 def clean_and_tokenize(sentence):
     sentence = re.sub("(https?://[^ ]+)", " ", sentence).lower()
     text = BeautifulSoup(sentence, "lxml").get_text()
     text = re.sub("[^a-zA-Z]", " ", text)
-    return word_tokenize(text)
+    return [wordnet_lemmatizer.lemmatize(w) for w in word_tokenize(text) if len(wn.synsets(w)) > 0]
 
 
 def read_single_repo(path):

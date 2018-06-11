@@ -1,7 +1,7 @@
 from nltk.corpus import wordnet as wn
 from gensim.models.word2vec import Word2Vec
 from corpus_type import CorpusType
-import pickle
+import json
 import os
 
 if __name__ == '__main__':
@@ -11,10 +11,10 @@ if __name__ == '__main__':
     gh_model = Word2Vec.load(base_model_path % CorpusType.GITHUB.value)
     words_list = list(set(wk_model.wv.vocab.keys()) & set(tw_model.wv.vocab.keys()) & set(gh_model.wv.vocab.keys()))
 
-    base_wordlist_path = '../data/wk_tw_gh_wordlist'
+    base_wordlist_path = '../result/wk_tw_gh_wordlist'
     os.makedirs(base_wordlist_path, exist_ok=True)
-    with open(os.path.join(base_wordlist_path, 'all'), 'wb') as fp:
-        pickle.dump(words_list, fp)
+    with open(os.path.join(base_wordlist_path, 'all'), 'w') as fp:
+        json.dump(words_list, fp)
 
     words_list_pos = {
         wn.VERB: [],
@@ -29,5 +29,5 @@ if __name__ == '__main__':
                 words_list_pos[pos].append(word)
 
     for pos in words_list_pos.keys():
-        with open(os.path.join(base_wordlist_path, pos), 'wb') as fp:
-            pickle.dump(words_list_pos[pos], fp)
+        with open(os.path.join(base_wordlist_path, pos), 'w') as fp:
+            json.dump(words_list_pos[pos], fp)
