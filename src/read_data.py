@@ -1,6 +1,6 @@
 import os
 import re
-import pickle
+import json
 import csv
 from bs4 import BeautifulSoup
 from tinydb import TinyDB
@@ -164,8 +164,8 @@ def read_all_files(path, corpus_type):
                     word_list = read_single_onebillion(path=file_full_path)
                 else:
                     raise Exception("wrong file type")
-                with open(dump_file_path, 'wb') as fp:
-                    pickle.dump(word_list, fp)
+                with open(dump_file_path, 'w') as fp:
+                    json.dump(word_list, fp)
 
 
 def read_all_wordlist(path):
@@ -176,15 +176,15 @@ def read_all_wordlist(path):
             for file in files:
                 file_full_path = os.path.join(root, file)
                 print('Parsing %s' % file_full_path)
-                with open(file_full_path, 'rb') as fp:
-                    word_list = pickle.load(fp)
+                with open(file_full_path, 'r') as fp:
+                    word_list = json.load(fp)
                     word_matrix.extend(word_list)
     return word_matrix
 
 
 if __name__ == '__main__':
 
-    global_corpus_type = CorpusType.TWITTER
+    global_corpus_type = CorpusType.GITHUB
 
     corpus_path = {CorpusType.GITHUB: '../data/github',
                    CorpusType.WIKIPEDIA: '../data/wikipedia/content',
