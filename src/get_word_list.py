@@ -29,5 +29,5 @@ if __name__ == '__main__':
                 words_list_pos[pos].append(word)
 
     for pos in words_list_pos.keys():
-        with open(os.path.join(base_wordlist_path, pos)) as fp:
+        with open(os.path.join(base_wordlist_path, pos), 'wb') as fp:
             pickle.dump(words_list_pos[pos], fp)
