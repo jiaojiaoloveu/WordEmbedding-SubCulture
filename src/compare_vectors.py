@@ -17,7 +17,7 @@ if __name__ == '__main__':
     tw_model.wv.vectors = np.matmul(tw_model_old.wv.vectors, tw_w)
     wk_model = Word2Vec.load(model_base_path % CorpusType.WIKITEXT.value)
 
-    with open('../result/wk_tw_gh_word_list/n', 'r') as fp:
+    with open('../result/wk_tw_gh_wordlist/n', 'r') as fp:
         wordlist_noun = json.load(fp)
 
     distance = {}
