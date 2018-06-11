@@ -3,10 +3,11 @@ import numpy as np
 import json
 from gensim.models.word2vec import Word2Vec
 from corpus_type import CorpusType
+from collections import OrderedDict
 
 
 def cosine(a, b):
-    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)).item()
 
 
 if __name__ == '__main__':
@@ -26,5 +27,6 @@ if __name__ == '__main__':
         old_dis = cosine(tw_model_old[noun], wk_model.wv[noun])
         distance[noun] = [new_dis, old_dis]
 
+    distance_ordered = OrderedDict(sorted(distance.items(), key=lambda it: it[1][0], reverse=True))
     with open('../result/tw_wk', 'w') as fp:
-        json.dump(distance, fp)
+        json.dump(distance_ordered, fp)
