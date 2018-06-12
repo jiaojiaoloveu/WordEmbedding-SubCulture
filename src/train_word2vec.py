@@ -26,6 +26,8 @@ if __name__ == '__main__':
     corpus_type = CorpusType.GITHUB.value
 
     token_matrix = read_all_wordlist('../data/%s-wordlist-all' % corpus_type)
-    train_word_vectors(sentences=token_matrix, path=('../models/embedding/%s/word2vec_sg_%s_size_%s' %
-                                                     (corpus_type, sg, size)), sg=sg, size=size, mincount=mincount)
+    train_word_vectors(sentences=token_matrix,
+                       path=('../models/embedding/%s/word2vec_sg_%s_size_%s_mincount_%s' %
+                             (corpus_type, sg, size, mincount)),
+                       sg=sg, size=size, mincount=mincount)
 
