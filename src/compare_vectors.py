@@ -25,7 +25,7 @@ if __name__ == '__main__':
 
     wk_model = Word2Vec.load(model_base_path % CorpusType.WIKITEXT.value)
 
-    pos_list = {'a', 'n', 'r', 'v'}
+    pos_list = {'all', 'a', 'n', 'r', 'v', 'all'}
 
     tw_cmp_base_path = '../result/tw_wk'
     os.makedirs(tw_cmp_base_path, exist_ok=True)
