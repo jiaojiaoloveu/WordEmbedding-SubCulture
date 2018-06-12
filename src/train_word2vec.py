@@ -15,11 +15,11 @@ def train_word_vectors(sentences, path):
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser(description="train models")
-    ap.add_argument("--sg", required=False, type=int, help="use sg(1) or cbow(0)")
-    ap.add_argument("--size", required=False, type=int, help="feature size")
+    ap.add_argument("--sg", required=False, type=int, help="use sg(1) or cbow(0)", default=0)
+    ap.add_argument("--size", required=False, type=int, help="feature size", default=300)
     args = vars(ap.parse_args())
-    sg = args.get("sg", default=0)
-    size = args.get("size", default=300)
+    sg = args.get("sg")
+    size = args.get("size")
 
     corpus_type = CorpusType.GITHUB.value
 
