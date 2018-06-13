@@ -1,7 +1,6 @@
 import os
 import argparse
 from read_data import read_all_wordlist
-from corpus_type import CorpusType
 from gensim.models.word2vec import Word2Vec
 from gensim.models.fasttext import FastText
 
@@ -25,18 +24,18 @@ if __name__ == '__main__':
     ap.add_argument("--size", required=False, type=int, help="feature size", default=300)
     ap.add_argument("--mincount", required=False, type=int, help="minimum word frequency", default=5)
     ap.add_argument("--model", required=True, type=str, help="type of model to use(word2vec or fasttest)")
+    ap.add_argument("--corpus", required=True, type=str, help="twitter github wikitest")
     args = vars(ap.parse_args())
     sg = args.get("sg")
     size = args.get("size")
     mincount = args.get("mincount")
     modeltype = args.get("model")
+    corpustype = args.get("corpus")
 
-    corpus_type = CorpusType.GITHUB.value
-
-    token_matrix = read_all_wordlist('../data/%s-wordlist-all' % corpus_type)
+    token_matrix = read_all_wordlist('../data/%s-wordlist-all' % corpustype)
     train_word_vectors(modeltype=modeltype,
                        sentences=token_matrix,
                        path=('../models/embedding/%s/%s_sg_%s_size_%s_mincount_%s' %
-                             (corpus_type, modeltype, sg, size, mincount)),
+                             (corpustype, modeltype, sg, size, mincount)),
                        sg=sg, size=size, mincount=mincount)
 
