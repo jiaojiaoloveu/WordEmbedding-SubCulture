@@ -23,7 +23,7 @@ if __name__ == '__main__':
     ap = argparse.ArgumentParser(description="train models")
     ap.add_argument("--sg", required=False, type=int, help="use sg(1) or cbow(0)", default=0)
     ap.add_argument("--size", required=False, type=int, help="feature size", default=300)
-    ap.add_argument("--mincount", required=False, type=int, help="minimum word frequency", default=300)
+    ap.add_argument("--mincount", required=False, type=int, help="minimum word frequency", default=5)
     ap.add_argument("--model", required=True, type=str, help="type of model to use(word2vec or fasttest)")
     args = vars(ap.parse_args())
     sg = args.get("sg")
