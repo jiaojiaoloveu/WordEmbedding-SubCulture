@@ -2,6 +2,7 @@ import copy
 import numpy as np
 import json
 import os
+import argparse
 from gensim.models.word2vec import Word2Vec
 from corpus_type import CorpusType
 from collections import OrderedDict
@@ -12,30 +13,34 @@ def cosine(a, b):
 
 
 if __name__ == '__main__':
-    model_base_path = '../models/embedding/%s/word2vec_base_300'
-    tw_model_old = Word2Vec.load(model_base_path % CorpusType.TWITTER.value)
-    tw_w = np.load('../models/transform/tw_wk.npy')
+    ap = argparse.ArgumentParser(description="compare models")
+    ap.add_argument("--model", required=True, type=str)
+    args = vars(ap.parse_args())
+    model_name = args.get("model")
+    model_base_path = '../models/embedding/%s/%s'
+    tw_model_old = Word2Vec.load(model_base_path % (CorpusType.TWITTER.value, model_name))
+    tw_w = np.load('../models/transform/%s/tw_wk.npy' % model_name)
     tw_model = copy.deepcopy(tw_model_old)
     tw_model.wv.vectors = np.matmul(tw_model_old.wv.vectors, tw_w)
 
-    gh_model_old = Word2Vec.load(model_base_path % CorpusType.GITHUB.value)
-    gh_w = np.load('../models/transform/gh_wk.npy')
+    gh_model_old = Word2Vec.load(model_base_path % (CorpusType.GITHUB.value, model_name))
+    gh_w = np.load('../models/transform/%s/gh_wk.npy' % model_name)
     gh_model = copy.deepcopy(gh_model_old)
     gh_model.wv.vectors = np.matmul(gh_model_old.wv.vectors, gh_w)
 
-    wk_model = Word2Vec.load(model_base_path % CorpusType.WIKITEXT.value)
+    wk_model = Word2Vec.load(model_base_path % (CorpusType.WIKITEXT.value, model_name))
 
     pos_list = {'all', 'a', 'n', 'r', 'v', 'all'}
 
-    tw_cmp_base_path = '../result/tw_wk'
+    tw_cmp_base_path = '../result/tw_wk/%s' % model_name
     os.makedirs(tw_cmp_base_path, exist_ok=True)
-    gh_cmp_base_path = '../result/gh_wk'
+    gh_cmp_base_path = '../result/gh_wk/%s' % model_name
     os.makedirs(gh_cmp_base_path, exist_ok=True)
-    al_cmp_base_path = '../result/tw_gh_wk'
+    al_cmp_base_path = '../result/tw_gh_wk/%s' % model_name
     os.makedirs(al_cmp_base_path, exist_ok=True)
 
     for pos in pos_list:
-        with open('../result/wk_tw_gh_wordlist/%s' % pos, 'r') as fp:
+        with open('../result/wk_tw_gh_wordlist/%s/%s' % (model_name, pos), 'r') as fp:
             wordlist_noun = json.load(fp)
 
         tw_distance = {}

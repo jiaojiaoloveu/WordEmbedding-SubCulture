@@ -3,15 +3,20 @@ from gensim.models.word2vec import Word2Vec
 from corpus_type import CorpusType
 import json
 import os
+import argparse
 
 if __name__ == '__main__':
-    base_model_path = '../models/embedding/%s/word2vec_base_300'
-    wk_model = Word2Vec.load(base_model_path % CorpusType.WIKITEXT.value)
-    tw_model = Word2Vec.load(base_model_path % CorpusType.TWITTER.value)
-    gh_model = Word2Vec.load(base_model_path % CorpusType.GITHUB.value)
+    ap = argparse.ArgumentParser(description="get word list")
+    ap.add_argument('--model', type=str, required=True)
+    args = vars(ap.parse_args())
+    model_name = args.get("model")
+    base_model_path = '../models/embedding/%s/%s'
+    wk_model = Word2Vec.load(base_model_path % (CorpusType.WIKITEXT.value, model_name))
+    tw_model = Word2Vec.load(base_model_path % (CorpusType.TWITTER.value, model_name))
+    gh_model = Word2Vec.load(base_model_path % (CorpusType.GITHUB.value, model_name))
     words_list = list(set(wk_model.wv.vocab.keys()) & set(tw_model.wv.vocab.keys()) & set(gh_model.wv.vocab.keys()))
 
-    base_wordlist_path = '../result/wk_tw_gh_wordlist'
+    base_wordlist_path = '../result/wk_tw_gh_wordlist/%s' % model_name
     os.makedirs(base_wordlist_path, exist_ok=True)
     with open(os.path.join(base_wordlist_path, 'all'), 'w') as fp:
         json.dump(words_list, fp)

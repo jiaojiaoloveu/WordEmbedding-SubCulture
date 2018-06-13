@@ -1,14 +1,20 @@
 import os
-from corpus_type import CorpusType
+import argparse
 from gensim.models.word2vec import Word2Vec
 
 if __name__ == '__main__':
-    model_type = CorpusType.TWITTER
-    model_name = 'word2vec_base_300'
-    model_path = '../models/embedding/%s/%s' % (model_type.value, model_name)
+    ap = argparse.ArgumentParser(description="train models")
+    ap.add_argument("--corpus", required=True, type=str, help="which corpus to use(github, wikitest, twitter)")
+    ap.add_argument("--model", required=True, type=str, help="which model to use")
+    args = vars(ap.parse_args())
+    model_type = args.get("corpus")
+    model_name = args.get("model")
+
+    model_path = '../models/embedding/%s/%s' % (model_type, model_name)
     model = Word2Vec.load(model_path)
-    result_path = '../result/%s/%s' % (model_type.value, model_name)
+    result_path = '../result/%s/%s' % (model_type, model_name)
     os.makedirs(os.path.dirname(result_path), exist_ok=True)
+
     wordsim = model.wv.evaluate_word_pairs('../data/word353/wordsim353.tsv')
     question = model.wv.accuracy('../data/question/questions-words.txt')[-1]
     result_content = [
