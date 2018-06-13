@@ -11,7 +11,7 @@ def train_word_vectors(modeltype, sentences, path, sg, size, mincount):
     if modeltype == 'word2vec':
         model = Word2Vec(sentences, sg=sg, size=size, min_count=mincount)
         model.save(path)
-    elif modeltype == 'fasttest':
+    elif modeltype == 'fasttext':
         model = FastText(sentences, sg=sg, size=size, min_count=mincount)
         model.save(path)
     else:
@@ -23,8 +23,8 @@ if __name__ == '__main__':
     ap.add_argument("--sg", required=False, type=int, help="use sg(1) or cbow(0)", default=0)
     ap.add_argument("--size", required=False, type=int, help="feature size", default=300)
     ap.add_argument("--mincount", required=False, type=int, help="minimum word frequency", default=5)
-    ap.add_argument("--model", required=True, type=str, help="type of model to use(word2vec or fasttest)")
-    ap.add_argument("--corpus", required=True, type=str, help="twitter github wikitest")
+    ap.add_argument("--model", required=True, type=str, help="type of model to use(word2vec or fasttext)")
+    ap.add_argument("--corpus", required=True, type=str, help="twitter github wikitext")
     args = vars(ap.parse_args())
     sg = args.get("sg")
     size = args.get("size")
