@@ -1,8 +1,6 @@
 import os
 import argparse
-from corpus_type import decide_model_type
-from gensim.models.word2vec import Word2Vec
-from gensim.models.fasttext import FastText
+from utils import load_model
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser(description="train models")
@@ -11,15 +9,9 @@ if __name__ == '__main__':
     args = vars(ap.parse_args())
     corpus_type = args.get("corpus")
     model_name = args.get("model")
-    model_type = decide_model_type(model_name)
 
     model_path = '../models/embedding/%s/%s' % (corpus_type, model_name)
-    if model_type == 'word2vec':
-        model = Word2Vec.load(model_path)
-    elif model_type == 'fasttext':
-        model = FastText.load(model_path)
-    else:
-        model = []
+    model = load_model(model_path=model_path)
 
     result_path = '../result/%s/%s' % (corpus_type, model_name)
     os.makedirs(os.path.dirname(result_path), exist_ok=True)

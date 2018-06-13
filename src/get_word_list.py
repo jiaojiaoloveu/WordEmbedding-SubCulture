@@ -1,6 +1,6 @@
 from nltk.corpus import wordnet as wn
-from gensim.models.word2vec import Word2Vec
-from corpus_type import CorpusType
+from utils import CorpusType
+from utils import load_model
 import json
 import os
 import argparse
@@ -11,9 +11,10 @@ if __name__ == '__main__':
     args = vars(ap.parse_args())
     model_name = args.get("model")
     base_model_path = '../models/embedding/%s/%s'
-    wk_model = Word2Vec.load(base_model_path % (CorpusType.WIKITEXT.value, model_name))
-    tw_model = Word2Vec.load(base_model_path % (CorpusType.TWITTER.value, model_name))
-    gh_model = Word2Vec.load(base_model_path % (CorpusType.GITHUB.value, model_name))
+    wk_model = load_model(base_model_path % (CorpusType.WIKITEXT.value, model_name))
+    tw_model = load_model(base_model_path % (CorpusType.TWITTER.value, model_name))
+    gh_model = load_model(base_model_path % (CorpusType.GITHUB.value, model_name))
+
     words_list = list(set(wk_model.wv.vocab.keys()) & set(tw_model.wv.vocab.keys()) & set(gh_model.wv.vocab.keys()))
 
     base_wordlist_path = '../result/wk_tw_gh_wordlist/%s' % model_name

@@ -1,5 +1,5 @@
-from gensim.models.word2vec import Word2Vec
-from corpus_type import CorpusType
+from utils import CorpusType
+from utils import load_model
 import numpy as np
 import os
 import argparse
@@ -42,9 +42,9 @@ if __name__ == '__main__':
     args = vars(ap.parse_args())
     model_base = '../models/embedding/%s/%s'
     model_name = args.get("model")
-    tw_model = Word2Vec.load(model_base % (CorpusType.TWITTER.value, model_name))
-    gh_model = Word2Vec.load(model_base % (CorpusType.GITHUB.value, model_name))
-    wk_model = Word2Vec.load(model_base % (CorpusType.WIKITEXT.value, model_name))
+    tw_model = load_model(model_base % (CorpusType.TWITTER.value, model_name))
+    gh_model = load_model(model_base % (CorpusType.GITHUB.value, model_name))
+    wk_model = load_model(model_base % (CorpusType.WIKITEXT.value, model_name))
 
     transform_base = '../models/transform/%s' % model_name
     os.makedirs(transform_base, exist_ok=True)

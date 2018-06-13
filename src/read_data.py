@@ -8,7 +8,7 @@ from nltk.tokenize import word_tokenize
 from nltk.corpus import twitter_samples
 from nltk.twitter.common import json2csv
 from langdetect import detect, lang_detect_exception
-from corpus_type import CorpusType
+from utils import CorpusType
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import wordnet as wn
 
