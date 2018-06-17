@@ -1,3 +1,5 @@
+import json
+import os
 import numpy as np
 import sample_seeds
 from labels import LabelSpace
@@ -46,6 +48,14 @@ def main():
     eval_label = np.array(token_label)
 
     (seed_words, eval_words) = sample_seeds.main()
+
+    word_dataset_base = '../result/semi-supervised'
+    os.makedirs(word_dataset_base, exist_ok=True)
+    with open(os.path.join(word_dataset_base, 'seed'), 'w') as fp:
+        json.dump(seed_words, fp)
+    with open(os.path.join(word_dataset_base, 'eval', 'w')) as fp:
+        json.dump(eval_label, fp)
+
     for ind in range(0, len(token_list)):
         word = token_list[ind]
         if word in seed_words.keys():

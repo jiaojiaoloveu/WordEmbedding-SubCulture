@@ -97,9 +97,8 @@ def read_warriner_ratings(path):
 def main():
     csv_path = '../data/epa/Ratings_Warriner_et_al.csv'
     voc = read_warriner_ratings(csv_path)
-    sample = get_rand_seeds(voc)
-    # sample = get_fixed_seeds(voc)
-    return sample
+    return get_rand_seeds(voc)
+    # return get_fixed_seeds(voc)
 
 
 if __name__ == '__main__':
