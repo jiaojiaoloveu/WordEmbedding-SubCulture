@@ -18,21 +18,20 @@ def load_word_vectors(model_path):
     return word_vectors
 
 
-def mean_absolute_error(it, real_label, predict_label):
+def mean_absolute_error(it, real_label, predict_label, log_mask):
     assert real_label.shape == predict_label.shape
     mask = np.any(real_label, axis=1)
     real_label_mask = real_label[mask]
     predict_label_mask = predict_label[mask]
     mae = np.sum(np.absolute(real_label_mask - predict_label_mask), axis=0) / np.sum(mask)
 
-    print_label = 10
     with open(os.path.join(word_dataset_base, 'log'), 'w+') as fp:
         out = [
             'iteration #%s/%s' % (it, Configs.iterations),
             'real',
-            str(real_label_mask[0:print_label]),
+            str(real_label_mask[log_mask]),
             'predict',
-            str(predict_label_mask[0:print_label]),
+            str(predict_label_mask[log_mask]),
             'mae',
             mae
         ]
@@ -137,13 +136,17 @@ def train():
     label_mask_inv = np.logical_not(label_mask)
     label_mask_all = (1 - Configs.alpha) * label_mask + label_mask_inv
 
-    mean_absolute_error(eval_label, token_label)
+    log_window_size = 20
+    eval_num = np.sum(np.any(eval_label, axis=1))
+    log_mask = np.random.rand(eval_num) < (1.0 * log_window_size / eval_num)
+
+    mean_absolute_error(eval_label, token_label, log_mask)
     original_token_label = np.array(token_label)
     for it in range(0, Configs.iterations):
         transient_token_label = np.matmul(laplacian_matrix, token_label)
         token_label = transient_token_label * np.reshape(label_mask_all, (token_num, 1)) + \
                       Configs.alpha * original_token_label
-        mean_absolute_error(it, eval_label, token_label)
+        mean_absolute_error(it, eval_label, token_label, log_mask)
 
 
 if __name__ == '__main__':
