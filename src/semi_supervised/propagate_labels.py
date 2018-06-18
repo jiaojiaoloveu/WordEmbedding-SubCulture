@@ -1,5 +1,7 @@
 import json
 import os
+import random
+import argparse
 import numpy as np
 import sample_seeds
 from labels import LabelSpace
@@ -25,39 +27,74 @@ def mean_absolute_error(real_label, predict_label):
     return mae
 
 
+def log_data(token_words, seed_words, eval_words):
+    word_dataset_base = '../result/semi-supervised'
+    os.makedirs(word_dataset_base, exist_ok=True)
+    with open(os.path.join(word_dataset_base, 'token'), 'w') as fp:
+        json.dump(token_words, fp)
+    with open(os.path.join(word_dataset_base, 'seed'), 'w') as fp:
+        json.dump(seed_words, fp)
+    with open(os.path.join(word_dataset_base, 'eval', 'w')) as fp:
+        json.dump(eval_words, fp)
+
+
 def main():
+    ap = argparse.ArgumentParser("semi-supervised training using graph")
+    ap.add_argument('--train', type=int, required=False, default=5000)
+    ap.add_argument('--seed', type=int, required=False, default=50)
+    ap.add_argument('--eval', type=int, required=False, default=500)
+    ap.add_argument('--threshold', type=float, required=False, default=2.5)
+    args = vars(ap.parse_args())
+    token_num = args.get('train')
+    seed_num = args.get('seed')
+    eval_num = args.get('eval')
+    threshold = args.get('threshold')
+
     google_news_model_path = '../models/embedding/GoogleNews-vectors-negative300.bin'
     google_news_model = load_word_vectors(google_news_model_path)
 
-    (token_num, feature_size) = google_news_model.vectors.shape
+    all_token_words = list(google_news_model.vocab.keys())
+    all_alphabets_token = [token for token in all_token_words if token.isalpha()]
+    token_words = set(random.sample(all_alphabets_token, token_num))
+
+    (seed_words, eval_words) = sample_seeds.get_rand_seeds(seed_num, eval_num, threshold)
+
+    for token in seed_words.keys():
+        if token in all_token_words:
+            token_words.add(token)
+        else:
+            print('%s not in 3B' % token)
+    for token in eval_words.keys():
+        if token in all_token_words:
+            token_words.add(token)
+        else:
+            print('%s not in 3B' % token)
+
+    token_words = list(token_words)
+    token_num = len(token_words)
+
+    log_data(token_words, seed_words, eval_words)
+
     weight_matrix = np.zeros((token_num, token_num), dtype=np.double)
 
-    token_list = list(google_news_model.vocab.keys())
-
-    for ind in range(0, len(token_list) - 1):
+    for ind in range(0, token_num - 1):
         # fully connected graph
         # weight between nodes positive
         # distance = 1 - cosine-dis
-        weight_matrix[ind, ind + 1:] = 2 - google_news_model.distances(token_list[ind], token_list[ind + 1])
+        weight_matrix[ind, ind + 1:] = 2 - google_news_model.distances(token_words[ind], token_words[ind + 1])
+
+    del google_news_model
+
     weight_matrix = weight_matrix + weight_matrix.transpose()
     degree_matrix = np.eye(token_num) * np.sum(weight_matrix, axis=1)
     inverse_degree_matrix = np.linalg.inv(degree_matrix)
     laplacian_matrix = np.matmul(inverse_degree_matrix, weight_matrix)
 
-    token_label = np.zeros((token_num, feature_size), dtype=np.double)
+    token_label = np.zeros((token_num, LabelSpace.Dimension), dtype=np.double)
     eval_label = np.array(token_label)
 
-    (seed_words, eval_words) = sample_seeds.main()
-
-    word_dataset_base = '../result/semi-supervised'
-    os.makedirs(word_dataset_base, exist_ok=True)
-    with open(os.path.join(word_dataset_base, 'seed'), 'w') as fp:
-        json.dump(seed_words, fp)
-    with open(os.path.join(word_dataset_base, 'eval', 'w')) as fp:
-        json.dump(eval_label, fp)
-
-    for ind in range(0, len(token_list)):
-        word = token_list[ind]
+    for ind in range(0, token_num):
+        word = token_words[ind]
         if word in seed_words.keys():
             token_label[ind] = [seed_words[word][LabelSpace.E],
                                 seed_words[word][LabelSpace.P],

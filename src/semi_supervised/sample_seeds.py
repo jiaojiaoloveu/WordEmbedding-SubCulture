@@ -4,7 +4,7 @@ from labels import WarrinerColumn
 from labels import LabelSpace
 
 
-def rand_eval_wordlist(vocabulary, word_seeds, eval_size):
+def __rand_eval_wordlist(vocabulary, word_seeds, eval_size):
     eval_poll = []
     for word in vocabulary.keys():
         if word not in word_seeds:
@@ -13,7 +13,7 @@ def rand_eval_wordlist(vocabulary, word_seeds, eval_size):
     return eval_words
 
 
-def get_fixed_seeds(vocabulary, eval_size=500):
+def __get_fixed_seeds(vocabulary, eval_size):
     word_seeds = ['good', 'nice', 'excellent', 'positive', 'warm', 'correct', 'superior',
                   'bad', 'awful', 'nasty', 'negative', 'cold', 'wrong', 'inferior',
                   'powerful', 'strong', 'potent', 'dominant', 'big', 'forceful', 'hard',
@@ -21,12 +21,12 @@ def get_fixed_seeds(vocabulary, eval_size=500):
                   'active', 'fast', 'noisy', 'lively', 'energetic', 'dynamic', 'quick', 'vital',
                   'quiet', 'clam', 'inactive', 'slow', 'stagnant', 'inoperative', 'passive'
                   ]
-    eval_words = rand_eval_wordlist(vocabulary, word_seeds, eval_size)
-    return (get_mapping_epa(vocabulary, word_seeds),
-            get_mapping_epa(vocabulary, eval_words))
+    eval_words = __rand_eval_wordlist(vocabulary, word_seeds, eval_size)
+    return (__get_mapping_epa(vocabulary, word_seeds),
+            __get_mapping_epa(vocabulary, eval_words))
 
 
-def get_rand_seeds(vocabulary, seed_size=30, eval_size=500, threshold=2.5):
+def __get_rand_seeds(vocabulary, seed_size, eval_size, threshold):
     seeds_poll = []
     for word in vocabulary.keys():
         epa = vocabulary[word]
@@ -35,12 +35,12 @@ def get_rand_seeds(vocabulary, seed_size=30, eval_size=500, threshold=2.5):
                 seeds_poll.append(word)
                 break
     word_seeds = random.sample(seeds_poll, seed_size)
-    eval_words = rand_eval_wordlist(vocabulary, word_seeds, eval_size)
-    return (get_mapping_epa(vocabulary, word_seeds),
-            get_mapping_epa(vocabulary, eval_words))
+    eval_words = __rand_eval_wordlist(vocabulary, word_seeds, eval_size)
+    return (__get_mapping_epa(vocabulary, word_seeds),
+            __get_mapping_epa(vocabulary, eval_words))
 
 
-def get_mapping_epa(vocabulary, word_seeds):
+def __get_mapping_epa(vocabulary, word_seeds):
     word_epa = {}
     for word in word_seeds:
         if word in vocabulary.keys():
@@ -48,21 +48,21 @@ def get_mapping_epa(vocabulary, word_seeds):
     return word_epa
 
 
-def max_min_scaling(x, maxA, minA, maxB, minB):
+def __max_min_scaling(x, maxA, minA, maxB, minB):
     return 1.0 * (x - minA) / (maxA - minA) * (maxB - minB) + minB
 
 
-def scale_vad_to_epa(vocabulary_vad, max_min_board):
+def __scale_vad_to_epa(vocabulary_vad, max_min_board):
     vocabulary_epa = {}
     for word in vocabulary_vad.keys():
         vad = vocabulary_vad[word]
         epa = {}
         for axis in vad.keys():
-            epa[LabelSpace.get_epa(axis)] = max_min_scaling(vad[axis],
-                                                            max_min_board[axis][WarrinerColumn.Max],
-                                                            max_min_board[axis][WarrinerColumn.Min],
-                                                            LabelSpace.Max,
-                                                            LabelSpace.Min)
+            epa[LabelSpace.get_epa(axis)] = __max_min_scaling(vad[axis],
+                                                              max_min_board[axis][WarrinerColumn.Max],
+                                                              max_min_board[axis][WarrinerColumn.Min],
+                                                              LabelSpace.Max,
+                                                              LabelSpace.Min)
         vocabulary_epa[word] = epa
     return vocabulary_epa
 
@@ -91,15 +91,20 @@ def read_warriner_ratings(path):
                 if max_min_board[axis][WarrinerColumn.Max] < vad[axis]:
                     max_min_board[axis][WarrinerColumn.Max] = vad[axis]
 
-    return scale_vad_to_epa(vocabulary_vad, max_min_board)
+    return __scale_vad_to_epa(vocabulary_vad, max_min_board)
 
 
-def main():
-    csv_path = '../data/epa/Ratings_Warriner_et_al.csv'
+def get_rand_seeds(seed_size=100, eval_size=500, threshold=2.5):
     voc = read_warriner_ratings(csv_path)
-    return get_rand_seeds(voc)
-    # return get_fixed_seeds(voc)
+    return __get_rand_seeds(voc, seed_size, eval_size, threshold)
+
+
+def get_fixed_seeds(eval_size=500):
+    voc = read_warriner_ratings(csv_path)
+    return __get_fixed_seeds(voc, eval_size)
 
 
 if __name__ == '__main__':
-    main()
+    csv_path = '../data/epa/Ratings_Warriner_et_al.csv'
+    get_rand_seeds()
+    get_fixed_seeds()
