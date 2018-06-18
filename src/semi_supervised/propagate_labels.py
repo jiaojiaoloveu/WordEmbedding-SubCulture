@@ -69,7 +69,7 @@ def generate():
 
     # get token_num tokens from epa wordset synsets
     token_words = set()
-    token_words_buff = set(seed_words.keys() + eval_words.keys())
+    token_words_buff = set(list(seed_words.keys()) + list(eval_words.keys()))
     while len(token_words) + len(token_words_buff) < token_num:
         token_words_syn = list()
         for token in token_words_buff:
