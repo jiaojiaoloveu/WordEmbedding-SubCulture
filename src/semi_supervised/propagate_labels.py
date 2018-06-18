@@ -19,11 +19,17 @@ def load_word_vectors(model_path):
 
 def mean_absolute_error(real_label, predict_label):
     assert real_label.shape == predict_label.shape
-    (token_size, feature_size) = real_label.shape
-
     mask = np.any(real_label, axis=1)
-    error_mat = np.absolute(real_label - predict_label) * np.reshape(mask, (token_size, 1))
-    mae = np.sum(error_mat, axis=0) / np.sum(mask)
+    real_label_mask = real_label[mask]
+    predict_label_mask = predict_label[mask]
+    mae = np.sum(np.absolute(real_label_mask - predict_label_mask), axis=0) / np.sum(mask)
+
+    print_label = 10
+    print('real')
+    print(real_label[0:print_label])
+    print('predict')
+    print(predict_label_mask[0:print_label])
+    print('mae')
     print(mae)
     return mae
 
@@ -123,9 +129,7 @@ def train():
         print('iteration #%s/%s' % (it, Configs.iterations))
         transient_token_label = np.matmul(laplacian_matrix, token_label)
         # token_label = Configs.alpha * transient_token_label + (1 - Configs.alpha) * original_token_label
-        token_label = Configs.alpha * transient_token_label \
-                      * np.reshape(token_mask, (token_num, 1)) \
-                      + original_token_label
+        token_label = Configs.alpha * transient_token_label[token_mask] + original_token_label
         mean_absolute_error(eval_label, token_label)
 
 
