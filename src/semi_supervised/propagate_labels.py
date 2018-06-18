@@ -115,12 +115,17 @@ def train():
                                eval_words[word][LabelSpace.P],
                                eval_words[word][LabelSpace.A]]
 
+    token_mask = np.logical_not(np.any(token_label, axis=1))
+
     mean_absolute_error(eval_label, token_label)
     original_token_label = np.array(token_label)
     for it in range(0, Configs.iterations):
         print('iteration #%s/%s' % (it, Configs.iterations))
         transient_token_label = np.matmul(laplacian_matrix, token_label)
-        token_label = Configs.alpha * transient_token_label + (1 - Configs.alpha) * original_token_label
+        # token_label = Configs.alpha * transient_token_label + (1 - Configs.alpha) * original_token_label
+        token_label = Configs.alpha * transient_token_label \
+                      * np.reshape(token_mask, (token_num, 1)) \
+                      + original_token_label
         mean_absolute_error(eval_label, token_label)
 
 
