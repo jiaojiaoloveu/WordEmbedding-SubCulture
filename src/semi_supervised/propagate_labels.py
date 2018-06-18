@@ -26,7 +26,7 @@ def mean_absolute_error(real_label, predict_label):
 
     print_label = 10
     print('real')
-    print(real_label[0:print_label])
+    print(real_label_mask[0:print_label])
     print('predict')
     print(predict_label_mask[0:print_label])
     print('mae')
@@ -121,15 +121,17 @@ def train():
                                eval_words[word][LabelSpace.P],
                                eval_words[word][LabelSpace.A]]
 
-    token_mask = np.logical_not(np.any(token_label, axis=1))
+    label_mask = np.any(token_label, axis=1)
+    label_mask_inv = np.logical_not(label_mask)
+    label_mask_all = (1 - Configs.alpha) * label_mask + label_mask_inv
 
     mean_absolute_error(eval_label, token_label)
     original_token_label = np.array(token_label)
     for it in range(0, Configs.iterations):
         print('iteration #%s/%s' % (it, Configs.iterations))
         transient_token_label = np.matmul(laplacian_matrix, token_label)
-        # token_label = Configs.alpha * transient_token_label + (1 - Configs.alpha) * original_token_label
-        token_label = Configs.alpha * transient_token_label[token_mask] + original_token_label
+        token_label = transient_token_label * np.reshape(label_mask_all, (token_num, 1)) + \
+                      Configs.alpha * original_token_label
         mean_absolute_error(eval_label, token_label)
 
 
