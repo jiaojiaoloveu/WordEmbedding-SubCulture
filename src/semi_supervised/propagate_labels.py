@@ -81,7 +81,7 @@ def main():
         # fully connected graph
         # weight between nodes positive
         # distance = 1 - cosine-dis
-        weight_matrix[ind, ind + 1:] = 2 - google_news_model.distances(token_words[ind], token_words[ind + 1])
+        weight_matrix[ind, ind + 1:] = 2 - google_news_model.distances(token_words[ind], token_words[ind + 1:])
 
     del google_news_model
 
