@@ -34,7 +34,7 @@ def log_data(token_words, seed_words, eval_words):
         json.dump(token_words, fp)
     with open(os.path.join(word_dataset_base, 'seed'), 'w') as fp:
         json.dump(seed_words, fp)
-    with open(os.path.join(word_dataset_base, 'eval', 'w')) as fp:
+    with open(os.path.join(word_dataset_base, 'eval'), 'w') as fp:
         json.dump(eval_words, fp)
 
 

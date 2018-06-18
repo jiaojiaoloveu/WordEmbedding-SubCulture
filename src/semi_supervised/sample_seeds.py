@@ -83,6 +83,8 @@ def read_warriner_ratings(path):
         reader = csv.DictReader(csvfile)
         for row in reader:
             word = row[WarrinerColumn.Word]
+            if not word.isalpha():
+                continue
             vad = {LabelSpace.V: float(row[WarrinerColumn.V]),
                    LabelSpace.A: float(row[WarrinerColumn.A]),
                    LabelSpace.D: float(row[WarrinerColumn.D])
