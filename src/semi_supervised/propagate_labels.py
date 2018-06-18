@@ -7,7 +7,6 @@ import sample_seeds
 from labels import LabelSpace
 from labels import Configs
 from gensim.models import KeyedVectors
-from itertools import chain
 from nltk.corpus import wordnet as wn
 
 
@@ -19,7 +18,7 @@ def load_word_vectors(model_path):
     return word_vectors
 
 
-def mean_absolute_error(real_label, predict_label):
+def mean_absolute_error(it, real_label, predict_label):
     assert real_label.shape == predict_label.shape
     mask = np.any(real_label, axis=1)
     real_label_mask = real_label[mask]
@@ -27,12 +26,17 @@ def mean_absolute_error(real_label, predict_label):
     mae = np.sum(np.absolute(real_label_mask - predict_label_mask), axis=0) / np.sum(mask)
 
     print_label = 10
-    print('real')
-    print(real_label_mask[0:print_label])
-    print('predict')
-    print(predict_label_mask[0:print_label])
-    print('mae')
-    print(mae)
+    with open(os.path.join(word_dataset_base, 'log'), 'w+') as fp:
+        out = [
+            'iteration #%s/%s' % (it, Configs.iterations),
+            'real',
+            str(real_label_mask[0:print_label]),
+            'predict',
+            str(predict_label_mask[0:print_label]),
+            'mae',
+            mae
+        ]
+        fp.writelines('%s\n' % line for line in out)
     return mae
 
 
@@ -136,11 +140,10 @@ def train():
     mean_absolute_error(eval_label, token_label)
     original_token_label = np.array(token_label)
     for it in range(0, Configs.iterations):
-        print('iteration #%s/%s' % (it, Configs.iterations))
         transient_token_label = np.matmul(laplacian_matrix, token_label)
         token_label = transient_token_label * np.reshape(label_mask_all, (token_num, 1)) + \
                       Configs.alpha * original_token_label
-        mean_absolute_error(eval_label, token_label)
+        mean_absolute_error(it, eval_label, token_label)
 
 
 if __name__ == '__main__':
