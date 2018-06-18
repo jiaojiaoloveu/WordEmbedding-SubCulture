@@ -28,7 +28,7 @@ def mean_absolute_error(real_label, predict_label):
     return mae
 
 
-def log_data(token_words, seed_words, eval_words, word_matrix):
+def log_data(token_words, seed_words, eval_words, weight_matrix):
     os.makedirs(word_dataset_base, exist_ok=True)
     with open(os.path.join(word_dataset_base, 'token'), 'w') as fp:
         json.dump(token_words, fp)
@@ -36,18 +36,18 @@ def log_data(token_words, seed_words, eval_words, word_matrix):
         json.dump(seed_words, fp)
     with open(os.path.join(word_dataset_base, 'eval'), 'w') as fp:
         json.dump(eval_words, fp)
-    np.save(os.path.join(word_dataset_base, 'matrix'), word_matrix)
+    np.save(os.path.join(word_dataset_base, 'matrix'), weight_matrix)
 
 
 def reload_data():
-    with open(os.path.join(word_dataset_base, 'token'), 'w') as fp:
+    with open(os.path.join(word_dataset_base, 'token'), 'r') as fp:
         token_words = json.load(fp)
-    with open(os.path.join(word_dataset_base, 'seed'), 'w') as fp:
-        seed_words = json.dump(fp)
-    with open(os.path.join(word_dataset_base, 'eval'), 'w') as fp:
-        eval_words = json.dump(fp)
-    word_matrix = np.load(os.path.join(word_dataset_base, 'matrix'))
-    return token_words, seed_words, eval_words, word_matrix
+    with open(os.path.join(word_dataset_base, 'seed'), 'r') as fp:
+        seed_words = json.load(fp)
+    with open(os.path.join(word_dataset_base, 'eval'), 'r') as fp:
+        eval_words = json.load(fp)
+    weight_matrix = np.load(os.path.join(word_dataset_base, 'matrix'))
+    return token_words, seed_words, eval_words, weight_matrix
 
 
 def generate():
@@ -89,6 +89,7 @@ def generate():
 
     del google_news_model
     log_data(token_words, seed_words, eval_words, weight_matrix)
+    return token_words, seed_words, eval_words, weight_matrix
 
 
 def train():
