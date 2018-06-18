@@ -4,6 +4,9 @@ from labels import WarrinerColumn
 from labels import LabelSpace
 
 
+csv_path = '../data/epa/Ratings_Warriner_et_al.csv'
+
+
 def __rand_eval_wordlist(vocabulary, word_seeds, eval_size):
     eval_poll = []
     for word in vocabulary.keys():
@@ -105,6 +108,5 @@ def get_fixed_seeds(eval_size=500):
 
 
 if __name__ == '__main__':
-    csv_path = '../data/epa/Ratings_Warriner_et_al.csv'
     get_rand_seeds()
     get_fixed_seeds()
