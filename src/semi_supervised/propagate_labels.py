@@ -102,7 +102,7 @@ def generate():
         # fully connected graph
         # weight between nodes positive
         # distance = 1 - cosine-dis
-        weight_matrix[ind, ind + 1:] = 2 - google_news_model.distances(token_words[ind], token_words[ind + 1:])
+        weight_matrix[ind, ind + 1:] = 1 - google_news_model.distances(token_words[ind], token_words[ind + 1:])
     del google_news_model
 
     log_data(token_words, seed_words, eval_words, weight_matrix)
