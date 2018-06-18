@@ -25,7 +25,7 @@ def mean_absolute_error(it, real_label, predict_label, log_mask):
     predict_label_mask = predict_label[mask]
     mae = np.sum(np.absolute(real_label_mask - predict_label_mask), axis=0) / np.sum(mask)
 
-    with open(os.path.join(word_dataset_base, 'log'), 'w+') as fp:
+    with open(os.path.join(word_dataset_base, 'log'), 'a') as fp:
         out = [
             'iteration #%s/%s' % (it, Configs.iterations),
             'real',
