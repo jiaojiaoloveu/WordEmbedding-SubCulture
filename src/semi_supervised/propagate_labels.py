@@ -46,7 +46,7 @@ def reload_data():
         seed_words = json.load(fp)
     with open(os.path.join(word_dataset_base, 'eval'), 'r') as fp:
         eval_words = json.load(fp)
-    weight_matrix = np.load(os.path.join(word_dataset_base, 'matrix'))
+    weight_matrix = np.load(os.path.join(word_dataset_base, 'matrix.npy'))
     return token_words, seed_words, eval_words, weight_matrix
 
 
