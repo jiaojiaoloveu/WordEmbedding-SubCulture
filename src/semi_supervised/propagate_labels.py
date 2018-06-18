@@ -150,7 +150,14 @@ if __name__ == '__main__':
     ap.add_argument('--eval', type=int, required=False, default=500)
     ap.add_argument('--threshold', type=float, required=False, default=2.5)
     ap.add_argument('--generate', type=int, required=False, default=0)
+    ap.add_argument('--alpha', type=float, required=False)
+    ap.add_argument('--iteration', type=int, required=False)
     args = vars(ap.parse_args())
+    if args.get("alpha") is not None:
+        Configs.alpha = args.get("alpha")
+    if args.get("iteration") is not None:
+        Configs.iterations = args.get("iteration")
+
     if args.get("generate") == 0:
         generate()
     train()

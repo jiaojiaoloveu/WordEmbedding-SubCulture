@@ -36,5 +36,5 @@ class WarrinerColumn:
 
 class Configs:
     alpha = 0.8
-    iterations = 100
+    iterations = 10
     threshold = 0.5
