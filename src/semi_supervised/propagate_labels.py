@@ -115,9 +115,13 @@ def train():
     token_num = len(token_words)
 
     print('calculate matrix')
+    print('1')
     weight_matrix = weight_matrix + weight_matrix.transpose()
+    print('2')
     degree_matrix = np.eye(token_num) * np.sum(weight_matrix, axis=1)
+    print('3')
     inverse_degree_matrix = np.linalg.inv(degree_matrix)
+    print('4')
     laplacian_matrix = np.matmul(inverse_degree_matrix, weight_matrix)
 
     print('generate eval mat')
