@@ -7,6 +7,8 @@ import sample_seeds
 from labels import LabelSpace
 from labels import Configs
 from gensim.models import KeyedVectors
+from itertools import chain
+from nltk.corpus import wordnet as wn
 
 
 word_dataset_base = '../result/semi-supervised'
@@ -62,27 +64,33 @@ def generate():
     eval_num = args.get('eval')
     threshold = args.get('threshold')
 
+    # seed_words and eval_words as dictionary of word:epa
+    (seed_words, eval_words) = sample_seeds.get_rand_seeds(seed_num, eval_num, threshold)
+
+    # get token_num tokens from epa wordset synsets
+    token_words = set()
+    token_words_buff = set(seed_words.keys() + eval_words.keys())
+    while len(token_words) + len(token_words_buff) < token_num:
+        token_words_syn = list()
+        for token in token_words_buff:
+            for syn in wn.synsets(token):
+                token_words_syn.extend(syn.lemma_names())
+        token_words.update(token_words_buff)
+        token_words_buff = set(token_words_syn)
+    token_words.update(token_words_buff)
+
+    # get token_num tokens from whole word vector space at random
     google_news_model_path = '../models/embedding/GoogleNews-vectors-negative300.bin'
     google_news_model = load_word_vectors(google_news_model_path)
 
-    all_token_words = list(google_news_model.vocab.keys())
+    all_token_words = set(google_news_model.vocab.keys())
     all_alphabets_token = [token for token in all_token_words if token.isalpha()]
-    token_words = set(random.sample(all_alphabets_token, token_num))
+    token_words_rand = set(random.sample(all_alphabets_token, token_num))
 
-    (seed_words, eval_words) = sample_seeds.get_rand_seeds(seed_num, eval_num, threshold)
-
-    for token in seed_words.keys():
-        if token in all_token_words:
-            token_words.add(token)
-        else:
-            print('%s not in 3B' % token)
-    for token in eval_words.keys():
-        if token in all_token_words:
-            token_words.add(token)
-        else:
-            print('%s not in 3B' % token)
-
-    token_words = list(token_words)
+    # join together as a list
+    # and make sure tokens are defined in high space
+    token_words.update(token_words_rand)
+    token_words = list(token_words & all_token_words)
     token_num = len(token_words)
 
     weight_matrix = np.zeros((token_num, token_num), dtype=np.double)
@@ -92,8 +100,8 @@ def generate():
         # weight between nodes positive
         # distance = 1 - cosine-dis
         weight_matrix[ind, ind + 1:] = 2 - google_news_model.distances(token_words[ind], token_words[ind + 1:])
-
     del google_news_model
+
     log_data(token_words, seed_words, eval_words, weight_matrix)
     return token_words, seed_words, eval_words, weight_matrix
 

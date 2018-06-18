@@ -100,6 +100,7 @@ def read_warriner_ratings(path):
 
 
 def get_rand_seeds(seed_size=100, eval_size=500, threshold=2.5):
+    # return (dic, dic)
     voc = read_warriner_ratings(csv_path)
     return __get_rand_seeds(voc, seed_size, eval_size, threshold)
 
