@@ -149,7 +149,6 @@ def train():
     for it in range(0, Configs.iterations):
         print('round %s/%s' % (it, Configs.iterations))
         transient_token_label = np.matmul(laplacian_matrix, token_label)
-        print(transient_token_label[0:100:10])
         token_label = transient_token_label * np.reshape(label_mask_all, (token_num, 1)) + \
                       Configs.alpha * original_token_label
         mean_absolute_error(it, eval_label[eval_mask], token_label[eval_mask], log_mask, eval_num)
