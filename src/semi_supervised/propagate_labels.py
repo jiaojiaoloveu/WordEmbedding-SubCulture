@@ -173,4 +173,6 @@ if __name__ == '__main__':
 
     if args.get("generate") == 0:
         generate()
+
+    os.remove(os.path.join(word_dataset_base, 'log'))
     train()
