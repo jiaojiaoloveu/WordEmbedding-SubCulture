@@ -112,13 +112,11 @@ def train():
     token_num = len(token_words)
 
     print('calculate matrix')
-    print('1')
+    weight_matrix_mask = np.abs(weight_matrix) > 0.3
+    weight_matrix = weight_matrix * weight_matrix_mask
     weight_matrix = weight_matrix + weight_matrix.transpose()
-    print('2')
     degree_matrix = np.sum(weight_matrix, axis=1)
-    print('3')
     inverse_degree_matrix = 1 / degree_matrix
-    print('4')
     laplacian_matrix = weight_matrix * np.reshape(inverse_degree_matrix, (token_num, 1))
 
     print('generate eval mat')
@@ -151,6 +149,7 @@ def train():
     for it in range(0, Configs.iterations):
         print('round %s/%s' % (it, Configs.iterations))
         transient_token_label = np.matmul(laplacian_matrix, token_label)
+        print(transient_token_label[0:100:10])
         token_label = transient_token_label * np.reshape(label_mask_all, (token_num, 1)) + \
                       Configs.alpha * original_token_label
         mean_absolute_error(it, eval_label[eval_mask], token_label[eval_mask], log_mask, eval_num)
