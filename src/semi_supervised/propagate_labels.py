@@ -99,7 +99,7 @@ def generate():
         # fully connected graph
         # weight between nodes positive
         # distance = 1 - cosine-dis
-        weight_matrix[ind, ind + 1:] = 1 - google_news_model.distances(token_words[ind], token_words[ind + 1:])
+        weight_matrix[ind, ind + 1:] = 2 - google_news_model.distances(token_words[ind], token_words[ind + 1:])
     del google_news_model
 
     log_data(token_words, seed_words, eval_words, weight_matrix)
@@ -112,10 +112,10 @@ def train():
     token_num = len(token_words)
 
     print('calculate matrix')
-    weight_matrix_mask = np.abs(weight_matrix) > 0.1
+    weight_matrix_mask = weight_matrix > 0.1
     weight_matrix = weight_matrix * weight_matrix_mask
     weight_matrix = weight_matrix + weight_matrix.transpose()
-    degree_matrix = np.sum(weight_matrix, axis=1)
+    degree_matrix = np.sum(weight_matrix, axis=0)
     inverse_degree_matrix = 1 / degree_matrix
     laplacian_matrix = weight_matrix * inverse_degree_matrix
 
@@ -173,5 +173,7 @@ if __name__ == '__main__':
     if args.get("generate") == 0:
         generate()
 
-    os.remove(os.path.join(word_dataset_base, 'log'))
+    log_path = os.path.join(word_dataset_base, 'log')
+    if os.path.exists(log_path):
+        os.remove(log_path)
     train()
