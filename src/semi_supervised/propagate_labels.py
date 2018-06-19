@@ -146,7 +146,7 @@ def train():
     log_mask = np.random.rand(eval_num) < (1.0 * log_window_size / eval_num)
     print(log_mask)
 
-    mean_absolute_error(-1, eval_label, token_label, log_mask, eval_num)
+    mean_absolute_error(-1, eval_label[eval_mask], token_label[eval_mask], log_mask, eval_num)
     original_token_label = np.array(token_label)
     for it in range(0, Configs.iterations):
         print('round %s/%s' % (it, Configs.iterations))
