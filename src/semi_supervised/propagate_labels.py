@@ -99,7 +99,9 @@ def generate():
         # fully connected graph
         # weight between nodes positive
         # distance = 1 - cosine-dis
-        weight_matrix[ind, ind + 1:] = 2 - google_news_model.distances(token_words[ind], token_words[ind + 1:])
+        distance_matrix = google_news_model.distances(token_words[ind], token_words[ind + 1:])
+        distance_matrix_mask = distance_matrix < 0.5
+        weight_matrix[ind, ind + 1:] = np.exp(-2 * distance_matrix * distance_matrix_mask)
     del google_news_model
 
     log_data(token_words, seed_words, eval_words, weight_matrix)
@@ -112,12 +114,10 @@ def train():
     token_num = len(token_words)
 
     print('calculate matrix')
-    weight_matrix_mask = weight_matrix > 0.1
-    weight_matrix = weight_matrix * weight_matrix_mask
     weight_matrix = weight_matrix + weight_matrix.transpose()
-    degree_matrix = np.sum(weight_matrix, axis=0)
+    degree_matrix = np.sum(weight_matrix, axis=1)
     inverse_degree_matrix = 1 / degree_matrix
-    laplacian_matrix = weight_matrix * inverse_degree_matrix
+    laplacian_matrix = weight_matrix * np.reshape(inverse_degree_matrix, (token_num, 1))
 
     print('generate eval mat')
     token_label = np.zeros((token_num, LabelSpace.Dimension), dtype=np.double)
@@ -138,7 +138,7 @@ def train():
     label_mask_inv = np.logical_not(label_mask)
     label_mask_all = (1 - Configs.alpha) * label_mask + label_mask_inv
 
-    eval_mask = np.any(eval_label, axis = 1)
+    eval_mask = np.any(eval_label, axis=1)
     eval_num = np.sum(eval_mask)
     log_window_size = 20
     log_mask = np.random.rand(eval_num) < (1.0 * log_window_size / eval_num)
