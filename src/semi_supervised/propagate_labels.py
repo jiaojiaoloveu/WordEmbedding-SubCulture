@@ -1,4 +1,4 @@
-import json
+
 import os
 import random
 import argparse
@@ -112,12 +112,12 @@ def train():
     token_num = len(token_words)
 
     print('calculate matrix')
-    weight_matrix_mask = np.abs(weight_matrix) > 0.3
+    weight_matrix_mask = np.abs(weight_matrix) > 0.1
     weight_matrix = weight_matrix * weight_matrix_mask
     weight_matrix = weight_matrix + weight_matrix.transpose()
     degree_matrix = np.sum(weight_matrix, axis=1)
     inverse_degree_matrix = 1 / degree_matrix
-    laplacian_matrix = weight_matrix * np.reshape(inverse_degree_matrix, (token_num, 1))
+    laplacian_matrix = weight_matrix * inverse_degree_matrix
 
     print('generate eval mat')
     token_label = np.zeros((token_num, LabelSpace.Dimension), dtype=np.double)
