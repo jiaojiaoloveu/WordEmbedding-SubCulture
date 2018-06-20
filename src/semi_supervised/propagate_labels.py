@@ -77,6 +77,9 @@ def generate():
     token_words = list(token_words & all_token_words)
     token_num = len(token_words)
 
+    print('%s/%s seeds in token words' % (len(set(token_words) & set(seed_words.keys())), seed_num))
+    print('%s/%s eval in token words' % (len(set(token_words) & set(eval_words.keys())), eval_num))
+
     weight_matrix = np.zeros((token_num, token_num), dtype=np.double)
 
     for ind in range(0, token_num - 1):
@@ -139,8 +142,7 @@ def train():
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser("semi-supervised training using graph")
-    ap.add_argument('--train', type=int, required=False, default=5000)
-    ap.add_argument('--seed', type=int, required=False, default=50)
+    ap.add_argument('--seed', type=int, required=False, default=1000)
     ap.add_argument('--eval', type=int, required=False, default=500)
     ap.add_argument('--threshold', type=float, required=False, default=2.5)
     ap.add_argument('--generate', type=int, required=False, default=0)
