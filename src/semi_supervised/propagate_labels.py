@@ -1,13 +1,11 @@
 import json
 import os
-import random
 import argparse
 import numpy as np
 import sample_seeds
 from labels import LabelSpace
 from labels import Configs
 from gensim.models import KeyedVectors
-from nltk.corpus import wordnet as wn
 
 
 word_dataset_base = '../result/semi-supervised'
@@ -128,7 +126,6 @@ def train():
     eval_num = np.sum(eval_mask)
     log_window_size = 20
     log_mask = np.random.rand(eval_num) < (1.0 * log_window_size / eval_num)
-    print(log_mask)
 
     mean_absolute_error(-1, eval_label[eval_mask], token_label[eval_mask], log_mask, eval_num)
     original_token_label = np.array(token_label)
