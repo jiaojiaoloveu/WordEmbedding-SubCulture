@@ -98,16 +98,15 @@ def train():
     token_num = len(token_words)
 
     print('calculate matrix')
-    weight_matrix_mask = weight_matrix < 0.5
-    weight_matrix = np.exp(weight_matrix_mask * weight_matrix * -4)
-    np.fill_diagonal(weight_matrix, 0)
     weight_matrix = weight_matrix + np.transpose(weight_matrix)
+    weight_matrix_mask = weight_matrix < 0.5
+    np.fill_diagonal(weight_matrix_mask, False)
+    weight_matrix = np.exp(weight_matrix * -4) * weight_matrix_mask
     degree_matrix = np.sum(weight_matrix, axis=1)
     inverse_degree_matrix = 1 / degree_matrix
     laplacian_matrix = weight_matrix * np.reshape(inverse_degree_matrix, (token_num, 1))
 
-    with open(os.path.join(word_dataset_base, 'lap'), 'w') as fp:
-        json.dump(laplacian_matrix, fp)
+    np.save(os.path.join(word_dataset_base, 'lap'), laplacian_matrix)
 
     print('generate eval mat')
     token_label = np.zeros((token_num, LabelSpace.Dimension), dtype=np.double)
