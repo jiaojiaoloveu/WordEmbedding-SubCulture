@@ -112,4 +112,4 @@ def get_fixed_seeds(eval_size=500):
 
 if __name__ == '__main__':
     get_rand_seeds()
-    get_fixed_seeds()
+    # get_fixed_seeds()

@@ -59,37 +59,21 @@ def reload_data():
 
 
 def generate():
-    token_num = args.get('train')
     seed_num = args.get('seed')
     eval_num = args.get('eval')
     threshold = args.get('threshold')
 
     # seed_words and eval_words as dictionary of word:epa
     (seed_words, eval_words) = sample_seeds.get_rand_seeds(seed_num, eval_num, threshold)
+    token_words = set(list(seed_words.keys()) + list(eval_words.keys()))
 
-    # get token_num tokens from epa wordset synsets
-    token_words = set()
-    token_words_buff = set(list(seed_words.keys()) + list(eval_words.keys()))
-    while len(token_words) + len(token_words_buff) < token_num:
-        token_words_syn = list()
-        for token in token_words_buff:
-            for syn in wn.synsets(token):
-                token_words_syn.extend(syn.lemma_names())
-        token_words.update(token_words_buff)
-        token_words_buff = set(token_words_syn)
-    token_words.update(token_words_buff)
+    with open(os.path.join(word_dataset_base, 'twitter-wordlist'), 'r') as fp:
+        corpus_words = set(json.load(fp))
+    token_words.update(corpus_words)
 
-    # get token_num tokens from whole word vector space at random
     google_news_model_path = '../models/embedding/GoogleNews-vectors-negative300.bin'
     google_news_model = load_word_vectors(google_news_model_path)
-
     all_token_words = set(google_news_model.vocab.keys())
-    all_alphabets_token = [token for token in all_token_words if token.isalpha()]
-    token_words_rand = set(random.sample(all_alphabets_token, token_num))
-
-    # join together as a list
-    # and make sure tokens are defined in high space
-    token_words.update(token_words_rand)
     token_words = list(token_words & all_token_words)
     token_num = len(token_words)
 
@@ -100,8 +84,7 @@ def generate():
         # weight between nodes positive
         # distance = 1 - cosine-dis
         distance_matrix = google_news_model.distances(token_words[ind], token_words[ind + 1:])
-        distance_matrix_mask = distance_matrix < 0.5
-        weight_matrix[ind, ind + 1:] = np.exp(-2 * distance_matrix * distance_matrix_mask)
+        weight_matrix[ind, ind + 1:] = distance_matrix
     del google_news_model
 
     log_data(token_words, seed_words, eval_words, weight_matrix)
