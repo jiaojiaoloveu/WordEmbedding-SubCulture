@@ -100,8 +100,8 @@ def train():
     print('calculate matrix')
     weight_matrix_mask = weight_matrix < 0.5
     weight_matrix = np.exp(weight_matrix_mask * weight_matrix * -4)
-    weight_matrix = np.fill_diagonal(weight_matrix, 0)
-    weight_matrix = weight_matrix + weight_matrix.transpose()
+    np.fill_diagonal(weight_matrix, 0)
+    weight_matrix = weight_matrix + np.transpose(weight_matrix)
     degree_matrix = np.sum(weight_matrix, axis=1)
     inverse_degree_matrix = 1 / degree_matrix
     laplacian_matrix = weight_matrix * np.reshape(inverse_degree_matrix, (token_num, 1))
