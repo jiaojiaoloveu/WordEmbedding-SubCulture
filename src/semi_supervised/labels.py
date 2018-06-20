@@ -38,3 +38,4 @@ class Configs:
     alpha = 0.8
     iterations = 10
     threshold = 0.5
+    enn = 0.8
