@@ -125,7 +125,7 @@ def train():
     np.fill_diagonal(weight_matrix_mask, False)
     weight_matrix = np.exp(weight_matrix * -4) * weight_matrix_mask
     degree_matrix = np.sum(weight_matrix, axis=1)
-    inverse_degree_matrix = 1 / degree_matrix
+    inverse_degree_matrix = np.divide(1, degree_matrix, where=degree_matrix != 0)
     laplacian_matrix = weight_matrix * np.reshape(inverse_degree_matrix, (token_num, 1))
 
     np.save(os.path.join(word_dataset_base, 'lap'), laplacian_matrix)
