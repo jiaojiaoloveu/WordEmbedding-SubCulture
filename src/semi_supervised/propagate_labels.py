@@ -6,6 +6,7 @@ import sample_seeds
 from labels import LabelSpace
 from labels import Configs
 from gensim.models import KeyedVectors
+from scipy.stats.stats import pearsonr
 
 
 word_dataset_base = '../result/semi-supervised'
@@ -29,7 +30,9 @@ def mean_absolute_error(it, real_label, predict_label, log_mask, eval_num):
             'predict',
             str(predict_label[log_mask]),
             'mae',
-            mae
+            mae,
+            'corr',
+            str(pearsonr(real_label, predict_label))
         ]
         fp.writelines('%s\n' % line for line in out)
     return mae
