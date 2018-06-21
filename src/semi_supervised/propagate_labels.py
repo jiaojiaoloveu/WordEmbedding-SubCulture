@@ -42,10 +42,8 @@ def log_data(token_words, seed_words, eval_words, token_label, eval_label, weigh
         json.dump(seed_words, fp)
     with open(os.path.join(word_dataset_base, 'eval'), 'w') as fp:
         json.dump(eval_words, fp)
-    with open(os.path.join(word_dataset_base, 'token_label'), 'w') as fp:
-        json.dump(token_label, fp)
-    with open(os.path.join(word_dataset_base, 'eval_label'), 'w') as fp:
-        json.dump(eval_label, fp)
+    np.save(os.path.join(word_dataset_base, 'token_label'), token_label)
+    np.save(os.path.join(word_dataset_base, 'eval_label'), eval_label)
     np.save(os.path.join(word_dataset_base, 'matrix'), weight_matrix)
 
 
@@ -56,10 +54,8 @@ def reload_data():
         seed_words = json.load(fp)
     with open(os.path.join(word_dataset_base, 'eval'), 'r') as fp:
         eval_words = json.load(fp)
-    with open(os.path.join(word_dataset_base, 'token_label'), 'r') as fp:
-        token_label = json.load(fp)
-    with open(os.path.join(word_dataset_base, 'eval_label'), 'r') as fp:
-        eval_label = json.load(fp)
+    token_label = np.load(os.path.join(word_dataset_base, 'token_label.npy'))
+    eval_label = np.load(os.path.join(word_dataset_base, 'eval_label.npy'))
     weight_matrix = np.load(os.path.join(word_dataset_base, 'matrix.npy'))
     return token_words, seed_words, eval_words, token_label, eval_label, weight_matrix
 
