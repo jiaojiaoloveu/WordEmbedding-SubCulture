@@ -97,8 +97,8 @@ def generate():
                                eval_words[word][LabelSpace.P],
                                eval_words[word][LabelSpace.A]]
 
-    print('%s/%s seeds in token words' % (len(set(token_words) & set(seed_words.keys())), seed_num))
-    print('%s/%s eval in token words' % (len(set(token_words) & set(eval_words.keys())), eval_num))
+    print('%s/%s seeds in token words' % (len(set(token_words) & set(seed_words.keys())), Configs.seed))
+    print('%s/%s eval in token words' % (len(set(token_words) & set(eval_words.keys())), Configs.eval))
 
     weight_matrix = np.zeros((token_num, token_num), dtype=np.double)
 
