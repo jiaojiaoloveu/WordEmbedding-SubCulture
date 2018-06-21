@@ -80,6 +80,8 @@ def generate():
     token_num = len(token_words)
 
     token_label = np.zeros((token_num, LabelSpace.Dimension), dtype=np.double)
+    # token_label = (LabelSpace.Max - LabelSpace.Min) * np.random.random_sample((token_num, LabelSpace.Dimension)) + LabelSpace.Min
+
     eval_label = np.array(token_label)
 
     for ind in range(0, token_num):
@@ -119,7 +121,7 @@ def train():
     weight_matrix = weight_matrix + np.transpose(weight_matrix)
     weight_matrix_mask = weight_matrix < Configs.enn
     np.fill_diagonal(weight_matrix_mask, False)
-    weight_matrix = np.exp(weight_matrix * -4) * weight_matrix_mask
+    weight_matrix = np.exp(weight_matrix * -Configs.exp) * weight_matrix_mask
     degree_matrix = np.sum(weight_matrix, axis=1)
     inverse_degree_matrix = np.divide(1, degree_matrix, where=degree_matrix != 0)
     laplacian_matrix = weight_matrix * np.reshape(inverse_degree_matrix, (token_num, 1))
@@ -159,6 +161,7 @@ if __name__ == '__main__':
     ap.add_argument('--alpha', type=float, required=False)
     ap.add_argument('--iteration', type=int, required=False)
     ap.add_argument('--enn', type=float, required=False)
+    ap.add_argument('--exp', type=float, required=False)
     args = vars(ap.parse_args())
     if args.get("alpha") is not None:
         Configs.alpha = args.get("alpha")
@@ -166,6 +169,8 @@ if __name__ == '__main__':
         Configs.iterations = args.get("iteration")
     if args.get('enn') is not None:
         Configs.enn = args.get('enn')
+    if args.get('exp') is not None:
+        Configs.exp = args.get('exp')
 
     if args.get("generate") == 0:
         generate()

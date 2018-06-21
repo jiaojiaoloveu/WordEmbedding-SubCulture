@@ -39,3 +39,4 @@ class Configs:
     iterations = 10
     threshold = 0.5
     enn = 0.8
+    exp = 2
