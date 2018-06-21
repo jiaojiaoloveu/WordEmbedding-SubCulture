@@ -9,6 +9,7 @@ from gensim.models import KeyedVectors
 
 
 word_dataset_base = '../result/semi-supervised'
+log_name = 'log_exp%s_enn%s_it%s'
 
 
 def load_word_vectors(model_path):
@@ -20,7 +21,7 @@ def mean_absolute_error(it, real_label, predict_label, log_mask, eval_num):
     assert real_label.shape == predict_label.shape
     mae = np.sum(np.absolute(real_label - predict_label), axis=0) / eval_num
 
-    with open(os.path.join(word_dataset_base, 'log'), 'a') as fp:
+    with open(os.path.join(word_dataset_base, log_name), 'a') as fp:
         out = [
             'iteration #%s/%s' % (it, Configs.iterations),
             'real',
@@ -175,7 +176,10 @@ if __name__ == '__main__':
     if args.get("generate") == 0:
         generate()
 
-    log_path = os.path.join(word_dataset_base, 'log')
+    log_name = log_name % (Configs.exp, Configs.enn, Configs.iterations)
+
+    log_path = os.path.join(word_dataset_base, log_name)
     if os.path.exists(log_path):
         os.remove(log_path)
+
     train()
