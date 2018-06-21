@@ -32,7 +32,9 @@ def mean_absolute_error(it, real_label, predict_label, log_mask, eval_num):
             'mae',
             mae,
             'corr',
-            str(pearsonr(real_label, predict_label))
+            str(pearsonr(real_label[:, 0], predict_label[:, 0])),
+            str(pearsonr(real_label[:, 1], predict_label[:, 1])),
+            str(pearsonr(real_label[:, 2], predict_label[:, 2]))
         ]
         fp.writelines('%s\n' % line for line in out)
     return mae
