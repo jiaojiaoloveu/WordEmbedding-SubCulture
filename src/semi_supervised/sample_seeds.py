@@ -47,7 +47,8 @@ def __get_rand_seeds(vocabulary, seed_size, eval_size, threshold):
         word_seeds.extend(random.sample(seeds_poll[axis], int(seed_size / 3)))
         print('axis %s size %s' % (axis, len(seeds_poll[axis])))
         print('current size %s' % len(word_seeds))
-    word_seeds = list(set(word_seeds) & set(_fixed_seeds()))
+    word_seeds.extend(_fixed_seeds())
+    word_seeds = list(set(word_seeds))
     eval_words = __rand_eval_wordlist(vocabulary, word_seeds, eval_size)
     return (__get_mapping_epa(vocabulary, word_seeds),
             __get_mapping_epa(vocabulary, eval_words))
@@ -66,6 +67,7 @@ def __max_min_scaling(x, maxA, minA, maxB, minB):
 
 
 def __scale_vad_to_epa(vocabulary_vad, max_min_board):
+    print(max_min_board)
     vocabulary_epa = {}
     for word in vocabulary_vad.keys():
         vad = vocabulary_vad[word]
