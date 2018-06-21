@@ -35,8 +35,8 @@ class WarrinerColumn:
 
 
 class Configs:
-    alpha = 0.8
-    iterations = 10
+    alpha = 1
+    iterations = 100
     enn = 0.5
     exp = 2
 

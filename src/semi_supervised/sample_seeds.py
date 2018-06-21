@@ -109,7 +109,7 @@ def read_warriner_ratings(path):
     return __scale_vad_to_epa(vocabulary_vad, max_min_board)
 
 
-def get_rand_seeds(seed_size=100, eval_size=500, threshold=2.5):
+def get_rand_seeds(seed_size=100, eval_size=500, threshold=2.0):
     # return (dic, dic)
     voc = read_warriner_ratings(csv_path)
     return __get_rand_seeds(voc, seed_size, eval_size, threshold)

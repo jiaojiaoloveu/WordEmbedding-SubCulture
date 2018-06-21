@@ -68,7 +68,7 @@ def reload_data():
 
 def generate():
     # seed_words and eval_words as dictionary of word:epa
-    (seed_words, eval_words) = sample_seeds.get_rand_seeds(Configs.seed_num, Configs.eval_num, Configs.epa)
+    (seed_words, eval_words) = sample_seeds.get_rand_seeds(Configs.seed, Configs.eval, Configs.epa)
     token_words = set(list(seed_words.keys()) + list(eval_words.keys()))
 
     with open(os.path.join(word_dataset_base, 'twitter-wordlist'), 'r') as fp:
