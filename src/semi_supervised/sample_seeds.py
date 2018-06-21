@@ -7,6 +7,17 @@ from labels import LabelSpace
 csv_path = '../data/epa/Ratings_Warriner_et_al.csv'
 
 
+def _fixed_seeds():
+    voc = ['good', 'nice', 'excellent', 'positive', 'warm', 'correct', 'superior',
+            'bad', 'awful', 'nasty', 'negative', 'cold', 'wrong', 'inferior',
+            'powerful', 'strong', 'potent', 'dominant', 'big', 'forceful', 'hard',
+            'powerless', 'weak', 'impotent', 'small', 'incapable', 'hopeless', 'soft',
+            'active', 'fast', 'noisy', 'lively', 'energetic', 'dynamic', 'quick', 'vital',
+            'quiet', 'clam', 'inactive', 'slow', 'stagnant', 'inoperative', 'passive'
+            ]
+    return voc
+
+
 def __rand_eval_wordlist(vocabulary, word_seeds, eval_size):
     eval_poll = []
     for word in vocabulary.keys():
@@ -17,27 +28,26 @@ def __rand_eval_wordlist(vocabulary, word_seeds, eval_size):
 
 
 def __get_fixed_seeds(vocabulary, eval_size):
-    word_seeds = ['good', 'nice', 'excellent', 'positive', 'warm', 'correct', 'superior',
-                  'bad', 'awful', 'nasty', 'negative', 'cold', 'wrong', 'inferior',
-                  'powerful', 'strong', 'potent', 'dominant', 'big', 'forceful', 'hard',
-                  'powerless', 'weak', 'impotent', 'small', 'incapable', 'hopeless', 'soft',
-                  'active', 'fast', 'noisy', 'lively', 'energetic', 'dynamic', 'quick', 'vital',
-                  'quiet', 'clam', 'inactive', 'slow', 'stagnant', 'inoperative', 'passive'
-                  ]
+    word_seeds = _fixed_seeds()
     eval_words = __rand_eval_wordlist(vocabulary, word_seeds, eval_size)
     return (__get_mapping_epa(vocabulary, word_seeds),
             __get_mapping_epa(vocabulary, eval_words))
 
 
 def __get_rand_seeds(vocabulary, seed_size, eval_size, threshold):
-    seeds_poll = []
+    seeds_poll = {'E': [], 'P': [], 'A': []}
     for word in vocabulary.keys():
         epa = vocabulary[word]
         for axis in epa.keys():
             if abs(epa[axis]) > threshold:
-                seeds_poll.append(word)
-                break
-    word_seeds = random.sample(seeds_poll, seed_size)
+                seeds_poll[axis].append(word)
+    word_seeds = []
+    print('eval size %s' % seed_size)
+    for axis in seeds_poll.keys():
+        word_seeds.extend(random.sample(seeds_poll[axis], int(seed_size / 3)))
+        print('axis %s size %s' % (axis, len(seeds_poll[axis])))
+        print('current size %s' % len(word_seeds))
+    word_seeds = list(set(word_seeds) & set(_fixed_seeds()))
     eval_words = __rand_eval_wordlist(vocabulary, word_seeds, eval_size)
     return (__get_mapping_epa(vocabulary, word_seeds),
             __get_mapping_epa(vocabulary, eval_words))

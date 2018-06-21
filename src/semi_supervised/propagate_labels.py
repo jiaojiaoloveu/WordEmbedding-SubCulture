@@ -67,12 +67,8 @@ def reload_data():
 
 
 def generate():
-    seed_num = args.get('seed')
-    eval_num = args.get('eval')
-    threshold = args.get('threshold')
-
     # seed_words and eval_words as dictionary of word:epa
-    (seed_words, eval_words) = sample_seeds.get_rand_seeds(seed_num, eval_num, threshold)
+    (seed_words, eval_words) = sample_seeds.get_rand_seeds(Configs.seed_num, Configs.eval_num, Configs.epa)
     token_words = set(list(seed_words.keys()) + list(eval_words.keys()))
 
     with open(os.path.join(word_dataset_base, 'twitter-wordlist'), 'r') as fp:
@@ -160,9 +156,9 @@ def train():
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser("semi-supervised training using graph")
-    ap.add_argument('--seed', type=int, required=False, default=1000)
-    ap.add_argument('--eval', type=int, required=False, default=500)
-    ap.add_argument('--threshold', type=float, required=False, default=2.5)
+    ap.add_argument('--seed', type=int, required=False)
+    ap.add_argument('--eval', type=int, required=False)
+    ap.add_argument('--epa', type=float, required=False)
     ap.add_argument('--generate', type=int, required=False, default=0)
     ap.add_argument('--alpha', type=float, required=False)
     ap.add_argument('--iteration', type=int, required=False)
@@ -171,12 +167,24 @@ if __name__ == '__main__':
     args = vars(ap.parse_args())
     if args.get("alpha") is not None:
         Configs.alpha = args.get("alpha")
+
     if args.get("iteration") is not None:
         Configs.iterations = args.get("iteration")
+
     if args.get('enn') is not None:
         Configs.enn = args.get('enn')
+
     if args.get('exp') is not None:
         Configs.exp = args.get('exp')
+
+    if args.get('seed') is not None:
+        Configs.seed = args.get('seed')
+
+    if args.get('eval') is not None:
+        Configs.eval = args.get('eval')
+
+    if args.get('epa') is not None:
+        Configs.epa = args.get('epa')
 
     if args.get("generate") == 0:
         generate()
