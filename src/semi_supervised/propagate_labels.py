@@ -5,6 +5,7 @@ import numpy as np
 import sample_seeds
 from labels import LabelSpace
 from labels import Configs
+from scipy import special
 from gensim.models import KeyedVectors
 from scipy.stats.stats import pearsonr
 
@@ -18,9 +19,14 @@ def load_word_vectors(model_path):
     return word_vectors
 
 
-def mean_absolute_error(it, real_label, predict_label, log_mask, eval_num):
+def mean_absolute_error(it, real_label, predict_label, log_mask, eval_num, label_mean, label_std):
     assert real_label.shape == predict_label.shape
+
+    real_label_ori = __uni2norm(real_label, label_mean, label_std)
+    predict_label_ori = __uni2norm(predict_label, label_mean, label_std)
+
     mae = np.sum(np.absolute(real_label - predict_label), axis=0) / eval_num
+    mae_ori = np.sum(np.absolute(real_label_ori - predict_label_ori), axis=0) / eval_num
 
     with open(os.path.join(word_dataset_base, log_name), 'a') as fp:
         out = [
@@ -29,12 +35,22 @@ def mean_absolute_error(it, real_label, predict_label, log_mask, eval_num):
             str(real_label[log_mask]),
             'predict',
             str(predict_label[log_mask]),
+            'real_ori',
+            str(real_label_ori[log_mask]),
+            'predict_ori',
+            str(predict_label_ori[log_mask]),
             'mae',
             mae,
+            'mae',
+            mae_ori,
             'corr',
             str(pearsonr(real_label[:, 0], predict_label[:, 0])),
             str(pearsonr(real_label[:, 1], predict_label[:, 1])),
-            str(pearsonr(real_label[:, 2], predict_label[:, 2]))
+            str(pearsonr(real_label[:, 2], predict_label[:, 2])),
+            'corr_ori',
+            str(pearsonr(real_label_ori[:, 0], predict_label_ori[:, 0])),
+            str(pearsonr(real_label_ori[:, 1], predict_label_ori[:, 1])),
+            str(pearsonr(real_label_ori[:, 2], predict_label_ori[:, 2])),
         ]
         fp.writelines('%s\n' % line for line in out)
     return mae
@@ -113,9 +129,32 @@ def generate():
     log_data(token_words, seed_words, eval_words, token_label, eval_label, weight_matrix)
 
 
+def __norm2uni(x, mu, sigma):
+    y = (x - mu) / sigma
+    return 0.5 * special.erfc(-y / np.sqrt(2))
+
+
+def __uni2norm(x, mu, sigma):
+    y = -np.sqrt(2) * special.erfcinv(2 * x)
+    return y * sigma + mu
+
+
 def train():
     print('start training')
     token_words, seed_words, eval_words, token_label, eval_label, weight_matrix = reload_data()
+
+    token_label_mask = np.any(token_label, axis=1)
+    token_label_ori = token_label[token_label_mask]
+
+    eval_label_mask = np.any(eval_label, axis=1)
+    eval_label_ori = eval_label[eval_label_mask]
+
+    label_mean = np.mean(token_label_ori, axis=0)
+    label_std = np.std(token_label_ori, axis=0)
+
+    token_label[token_label_mask] = __norm2uni(token_label_ori, label_mean, label_std)
+    eval_label[eval_label_mask] = __norm2uni(eval_label_ori, label_mean, label_std)
+
     token_num = len(token_words)
 
     print('calculate matrix')
@@ -143,7 +182,7 @@ def train():
     log_window_size = 20
     log_mask = np.random.rand(eval_num) < (1.0 * log_window_size / eval_num)
 
-    mean_absolute_error(-1, eval_label[eval_mask], token_label[eval_mask], log_mask, eval_num)
+    mean_absolute_error(-1, eval_label[eval_mask], token_label[eval_mask], log_mask, eval_num, label_mean, label_std)
     original_token_label = np.array(token_label)
     for it in range(0, Configs.iterations):
         if it % 10 == 0:
@@ -151,7 +190,11 @@ def train():
         transient_token_label = np.matmul(laplacian_matrix, token_label)
         token_label = transient_token_label * np.reshape(label_mask_all, (token_num, 1)) + \
                       Configs.alpha * original_token_label
-        mean_absolute_error(it, eval_label[eval_mask], token_label[eval_mask], log_mask, eval_num)
+        mean_absolute_error(it, eval_label[eval_mask], token_label[eval_mask], log_mask, eval_num, label_mean, label_std)
+
+    token_label_mask = np.any(token_label, axis=1)
+    token_label_pre = token_label[token_label_mask]
+    token_label[token_label_mask] = __norm2uni(token_label_pre, label_mean, label_std)
 
     np.save(os.path.join(word_dataset_base, 'token_label_pre'), token_label)
 
