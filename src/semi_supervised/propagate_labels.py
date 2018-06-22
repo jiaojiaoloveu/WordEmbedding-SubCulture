@@ -71,7 +71,7 @@ def generate():
     (seed_words, eval_words) = sample_seeds.get_rand_seeds(Configs.seed, Configs.eval, Configs.epa)
     token_words = set(list(seed_words.keys()) + list(eval_words.keys()))
 
-    with open(os.path.join(word_dataset_base, 'twitter-wordlist'), 'r') as fp:
+    with open(os.path.join(word_dataset_base, 'wikitext-wordlist'), 'r') as fp:
         corpus_words = set(json.load(fp))
     token_words.update(corpus_words)
 
