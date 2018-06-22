@@ -146,7 +146,8 @@ def train():
     mean_absolute_error(-1, eval_label[eval_mask], token_label[eval_mask], log_mask, eval_num)
     original_token_label = np.array(token_label)
     for it in range(0, Configs.iterations):
-        print('round %s/%s' % (it, Configs.iterations))
+        if it % 10 == 0:
+            print('round %s/%s' % (it, Configs.iterations))
         transient_token_label = np.matmul(laplacian_matrix, token_label)
         token_label = transient_token_label * np.reshape(label_mask_all, (token_num, 1)) + \
                       Configs.alpha * original_token_label
@@ -154,7 +155,7 @@ def train():
 
     np.save(os.path.join(word_dataset_base, 'token_label_pre'), token_label)
 
-    predict_label = dict(list(zip(token_words, token_label)))
+    predict_label = dict(list(zip(token_words, token_label.tolist())))
     with open(os.path.join(word_dataset_base, 'result'), 'w') as fp:
         json.dump(predict_label, fp)
 
