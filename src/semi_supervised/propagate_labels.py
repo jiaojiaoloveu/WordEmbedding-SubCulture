@@ -111,7 +111,6 @@ def generate():
     del google_news_model
 
     log_data(token_words, seed_words, eval_words, token_label, eval_label, weight_matrix)
-    return token_words, seed_words, eval_words, weight_matrix
 
 
 def train():
@@ -152,6 +151,12 @@ def train():
         token_label = transient_token_label * np.reshape(label_mask_all, (token_num, 1)) + \
                       Configs.alpha * original_token_label
         mean_absolute_error(it, eval_label[eval_mask], token_label[eval_mask], log_mask, eval_num)
+
+    np.save(os.path.join(word_dataset_base, 'token_label_pre'), token_label)
+
+    predict_label = dict(list(zip(token_words, token_label)))
+    with open(os.path.join(word_dataset_base, 'result'), 'w') as fp:
+        json.dump(predict_label, fp)
 
 
 if __name__ == '__main__':
