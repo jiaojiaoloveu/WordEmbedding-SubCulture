@@ -135,8 +135,10 @@ def __norm2uni(x, mu, sigma):
 
 
 def __uni2norm(x, mu, sigma):
-    y = -np.sqrt(2) * special.erfcinv(2 * x)
-    return y * sigma + mu
+    x_mask = np.any(x, axis=1)
+    y = -np.sqrt(2) * special.erfcinv(2 * x[x_mask])
+    x[x_mask] = y * sigma + mu
+    return x
 
 
 def train():
