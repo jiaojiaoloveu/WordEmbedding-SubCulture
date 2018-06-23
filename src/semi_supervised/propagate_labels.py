@@ -152,8 +152,10 @@ def train():
     eval_label_mask = np.any(eval_label, axis=1)
     eval_label_ori = eval_label[eval_label_mask]
 
-    label_mean = np.mean(token_label_ori, axis=0)
-    label_std = np.std(token_label_ori, axis=0)
+    # label_mean = np.mean(token_label_ori, axis=0)
+    # label_std = np.std(token_label_ori, axis=0)
+    label_mean = np.array([0.19571685413316248, -0.6727038433386933, 0.5452512966060962])
+    label_std = np.array([1.5079544406893441, 1.2448124114055585, 1.2972247817961575])
 
     print('mean %s, std %s' % (label_mean, label_std))
 
