@@ -137,8 +137,8 @@ def __norm2uni(x, mu, sigma):
 def __uni2norm(x, mu, sigma):
     y = np.array(x)
     y_mask = np.any(y, axis=1)
-    y = -np.sqrt(2) * special.erfcinv(2 * y[y_mask])
-    y[y_mask] = y * sigma + mu
+    z = -np.sqrt(2) * special.erfcinv(2 * y[y_mask])
+    y[y_mask] = z * sigma + mu
     return y
 
 
@@ -155,7 +155,7 @@ def train():
     label_mean = np.mean(token_label_ori, axis=0)
     label_std = np.std(token_label_ori, axis=0)
 
-    print('mean %s, std %s' % (label_mean.tostring(), label_std.tostring()))
+    print('mean %s, std %s' % (label_mean, label_std))
 
     print(token_label[token_label_mask])
 
