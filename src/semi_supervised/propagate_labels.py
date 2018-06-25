@@ -164,8 +164,6 @@ def train():
     token_label[token_label_mask] = __norm2uni(token_label_ori, label_mean, label_std)
     eval_label[eval_label_mask] = __norm2uni(eval_label_ori, label_mean, label_std)
 
-    print(token_label[token_label_mask])
-
     token_num = len(token_words)
 
     print('calculate matrix')
@@ -184,11 +182,11 @@ def train():
     print('seed word in token dic %s/%s', (len(set(seed_words.keys()) & set(token_words)), len(seed_words.keys())))
     print('eval word in token dic %s/%s', (len(set(eval_words.keys()) & set(token_words)), len(eval_words.keys())))
 
-    label_mask = np.any(token_label, axis=1)
+    label_mask = np.array(token_label_mask)
     label_mask_inv = np.logical_not(label_mask)
     label_mask_all = (1 - Configs.alpha) * label_mask + label_mask_inv
 
-    eval_mask = np.any(eval_label, axis=1)
+    eval_mask = np.array(eval_label_mask)
     eval_num = np.sum(eval_mask)
     log_window_size = 20
     log_mask = np.random.rand(eval_num) < (1.0 * log_window_size / eval_num)
@@ -200,13 +198,10 @@ def train():
             print('round %s/%s' % (it, Configs.iterations))
         transient_token_label = np.matmul(laplacian_matrix, token_label)
         token_label = transient_token_label * np.reshape(label_mask_all, (token_num, 1)) + \
-                      Configs.alpha * original_token_label
+                      Configs.alpha * original_token_label * np.reshape(label_mask, (token_num, 1))
         mean_absolute_error(it, eval_label[eval_mask], token_label[eval_mask], log_mask, eval_num, label_mean, label_std)
 
-    token_label_mask = np.any(token_label, axis=1)
-    token_label_pre = token_label[token_label_mask]
-    token_label[token_label_mask] = __norm2uni(token_label_pre, label_mean, label_std)
-
+    token_label = __uni2norm(token_label, label_mean, label_std)
     np.save(os.path.join(word_dataset_base, 'token_label_pre'), token_label)
 
     predict_label = dict(list(zip(token_words, token_label.tolist())))
