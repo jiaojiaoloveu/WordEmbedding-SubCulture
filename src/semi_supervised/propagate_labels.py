@@ -7,6 +7,7 @@ from labels import LabelSpace
 from labels import Configs
 from scipy import special
 from gensim.models import KeyedVectors
+from gensim.models.word2vec import Word2Vec
 from scipy.stats.stats import pearsonr
 
 
@@ -82,27 +83,56 @@ def reload_data():
     return token_words, seed_words, eval_words, token_label, eval_label, weight_matrix
 
 
+def get_github_tokens():
+    # dic: str -> np.ndarray
+    github_model_path = '../models/embedding/github/word2vec_sg_0_size_300_mincount_5'
+    github_model = Word2Vec.load(github_model_path)
+    github_voc = {}
+    tokens_list = list(github_model.wv.vocab.keys())
+    for token in tokens_list:
+        github_voc[token] = github_model.wv[token]
+    return github_voc
+
+
+def __cosine(a, b):
+    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)).item()
+
+
+def get_github_distance(w1, wlist, wvocab):
+    distance_list = []
+    for w2 in wlist:
+        distance_list.append(1 - __cosine(w1, wvocab[w2]))
+    return distance_list
+
+
 def generate():
     # seed_words and eval_words as dictionary of word:epa
     (seed_words, eval_words) = sample_seeds.get_rand_seeds(Configs.seed, Configs.eval, Configs.epa)
     token_words = set(list(seed_words.keys()) + list(eval_words.keys()))
 
+    # append wikitext words to network
     with open(os.path.join(word_dataset_base, 'wikitext-wordlist'), 'r') as fp:
         corpus_words = set(json.load(fp))
     token_words.update(corpus_words)
 
+    # use trained model to calculate distance
     google_news_model_path = '../models/embedding/GoogleNews-vectors-negative300.bin'
     google_news_model = load_word_vectors(google_news_model_path)
     all_token_words = set(google_news_model.vocab.keys())
     token_words = list(token_words & all_token_words)
+    sub_token_num = len(token_words)
+
+    # add github words to network
+    github_words = get_github_tokens()
+    token_words.extend(list(github_words.keys()))
     token_num = len(token_words)
 
+    # objective matrix
     token_label = np.zeros((token_num, LabelSpace.Dimension), dtype=np.double)
-    # token_label = (LabelSpace.Max - LabelSpace.Min) * np.random.random_sample((token_num, LabelSpace.Dimension)) + LabelSpace.Min
-
     eval_label = np.array(token_label)
 
-    for ind in range(0, token_num):
+    # update label info
+    for ind in range(0, sub_token_num):
         word = token_words[ind]
         if word in seed_words.keys():
             token_label[ind] = [seed_words[word][LabelSpace.E],
@@ -116,14 +146,25 @@ def generate():
     print('%s/%s seeds in token words' % (len(set(token_words) & set(seed_words.keys())), Configs.seed))
     print('%s/%s eval in token words' % (len(set(token_words) & set(eval_words.keys())), Configs.eval))
 
+    # update weight info
     weight_matrix = np.zeros((token_num, token_num), dtype=np.double)
-
-    for ind in range(0, token_num - 1):
+    for ind in range(0, sub_token_num):
         # fully connected graph
         # weight between nodes positive
         # distance = 1 - cosine-dis
-        distance_matrix = google_news_model.distances(token_words[ind], token_words[ind + 1:])
-        weight_matrix[ind, ind + 1:] = distance_matrix
+        distance_matrix = google_news_model.distances(token_words[ind], token_words[ind + 1: sub_token_num])
+        weight_matrix[ind, ind + 1: sub_token_num] = distance_matrix
+        weight_matrix[ind, sub_token_num: token_num] = get_github_distance(
+            google_news_model.wv[token_words[ind]],
+            token_words[sub_token_num: token_num],
+            github_words)
+
+    for ind in range(sub_token_num, token_num - 1):
+        weight_matrix[ind, ind + 1: token_num] = get_github_distance(
+            github_words[token_words[ind]],
+            token_words[ind + 1: token_num],
+            github_words)
+
     del google_news_model
 
     log_data(token_words, seed_words, eval_words, token_label, eval_label, weight_matrix)
