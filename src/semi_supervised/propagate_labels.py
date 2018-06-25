@@ -130,16 +130,19 @@ def generate():
 
 
 def __norm2uni(x, mu, sigma):
+    # map from (-4,4) to (-1,1)
     y = (x - mu) / sigma
-    return 0.5 * special.erfc(-y / np.sqrt(2))
+    return special.erfc(-y / np.sqrt(2)) - 1
 
 
 def __uni2norm(x, mu, sigma):
-    y = np.array(x)
-    y_mask = np.any(y, axis=1)
-    z = -np.sqrt(2) * special.erfcinv(2 * y[y_mask])
-    y[y_mask] = z * sigma + mu
-    return y
+    y = -np.sqrt(2) * special.erfcinv(1 + x)
+    return y * sigma + mu
+    # y = np.array(x)
+    # y_mask = np.any(y, axis=1)
+    # z = -np.sqrt(2) * special.erfcinv(1 + y[y_mask])
+    # y[y_mask] = z * sigma + mu
+    # return y
 
 
 def train():
