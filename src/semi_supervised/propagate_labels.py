@@ -146,9 +146,12 @@ def generate():
     print('%s/%s seeds in token words' % (len(set(token_words) & set(seed_words.keys())), Configs.seed))
     print('%s/%s eval in token words' % (len(set(token_words) & set(eval_words.keys())), Configs.eval))
 
+    print('sub token number %s' % sub_token_num)
+    print('token number %s' % token_num)
+
     # update weight info
     weight_matrix = np.zeros((token_num, token_num), dtype=np.double)
-    for ind in range(0, sub_token_num):
+    for ind in range(0, sub_token_num - 1):
         # fully connected graph
         # weight between nodes positive
         # distance = 1 - cosine-dis
