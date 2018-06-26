@@ -6,6 +6,7 @@ import sample_seeds
 from labels import LabelSpace
 from labels import Configs
 from scipy import special
+from scipy import spatial
 from gensim.models import KeyedVectors
 from gensim.models.word2vec import Word2Vec
 from scipy.stats.stats import pearsonr
@@ -94,14 +95,10 @@ def get_github_tokens():
     return github_voc
 
 
-def __cosine(a, b):
-    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)).item()
-
-
 def get_github_distance(w1, wlist, wvocab):
     distance_list = []
     for w2 in wlist:
-        distance_list.append(1 - __cosine(w1, wvocab[w2]))
+        distance_list.append(1 - spatial.distance.cosine(w1, wvocab[w2]))
     return distance_list
 
 
