@@ -41,7 +41,7 @@ def preprocess_data():
         return [epa['E'], epa['P'], epa['A']]
 
     for word in word_epa_dataset.keys():
-        feature = google_model.wv[word]
+        feature = google_model[word]
         wv_feature.append(feature)
 
         label = word_epa_dataset[word]
