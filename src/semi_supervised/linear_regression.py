@@ -78,5 +78,5 @@ def linear_regression():
     kfold_est(feature, label)
 
 
-if __name__ == 'main':
+if __name__ == '__main__':
     linear_regression()
