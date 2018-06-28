@@ -36,11 +36,14 @@ def preprocess_data():
     epa_label = []
     word_epa_dataset = load_all()
     google_model = get_wv_space()
+    google_vocab = set(google_model.vocab.keys())
 
     def epa2list(epa):
         return [epa['E'], epa['P'], epa['A']]
 
     for word in word_epa_dataset.keys():
+        if word not in google_vocab:
+            continue
         feature = google_model[word]
         wv_feature.append(feature)
 
