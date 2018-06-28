@@ -58,7 +58,7 @@ def preprocess_data():
 
 def baseline_model():
     model = Sequential()
-    model.add(Dense(300, input_dim=300, kernel_initializer='normal', activation='relu'))
+    model.add(Dense(32, input_dim=300, kernel_initializer='normal', activation='relu'))
     model.add(Dense(3, kernel_initializer='normal'))
     model.compile(loss='mean_squared_error', optimizer='adam')
     return model
