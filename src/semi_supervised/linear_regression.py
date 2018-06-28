@@ -79,4 +79,4 @@ def linear_regression():
 
 
 if __name__ == 'main':
-    print('new')
+    linear_regression()
