@@ -1,5 +1,8 @@
 from sklearn.svm import SVR
 from neural_network import generate_data
+from propagate_labels import word_dataset_base
+import os
+import json
 import numpy as np
 import argparse
 
@@ -18,6 +21,9 @@ def train():
             score = clf.score(feature_test, label_test_axis)
             print('score %s' % score)
             label_test_axis_pre = clf.predict(feature_test)
+            with open(os.path.join(word_dataset_base, '%s_result_%s' % (model, axis)), 'w') as fp:
+                zipped = list(zip(label_test_axis_pre.tolist(), label_test_axis.tolist()))
+                json.dump(zipped, fp)
             mae = np.mean(np.abs(label_test_axis_pre - label_test_axis))
             print('mae: %s' % mae)
 
