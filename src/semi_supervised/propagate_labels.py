@@ -152,6 +152,8 @@ def generate():
         # fully connected graph
         # weight between nodes positive
         # distance = 1 - cosine-dis
+        if ind % 10 == 0:
+            print('first half %s / %s' % (ind, sub_token_num))
         distance_matrix = google_news_model.distances(token_words[ind], token_words[ind + 1: sub_token_num])
         weight_matrix[ind, ind + 1: sub_token_num] = distance_matrix
         weight_matrix[ind, sub_token_num: token_num] = get_github_distance(
@@ -160,6 +162,8 @@ def generate():
             github_words)
 
     for ind in range(sub_token_num, token_num - 1):
+        if ind % 10 == 0:
+            print('second half %s / %s' % (ind, token_num))
         weight_matrix[ind, ind + 1: token_num] = get_github_distance(
             github_words[token_words[ind]],
             token_words[ind + 1: token_num],
