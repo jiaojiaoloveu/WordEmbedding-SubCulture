@@ -3,6 +3,7 @@ from neural_network import generate_data
 from propagate_labels import word_dataset_base
 from propagate_labels import load_google_word_vectors, load_github_word_vectors
 from align_wv_space import align_models
+from time import time
 import os
 import json
 import numpy as np
@@ -39,6 +40,7 @@ def train(wv):
     if model == 'svr':
         clf = SVR()
         for axis in range(0, 3):
+            start = time()
             label_train_axis = label_train[:, axis]
             label_test_axis = label_test[:, axis]
             print('start training')
@@ -58,6 +60,7 @@ def train(wv):
                 label_space.append(clf.predict([gg, gh]))
             label_space = np.array(label_space)
             print(label_space)
+            print('time %s' % time() - start)
             print('mean google radius')
             gg_radius = np.abs(label_space[:, 0])
             print(np.mean(gg_radius))
