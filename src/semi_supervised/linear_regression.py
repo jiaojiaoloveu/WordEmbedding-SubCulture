@@ -1,8 +1,10 @@
 import json
 import os
+import argparse
 import numpy as np
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Dense, Conv1D, Activation, Dropout, Embedding
+from keras.layers import GlobalMaxPooling1D, MaxPooling1D
 from keras.wrappers.scikit_learn import KerasRegressor
 from sklearn.model_selection import cross_val_score, KFold
 from propagate_labels import load_word_vectors, word_dataset_base
@@ -10,13 +12,13 @@ from sample_seeds import csv_path, read_warriner_ratings
 
 
 def load_train():
-    with open(os.path.join(word_dataset_base, 'seed'), 'w') as fp:
+    with open(os.path.join(word_dataset_base, 'seed'), 'r') as fp:
         seed_words = json.load(fp)
     return seed_words
 
 
 def load_test():
-    with open(os.path.join(word_dataset_base, 'eval'), 'w') as fp:
+    with open(os.path.join(word_dataset_base, 'eval'), 'r') as fp:
         eval_words = json.load(fp)
     return eval_words
 
@@ -31,10 +33,15 @@ def get_wv_space():
     return model
 
 
-def preprocess_data():
+def load_feature_label(suffix):
+    feature = np.load(os.path.join(word_dataset_base, 'feature_' + suffix + '.npy'))
+    label = np.load(os.path.join(word_dataset_base, 'label_' + suffix + '.npy'))
+    return feature, label
+
+
+def preprocess_data(word_epa_dataset, suffix):
     wv_feature = []
     epa_label = []
-    word_epa_dataset = load_all()
     google_model = get_wv_space()
     google_vocab = set(google_model.vocab.keys())
 
@@ -54,32 +61,85 @@ def preprocess_data():
     epa_label = np.array(epa_label)
     print(wv_feature.shape)
     print(epa_label.shape)
-    np.save(os.path.join(word_dataset_base, 'feature'), wv_feature)
-    np.save(os.path.join(word_dataset_base, 'label'), epa_label)
+    np.save(os.path.join(word_dataset_base, 'feature_' + suffix), wv_feature)
+    np.save(os.path.join(word_dataset_base, 'label_' + suffix), epa_label)
     return wv_feature, epa_label
 
 
-def baseline_model():
+def baseline_model(dtype):
+    print(dtype)
     model = Sequential()
-    model.add(Dense(32, input_dim=300, kernel_initializer='normal', activation='relu'))
-    model.add(Dense(3, kernel_initializer='normal'))
-    model.compile(loss='mean_squared_error', optimizer='adam')
+    if dtype == 'lr':
+        model.add(Dense(32, input_dim=300, kernel_initializer='normal', activation='relu'))
+        model.add(Dense(3, kernel_initializer='normal'))
+    elif dtype == 'cnn':
+        model.add(Conv1D(32, 10, padding='valid', activation='relu', strides=1))
+        # model.add(MaxPooling1D(pool_size=5))
+        model.add(GlobalMaxPooling1D())
+        model.add(Dense(16))
+        model.add(Dropout(0.2))
+        model.add(Activation('relu'))
+        model.add(Dense(3))
+    elif dtype == 'cnn2':
+        model.add(Conv1D(4, 10, padding='valid', activation='relu', strides=1))
+        model.add(GlobalMaxPooling1D())
+        model.add(Dense(3))
+
+    model.compile(loss='mean_absolute_error', optimizer='adam', metrics=['accuracy'])
     return model
 
 
-def kfold_est(feature, label):
-    seed = 10
-    np.random.seed(seed)
-    estimator = KerasRegressor(build_fn=baseline_model, epochs=100, batch_size=5, verbose=0)
-    kfold = KFold(n_splits=10, random_state=seed)
-    results = cross_val_score(estimator, feature, label, cv=kfold)
-    print("Results: %.2f (%.2f) MSE" % (results.mean(), results.std()))
+#def kfold_est(feature, label):
+#    seed = 10
+#    np.random.seed(seed)
+#    estimator = KerasRegressor(build_fn=baseline_model, epochs=100, batch_size=5, verbose=0)
+#    kfold = KFold(n_splits=10, random_state=seed)
+#    results = cross_val_score(estimator, feature, label, cv=kfold)
+#    print("Results: %.2f (%.2f) MSE" % (results.mean(), results.std()))
 
 
-def linear_regression():
-    feature, label = preprocess_data()
-    kfold_est(feature, label)
+def fit_model(feature_train, label_train, feature_test, label_test, dtype):
+    if 'cnn' in dtype:
+        # channel last
+        feature_train = np.reshape(feature_train, feature_train.shape + (1, ))
+        feature_test = np.reshape(feature_test, feature_test.shape + (1,))
+    model = baseline_model(dtype=dtype)
+    print('start training %s %s' % (str(feature_train.shape), str(label_train.shape)))
+    model.fit(feature_train, label_train, epochs=10, batch_size=128)
+    print('start evaluating %s %s' % (str(feature_test.shape), str(label_test.shape)))
+    score = model.evaluate(feature_test, label_test, batch_size=128)
+    print(score)
+
+
+def train():
+    generate = args.get('generate')
+    model = args.get('model')
+    if generate < 2:
+        if generate == 0:
+            feature, label = load_feature_label('all')
+        else:
+            feature, label = preprocess_data(load_all(), 'all')
+        (items, dimensions) = feature.shape
+        mask = np.random.random_sample(items)
+        train_test_split = 0.4
+        feature_train, label_train = feature[mask < train_test_split], label[mask < train_test_split]
+        feature_test, label_test = feature[mask >= train_test_split], label[mask >= train_test_split]
+        fit_model(feature_train, label_train, feature_test, label_test, model)
+    elif generate < 4:
+        if generate == 2:
+            feature_train, label_train = load_feature_label('train')
+            feature_test, label_test = load_feature_label('test')
+        else:
+            feature_train, label_train = preprocess_data(load_train(), 'train')
+            feature_test, label_test = preprocess_data(load_test(), 'test')
+        fit_model(feature_train, label_train, feature_test, label_test, model)
+    else:
+        print('generate = %s not supported' % generate)
 
 
 if __name__ == '__main__':
-    linear_regression()
+    ap = argparse.ArgumentParser('keras deep learning method')
+    ap.add_argument('--generate', type=int, required=False)
+    ap.add_argument('--model', type=str, required=True)
+    args = vars(ap.parse_args())
+    train()
