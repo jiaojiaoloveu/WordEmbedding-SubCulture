@@ -16,10 +16,10 @@ def train():
             print('start training')
             clf.fit(feature_train, label_train_axis)
             score = clf.score(feature_test, label_test_axis)
-            print('score ' + score)
+            print('score %s' % score)
             label_test_axis_pre = clf.predict(feature_test)
             mae = np.mean(np.abs(label_test_axis_pre - label_test_axis))
-            print('mae: ' + mae)
+            print('mae: %s' % mae)
 
 
 if __name__ == '__main__':
