@@ -12,7 +12,9 @@ from gensim.models.word2vec import Word2Vec
 from scipy.stats.stats import pearsonr
 
 
-word_dataset_base = '../result/semi-supervised'
+word_dataset_base = '../result/epa_expansion'
+os.makedirs(word_dataset_base, exist_ok=True)
+
 log_name = 'log_exp%s_enn%s_it%s'
 
 
