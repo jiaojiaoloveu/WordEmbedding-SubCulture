@@ -7,7 +7,7 @@ import json
 import numpy as np
 import argparse
 
-verbs = []
+verbs = ['pull', 'take', 'debug', 'look', 'reverse', 'consult']
 
 
 def wv_map():
@@ -15,9 +15,10 @@ def wv_map():
     gg_model = load_google_word_vectors('../models/embedding/GoogleNews-vectors-negative300.bin')
     gh_model = load_github_word_vectors('../models/embedding/github/word2vec_sg_0_size_300_mincount_5')
     for w in verbs:
-        gg = gg_model[w]
-        gh = gh_model.wv[w]
-        dic[w] = (gg, gh)
+        if w in gg_model.vocab.keys() and w in gh_model.wv.vocab.keys():
+            gg = gg_model[w]
+            gh = gh_model.wv[w]
+            dic[w] = (gg, gh)
     return dic
 
 
