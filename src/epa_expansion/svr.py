@@ -8,7 +8,13 @@ import json
 import numpy as np
 import argparse
 
-verbs = ['pull', 'take', 'debug', 'look', 'reverse', 'consult']
+
+def get_tokens():
+    tokens = []
+    with open(os.path.join(word_dataset_base, 'wikitext-wordlist'), 'r') as fp:
+        tokens = json.load(fp)
+    print('comparing %s' % len(tokens))
+    return tokens
 
 
 def wv_map():
@@ -18,7 +24,7 @@ def wv_map():
     print('align wv space')
     gh_model, gg_model = align_models(gh_model, gg_model)
     print('align done')
-    for w in verbs:
+    for w in get_tokens():
         if w in gg_model.vocab.keys() and w in gh_model.wv.vocab.keys():
             gg = gg_model[w]
             gh = gh_model.wv[w]
@@ -50,7 +56,16 @@ def train(wv):
                 gg = wv[w][0]
                 gh = wv[w][1]
                 label_space.append(clf.predict([gg, gh]))
+            label_space = np.array(label_space)
             print(label_space)
+            print('mean google radius')
+            gg_radius = np.abs(label_space[:, 0])
+            print(np.mean(gg_radius))
+            print(np.std(gg_radius))
+            print('mean github radius')
+            gh_radius = np.abs(label_space[:, 1])
+            print(np.mean(gh_radius))
+            print(np.std(gh_radius))
 
 
 if __name__ == '__main__':
