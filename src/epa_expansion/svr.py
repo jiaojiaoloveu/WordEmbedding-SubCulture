@@ -2,6 +2,7 @@ from sklearn.svm import SVR
 from neural_network import generate_data
 from propagate_labels import word_dataset_base
 from propagate_labels import load_google_word_vectors, load_github_word_vectors
+from align_wv_space import align_models
 import os
 import json
 import numpy as np
@@ -14,6 +15,9 @@ def wv_map():
     dic = {}
     gg_model = load_google_word_vectors('../models/embedding/GoogleNews-vectors-negative300.bin')
     gh_model = load_github_word_vectors('../models/embedding/github/word2vec_sg_0_size_300_mincount_5')
+    print('align wv space')
+    gh_model, gg_model = align_models(gh_model, gg_model)
+    print('align done')
     for w in verbs:
         if w in gg_model.vocab.keys() and w in gh_model.wv.vocab.keys():
             gg = gg_model[w]
