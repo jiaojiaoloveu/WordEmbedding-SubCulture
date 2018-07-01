@@ -111,9 +111,7 @@ def fit_model(feature_train, label_train, feature_test, label_test, dtype):
     print(score)
 
 
-def train():
-    generate = args.get('generate')
-    model = args.get('model')
+def generate_data(generate):
     if generate < 2:
         if generate == 0:
             feature, label = load_feature_label('all')
@@ -124,7 +122,6 @@ def train():
         train_test_split = 0.4
         feature_train, label_train = feature[mask < train_test_split], label[mask < train_test_split]
         feature_test, label_test = feature[mask >= train_test_split], label[mask >= train_test_split]
-        fit_model(feature_train, label_train, feature_test, label_test, model)
     elif generate < 4:
         if generate == 2:
             feature_train, label_train = load_feature_label('train')
@@ -132,14 +129,22 @@ def train():
         else:
             feature_train, label_train = preprocess_data(load_train(), 'train')
             feature_test, label_test = preprocess_data(load_test(), 'test')
-        fit_model(feature_train, label_train, feature_test, label_test, model)
     else:
         print('generate = %s not supported' % generate)
+        raise Exception('generate not supported yet')
+    return feature_train, label_train, feature_test, label_test
+
+
+def train():
+    generate = args.get('generate')
+    model = args.get('model')
+    feature_train, label_train, feature_test, label_test = generate_data(generate)
+    fit_model(feature_train, label_train, feature_test, label_test, model)
 
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser('keras deep learning method')
-    ap.add_argument('--generate', type=int, required=False)
+    ap.add_argument('--generate', type=int, required=True)
     ap.add_argument('--model', type=str, required=True)
     args = vars(ap.parse_args())
     train()
