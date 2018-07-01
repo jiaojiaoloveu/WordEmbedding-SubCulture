@@ -18,9 +18,14 @@ os.makedirs(word_dataset_base, exist_ok=True)
 log_name = 'log_exp%s_enn%s_it%s'
 
 
-def load_word_vectors(model_path):
+def load_google_word_vectors(model_path):
     word_vectors = KeyedVectors.load_word2vec_format(model_path, binary=True)
     return word_vectors
+
+
+def load_github_word_vectors(model_path):
+    github_model = Word2Vec.load(model_path)
+    return github_model
 
 
 def mean_absolute_error(it, real_label, predict_label, log_mask, eval_num, label_mean, label_std):
@@ -89,7 +94,7 @@ def reload_data():
 def get_github_tokens():
     # dic: str -> np.ndarray
     github_model_path = '../models/embedding/github/word2vec_sg_0_size_300_mincount_5'
-    github_model = Word2Vec.load(github_model_path)
+    github_model = load_github_word_vectors(github_model_path)
     github_voc = {}
     tokens_list = list(github_model.wv.vocab.keys())
     for token in tokens_list:
@@ -116,7 +121,7 @@ def generate():
 
     # use trained model to calculate distance
     google_news_model_path = '../models/embedding/GoogleNews-vectors-negative300.bin'
-    google_news_model = load_word_vectors(google_news_model_path)
+    google_news_model = load_google_word_vectors(google_news_model_path)
     all_token_words = set(google_news_model.vocab.keys())
     token_words = list(token_words & all_token_words)
     sub_token_num = len(token_words)

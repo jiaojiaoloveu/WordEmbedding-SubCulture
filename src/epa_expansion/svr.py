@@ -1,13 +1,27 @@
 from sklearn.svm import SVR
 from neural_network import generate_data
 from propagate_labels import word_dataset_base
+from propagate_labels import load_google_word_vectors, load_github_word_vectors
 import os
 import json
 import numpy as np
 import argparse
 
+verbs = []
 
-def train():
+
+def wv_map():
+    dic = {}
+    gg_model = load_google_word_vectors('../models/embedding/GoogleNews-vectors-negative300.bin')
+    gh_model = load_github_word_vectors('../models/embedding/github/word2vec_sg_0_size_300_mincount_5')
+    for w in verbs:
+        gg = gg_model[w]
+        gh = gh_model.wv[w]
+        dic[w] = (gg, gh)
+    return dic
+
+
+def train(wv):
     generate = args.get('generate')
     feature_train, label_train, feature_test, label_test = generate_data(generate=generate)
     model = args.get('model')
@@ -26,6 +40,12 @@ def train():
                 json.dump(zipped, fp)
             mae = np.mean(np.abs(label_test_axis_pre - label_test_axis))
             print('mae: %s' % mae)
+            label_space = []
+            for w in wv:
+                gg = wv[w][0]
+                gh = wv[w][1]
+                label_space.append(clf.predict([gg, gh]))
+            print(label_space)
 
 
 if __name__ == '__main__':
@@ -33,4 +53,4 @@ if __name__ == '__main__':
     ap.add_argument('--generate', type=int, required=True)
     ap.add_argument('--model', type=str, required=True)
     args = vars(ap.parse_args())
-    train()
+    train(wv_map())

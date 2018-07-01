@@ -7,7 +7,7 @@ from keras.layers import Dense, Conv1D, Activation, Dropout, Embedding
 from keras.layers import GlobalMaxPooling1D, MaxPooling1D
 from keras.wrappers.scikit_learn import KerasRegressor
 from sklearn.model_selection import cross_val_score, KFold
-from propagate_labels import load_word_vectors, word_dataset_base
+from propagate_labels import load_google_word_vectors, word_dataset_base
 from sample_seeds import csv_path, read_warriner_ratings
 
 
@@ -29,7 +29,7 @@ def load_all():
 
 def get_wv_space():
     google_news_model_path = '../models/embedding/GoogleNews-vectors-negative300.bin'
-    model = load_word_vectors(google_news_model_path)
+    model = load_google_word_vectors(google_news_model_path)
     return model
 
 
