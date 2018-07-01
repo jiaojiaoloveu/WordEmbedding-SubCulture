@@ -21,3 +21,4 @@ if __name__ == '__main__':
     ap.add_argument('--generate', type=int, required=True)
     ap.add_argument('--model', type=str, required=True)
     args = vars(ap.parse_args())
+    train()
