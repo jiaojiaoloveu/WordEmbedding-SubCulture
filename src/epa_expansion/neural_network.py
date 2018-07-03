@@ -9,6 +9,7 @@ from keras.wrappers.scikit_learn import KerasRegressor
 from sklearn.model_selection import cross_val_score, KFold
 from propagate_labels import load_google_word_vectors, word_dataset_base
 from sample_seeds import csv_path, read_warriner_ratings
+from svr import wv_map
 
 
 def load_train():
@@ -141,7 +142,20 @@ def train():
     model = args.get('model')
     feature_train, label_train, feature_test, label_test = generate_data(generate)
     model = fit_model(feature_train, label_train, feature_test, label_test, model)
-
+    dic = wv_map()
+    gg_eval = []
+    gh_eval = []
+    for w in dic:
+        gg_eval.append(dic[w][0])
+        gh_eval.append(dic[w][1])
+    gg_eval = np.array(gg_eval)
+    gh_eval = np.array(gh_eval)
+    gg_pred = model.predict(gg_eval, batch_size=5)
+    gh_pred = model.predict(gh_eval, batch_size=5)
+    res = np.abs(gg_pred - gh_pred)
+    print('nn eval epa')
+    print(np.mean(res, axis=0))
+    print(np.std(res, axis=0))
 
 
 if __name__ == '__main__':

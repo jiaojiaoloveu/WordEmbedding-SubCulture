@@ -92,7 +92,7 @@ def get_aligned_wv(source, target, tokens):
         if word in source.vocab.keys() and word in target.vocab.keys():
             s_wv = model.predict(np.reshape(source[word], (1, 300)))[0]
             t_wv = target[word]
-            aligned_wv[word] = np.array(s_wv, t_wv)
+            aligned_wv[word] = np.array([s_wv, t_wv])
             print(aligned_wv[word].shape)
     return aligned_wv
 
