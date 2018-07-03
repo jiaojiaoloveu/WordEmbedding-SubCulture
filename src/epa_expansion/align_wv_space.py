@@ -1,6 +1,7 @@
 # from align_models import align_space
 import numpy as np
 import copy
+import random
 from nltk.corpus import stopwords
 from keras import optimizers
 from keras.models import Sequential
@@ -29,9 +30,10 @@ def get_training_dataset(source, target):
 
 def get_eval_dataset(source, target):
     overlap_words = set(source.vocab.keys()) & set(target.vocab.keys())
+    sample_overlap_words = random.sample(overlap_words, 1000)
     source_mat = []
     target_mat = []
-    for word in overlap_words:
+    for word in sample_overlap_words:
         source_mat.append(source[word])
         target_mat.append(target[word])
     source_mat = np.array(source_mat)
@@ -64,6 +66,9 @@ def align_space(source, target):
     source_mat, target_mat = get_training_dataset(source, target)
     model = sgd_model()
     model.fit(source_mat, target_mat, epochs=100, batch_size=5)
+    score = model.evaluate(source_mat, target_mat, batch_size=5)
+    print('model train')
+    print(score)
     source_pred = model.predict(source_mat)
     cal_cosine_dis(source_pred, target_mat)
     return model
@@ -75,7 +80,6 @@ def align_models_nn(source, target):
     print('model eval')
     score = model.evaluate(source_eval, target_eval, batch_size=5)
     print(score)
-    print('model pred')
     source_pred = model.predict(source_eval)
     cal_cosine_dis(source_pred, target_eval)
     return model
