@@ -5,7 +5,7 @@ import random
 from nltk.corpus import stopwords
 from keras import optimizers
 from keras.models import Sequential
-from keras.layers import Dense, Activation
+from keras.layers import Dense
 from gensim.models import KeyedVectors
 from gensim.models.word2vec import Word2Vec
 from scipy import spatial
@@ -89,9 +89,10 @@ def get_aligned_wv(source, target, tokens):
     aligned_wv = {}
     model = align_models_nn(source, target)
     for word in tokens:
-        s_wv = model.predict(np.reshape(source[word], (1, 300)))
-        t_wv = target[word]
-        aligned_wv[word] = (s_wv, t_wv)
+        if word in source.vocab.keys() and word in target.vocab.keys():
+            s_wv = model.predict(np.reshape(source[word], (1, 300)))
+            t_wv = target[word]
+            aligned_wv[word] = (s_wv, t_wv)
     return aligned_wv
 
 
