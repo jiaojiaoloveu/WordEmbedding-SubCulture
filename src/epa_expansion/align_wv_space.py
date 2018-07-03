@@ -7,6 +7,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Activation
 from gensim.models import KeyedVectors
 from gensim.models.word2vec import Word2Vec
+from scipy import spatial
 
 
 def get_dataset(source, target):
@@ -20,12 +21,15 @@ def get_dataset(source, target):
             target_mat.append(target[word])
     source_mat = np.array(source_mat)
     target_mat = np.array(target_mat)
+    print('shape')
+    print(source_mat.shape)
+    print(target_mat.shape)
     return source_mat, target_mat
 
 
 def sgd_model():
     model = Sequential()
-    model.add(Dense(300, kernel_initializer='uniform', input_dim=300))
+    model.add(Dense(300, kernel_initializer='normal', input_dim=300))
     sgd = optimizers.SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
     model.compile(loss='mean_squared_error', optimizer=sgd)
     return model
@@ -34,7 +38,17 @@ def sgd_model():
 def align_space(source, target):
     source_mat, target_mat = get_dataset(source, target)
     model = sgd_model()
-    model.fit(source_mat, target_mat, epochs=10, batch_size=128)
+    model.fit(source_mat, target_mat, epochs=5, batch_size=50)
+    source_pred = model.predict(source_mat)
+    aligned_list = zip(source_pred, target_mat)
+    res = []
+    for u, v in aligned_list:
+        res.append(spatial.distance.cosine(u, v))
+    res = np.array(res)
+    print('result')
+    print(res)
+    print(np.mean(res))
+    print(np.std(res))
     return model
 
 
