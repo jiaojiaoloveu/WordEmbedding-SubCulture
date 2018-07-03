@@ -10,7 +10,7 @@ from gensim.models.word2vec import Word2Vec
 from scipy import spatial
 
 
-def get_dataset(source, target):
+def get_training_dataset(source, target):
     stop_words = stopwords.words('english')
     overlap_words = set(source.vocab.keys()) & set(target.vocab.keys())
     source_mat = []
@@ -21,7 +21,22 @@ def get_dataset(source, target):
             target_mat.append(target[word])
     source_mat = np.array(source_mat)
     target_mat = np.array(target_mat)
-    print('shape')
+    print('shape training')
+    print(source_mat.shape)
+    print(target_mat.shape)
+    return source_mat, target_mat
+
+
+def get_eval_dataset(source, target):
+    overlap_words = set(source.vocab.keys()) & set(target.vocab.keys())
+    source_mat = []
+    target_mat = []
+    for word in overlap_words:
+        source_mat.append(source[word])
+        target_mat.append(target[word])
+    source_mat = np.array(source_mat)
+    target_mat = np.array(target_mat)
+    print('shape eval')
     print(source_mat.shape)
     print(target_mat.shape)
     return source_mat, target_mat
@@ -35,33 +50,42 @@ def sgd_model():
     return model
 
 
+def cal_cosine_dis(pred, label):
+    zipped = zip(pred, label)
+    res = []
+    for u, v in zipped:
+        res.append(spatial.distance.cosine(u, v))
+    res = np.array(res)
+    print(np.mean(res))
+    print(np.std(res))
+
+
 def align_space(source, target):
-    source_mat, target_mat = get_dataset(source, target)
+    source_mat, target_mat = get_training_dataset(source, target)
     model = sgd_model()
     model.fit(source_mat, target_mat, epochs=100, batch_size=5)
     source_pred = model.predict(source_mat)
-    aligned_list = zip(source_pred, target_mat)
-    res = []
-    for u, v in aligned_list:
-        res.append(spatial.distance.cosine(u, v))
-    res = np.array(res)
-    print('result')
-    print(res)
-    print(np.mean(res))
-    print(np.std(res))
+    cal_cosine_dis(source_pred, target_mat)
     return model
 
 
 def align_models_nn(source, target):
     model = align_space(source, target)
+    source_eval, target_eval = get_eval_dataset(source, target)
+    print('model eval')
+    score = model.evaluate(source_eval, target_eval, batch_size=5)
+    print(score)
+    print('model pred')
+    source_pred = model.predict(source_eval)
+    cal_cosine_dis(source_pred, target_eval)
     return model
 
 
-def align_models(source, target):
-    w = align_space(source, target)
-    new_source = copy.deepcopy(source)
-    new_source.wv.vectors = np.matmul(new_source.wv.vectors, w)
-    return new_source, target
+# def align_models(source, target):
+#     w = align_space(source, target)
+#     new_source = copy.deepcopy(source)
+#     new_source.wv.vectors = np.matmul(new_source.wv.vectors, w)
+#     return new_source, target
 
 
 if __name__ == '__main__':
