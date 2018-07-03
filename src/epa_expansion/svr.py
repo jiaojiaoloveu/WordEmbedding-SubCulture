@@ -63,9 +63,7 @@ def train(wv):
             print('mae: %s' % mae)
             label_space = []
             for w in wv:
-                gg = wv[w][0]
-                gh = wv[w][1]
-                label_space.append(clf.predict([gg, gh]))
+                label_space.append(clf.predict(wv[w]))
             label_space = np.array(label_space)
             print(label_space)
             print('time %s' % (time() - start))

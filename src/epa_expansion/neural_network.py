@@ -109,6 +109,7 @@ def fit_model(feature_train, label_train, feature_test, label_test, dtype):
     print('start evaluating %s %s' % (str(feature_test.shape), str(label_test.shape)))
     score = model.evaluate(feature_test, label_test, batch_size=128)
     print(score)
+    return model
 
 
 def generate_data(generate):
@@ -139,7 +140,8 @@ def train():
     generate = args.get('generate')
     model = args.get('model')
     feature_train, label_train, feature_test, label_test = generate_data(generate)
-    fit_model(feature_train, label_train, feature_test, label_test, model)
+    model = fit_model(feature_train, label_train, feature_test, label_test, model)
+
 
 
 if __name__ == '__main__':
