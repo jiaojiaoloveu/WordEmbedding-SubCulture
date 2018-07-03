@@ -14,7 +14,7 @@ def train(wv):
     feature_train, label_train, feature_test, label_test = generate_data(generate=generate)
     model = args.get('model')
     if model == 'svr':
-        clf = SVR()
+        clf = SVR(kernel='sigmoid', epsilon=0.05, C=0.5)
         for axis in range(0, 3):
             start = time()
             label_train_axis = label_train[:, axis]
@@ -36,12 +36,12 @@ def train(wv):
             print(label_space)
             print('time %s' % (time() - start))
             print('mean google radius')
-            gg_radius = np.abs(label_space[:, 1])
-            print(np.mean(gg_radius))
+            gg_radius = label_space[:, 1]
+            print(np.mean(np.abs(gg_radius)))
             print(np.std(gg_radius))
             print('mean github radius')
-            gh_radius = np.abs(label_space[:, 0])
-            print(np.mean(gh_radius))
+            gh_radius = label_space[:, 0]
+            print(np.mean(np.abs(gh_radius)))
             print(np.std(gh_radius))
 
 

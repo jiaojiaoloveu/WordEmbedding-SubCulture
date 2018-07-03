@@ -10,10 +10,8 @@ from scipy import spatial
 from gensim.models import KeyedVectors
 from gensim.models.word2vec import Word2Vec
 from scipy.stats.stats import pearsonr
+from gen_data import word_dataset_base
 
-
-word_dataset_base = '../result/epa_expansion'
-os.makedirs(word_dataset_base, exist_ok=True)
 
 log_name = 'log_exp%s_enn%s_it%s'
 
