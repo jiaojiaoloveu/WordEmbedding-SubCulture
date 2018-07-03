@@ -146,16 +146,21 @@ def train():
     gg_eval = []
     gh_eval = []
     for w in dic:
-        gg_eval.append(dic[w][0])
-        gh_eval.append(dic[w][1])
-    gg_eval = np.array(gg_eval)
+        gh_eval.append(dic[w][0])
+        gg_eval.append(dic[w][1])
     gh_eval = np.array(gh_eval)
-    gg_pred = model.predict(gg_eval, batch_size=5)
+    gg_eval = np.array(gg_eval)
     gh_pred = model.predict(gh_eval, batch_size=5)
-    res = np.abs(gg_pred - gh_pred)
+    gg_pred = model.predict(gg_eval, batch_size=5)
     print('nn eval epa')
-    print(np.mean(res, axis=0))
-    print(np.std(res, axis=0))
+
+    print('github')
+    print(np.mean(gg_pred, axis=0))
+    print(np.std(gg_pred, axis=0))
+
+    print('github')
+    print(np.mean(gh_pred, axis=0))
+    print(np.std(gh_pred, axis=0))
 
 
 if __name__ == '__main__':
