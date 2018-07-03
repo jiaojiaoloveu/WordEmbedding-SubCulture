@@ -85,6 +85,16 @@ def align_models_nn(source, target):
     return model
 
 
+def get_aligned_wv(source, target, tokens):
+    aligned_wv = {}
+    model = align_models_nn(source, target)
+    for word in tokens:
+        s_wv = model.predict([source[word]])
+        t_wv = target[word]
+        aligned_wv[word] = (s_wv, t_wv)
+    return aligned_wv
+
+
 # def align_models(source, target):
 #     w = align_space(source, target)
 #     new_source = copy.deepcopy(source)
