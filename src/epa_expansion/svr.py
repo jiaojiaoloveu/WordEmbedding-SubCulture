@@ -36,11 +36,11 @@ def train(wv):
             print(label_space)
             print('time %s' % (time() - start))
             print('mean google radius')
-            gg_radius = np.abs(label_space[:, 0])
+            gg_radius = np.abs(label_space[:, 1])
             print(np.mean(gg_radius))
             print(np.std(gg_radius))
             print('mean github radius')
-            gh_radius = np.abs(label_space[:, 1])
+            gh_radius = np.abs(label_space[:, 0])
             print(np.mean(gh_radius))
             print(np.std(gh_radius))
 

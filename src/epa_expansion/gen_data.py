@@ -22,7 +22,7 @@ def wv_map():
     gh_model = load_github_word_vectors('../models/embedding/github/word2vec_sg_0_size_300_mincount_5')
     print('align wv space')
     tokens = get_tokens()
-    dic = get_aligned_wv(gg_model, gh_model.wv, tokens)
+    dic = get_aligned_wv(gh_model.wv, gg_model, tokens)
     # gh_model, gg_model = align_models(gh_model, gg_model)
     # print('align done')
     # for w in get_tokens():
@@ -31,3 +31,4 @@ def wv_map():
     #         gh = gh_model.wv[w]
     #         dic[w] = (gg, gh)
     return dic
+
