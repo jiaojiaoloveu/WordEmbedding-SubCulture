@@ -60,7 +60,7 @@ def train(wv):
                 label_space.append(clf.predict([gg, gh]))
             label_space = np.array(label_space)
             print(label_space)
-            print('time %s' % time() - start)
+            print('time %s' % (time() - start))
             print('mean google radius')
             gg_radius = np.abs(label_space[:, 0])
             print(np.mean(gg_radius))
