@@ -30,15 +30,15 @@ def get_dataset(source, target):
 def sgd_model():
     model = Sequential()
     model.add(Dense(300, kernel_initializer='normal', input_dim=300))
-    sgd = optimizers.SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
-    model.compile(loss='mean_squared_error', optimizer=sgd)
+    sgd = optimizers.SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
+    model.compile(loss='mean_squared_error', optimizer=sgd, metrics=['accuracy'])
     return model
 
 
 def align_space(source, target):
     source_mat, target_mat = get_dataset(source, target)
     model = sgd_model()
-    model.fit(source_mat, target_mat, epochs=5, batch_size=50)
+    model.fit(source_mat, target_mat, epochs=100, batch_size=5)
     source_pred = model.predict(source_mat)
     aligned_list = zip(source_pred, target_mat)
     res = []
