@@ -89,7 +89,7 @@ def get_aligned_wv(source, target, tokens):
     aligned_wv = {}
     model = align_models_nn(source, target)
     for word in tokens:
-        s_wv = model.predict([source[word]])
+        s_wv = model.predict(np.reshape(source[word], (1, 300)))
         t_wv = target[word]
         aligned_wv[word] = (s_wv, t_wv)
     return aligned_wv
