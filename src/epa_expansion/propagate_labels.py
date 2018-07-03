@@ -10,20 +10,10 @@ from scipy import spatial
 from gensim.models import KeyedVectors
 from gensim.models.word2vec import Word2Vec
 from scipy.stats.stats import pearsonr
-from gen_data import word_dataset_base
+from gen_data import word_dataset_base, load_github_word_vectors, load_google_word_vectors
 
 
 log_name = 'log_exp%s_enn%s_it%s'
-
-
-def load_google_word_vectors(model_path):
-    word_vectors = KeyedVectors.load_word2vec_format(model_path, binary=True)
-    return word_vectors
-
-
-def load_github_word_vectors(model_path):
-    github_model = Word2Vec.load(model_path)
-    return github_model
 
 
 def mean_absolute_error(it, real_label, predict_label, log_mask, eval_num, label_mean, label_std):

@@ -1,6 +1,7 @@
-from propagate_labels import load_google_word_vectors, load_github_word_vectors
 from align_wv_space import get_aligned_wv
 from sample_seeds import read_warriner_ratings, csv_path
+from gensim.models import KeyedVectors
+from gensim.models.word2vec import Word2Vec
 import numpy as np
 import os
 import json
@@ -8,6 +9,16 @@ import json
 
 word_dataset_base = '../result/epa_expansion'
 os.makedirs(word_dataset_base, exist_ok=True)
+
+
+def load_google_word_vectors(model_path):
+    word_vectors = KeyedVectors.load_word2vec_format(model_path, binary=True)
+    return word_vectors
+
+
+def load_github_word_vectors(model_path):
+    github_model = Word2Vec.load(model_path)
+    return github_model
 
 
 def get_tokens():
