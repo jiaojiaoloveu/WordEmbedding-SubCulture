@@ -53,6 +53,9 @@ def fit_model(feature_train, label_train, feature_test, label_test, dtype):
     print('start evaluating %s %s' % (str(feature_test.shape), str(label_test.shape)))
     score = model.evaluate(feature_test, label_test, batch_size=128)
     print(score)
+    label_pred = model.predict(feature_test)
+    mae = np.mean(np.abs(label_pred - label_test), axis=0)
+    print('mae %s' % mae)
     return model
 
 
