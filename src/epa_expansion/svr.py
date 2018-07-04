@@ -14,7 +14,7 @@ def train(wv):
     feature_train, label_train, feature_test, label_test = generate_data(generate=generate)
     model = args.get('model')
     if model == 'svr':
-        clf = SVR(kernel='rbf', epsilon=0.05, gamma=0.0, C=10)
+        clf = SVR(kernel='rbf', epsilon=0.05, gamma='auto', C=10)
         for axis in range(0, 3):
             start = time()
             label_train_axis = label_train[:, axis]
