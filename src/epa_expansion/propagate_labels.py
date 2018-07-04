@@ -170,8 +170,11 @@ def generate():
         # fully connected graph
         # weight between nodes positive
         # distance = 1 - cosine-dis
-        if ind % 10 == 0:
+        if ind % 500 == 0:
             print('first half %s / %s' % (ind, sub_token_num))
+            print('ave time:')
+            print(np.mean(time_arr1))
+            print(np.mean(time_arr2))
         time1 = time.time()
         distance_matrix = google_news_model.distances(token_words[ind], token_words[ind + 1: sub_token_num])
         weight_matrix[ind, ind + 1: sub_token_num] = distance_matrix
@@ -183,9 +186,6 @@ def generate():
         time3 = time.time()
         time_arr1.append((time2 - time1) / (sub_token_num - ind - 1))
         time_arr2.append((time3 - time2) / (token_num - sub_token_num))
-    print('ave time:')
-    print(np.mean(time_arr1))
-    print(np.mean(time_arr2))
 
     for ind in range(sub_token_num, token_num - 1):
         if ind % 10 == 0:
