@@ -89,11 +89,13 @@ def __scale_vad_to_epa(vocabulary_vad, max_min_board):
 
 def __norm2uni(x, mu=label_mean, sigma=label_std):
     # map from (-4,4) to (-1,1)
+    print('norm2uni called')
     y = (x - mu) / sigma
     return special.erfc(-y / np.sqrt(2)) - 1
 
 
 def __uni2norm(x, mu=label_mean, sigma=label_std):
+    print('uni2norm called')
     y = -np.sqrt(2) * special.erfcinv(1 + x)
     return y * sigma + mu
 

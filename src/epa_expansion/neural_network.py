@@ -79,6 +79,8 @@ def train():
     if uniform:
         gh_pred = __uni2norm(gh_pred)
         gg_pred = __uni2norm(gg_pred)
+    print(gh_pred)
+    print(gg_pred)
     print('nn eval epa')
 
     print('google')
