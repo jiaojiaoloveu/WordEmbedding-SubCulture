@@ -76,9 +76,13 @@ def train():
     gg_eval = np.array(gg_eval)
     gh_pred = model.predict(gh_eval, batch_size=5)
     gg_pred = model.predict(gg_eval, batch_size=5)
+    print('before transform')
+    print(gh_pred)
+    print(gg_pred)
     if uniform:
         gh_pred = __uni2norm(gh_pred)
         gg_pred = __uni2norm(gg_pred)
+    print('after transform')
     print(gh_pred)
     print(gg_pred)
     print('nn eval epa')
