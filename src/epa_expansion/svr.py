@@ -17,10 +17,8 @@ def train(wv):
     model = args.get('model')
     if model == 'svr':
         clf = SVR(kernel='rbf', epsilon=0.05, gamma='auto', C=10)
-        gg_mean_arr, gg_abs_arr, gg_std_arr = [], [], []
-        gh_mean_arr, gh_abs_arr, gh_std_arr = [], [], []
+        gg_label_pred, gh_label_pred = []
         for axis in range(0, 3):
-            start = time()
             label_train_axis = label_train[:, axis]
             label_test_axis = label_test[:, axis]
             print('start training')
@@ -36,26 +34,24 @@ def train(wv):
             label_space = []
             for w in wv:
                 label_space.append(clf.predict(wv[w]))
-            label_space = np.array(label_space)
-            if uniform:
-                label_space = __uni2norm(label_space)
-            print('time %s' % (time() - start))
-            gg_radius = label_space[:, 1]
-            gg_mean_arr.append(np.mean(gg_radius))
-            gg_abs_arr.append(np.mean(np.abs(gg_radius)))
-            gg_std_arr.append(np.std(gg_radius))
-            gh_radius = label_space[:, 0]
-            gh_mean_arr.append(np.mean(gh_radius))
-            gh_abs_arr.append(np.mean(np.abs(gh_radius)))
-            gh_std_arr.append(np.std(gh_radius))
+            gh_label_pred.append(label_space[:, 0])
+            gg_label_pred.append(label_space[:, 1])
+        gh_label_pred = np.transpose(gh_label_pred)
+        gg_label_pred = np.transpose(gg_label_pred)
+        print('label pred shape')
+        print(gh_label_pred.shape)
+        print(gg_label_pred.shape)
+        if uniform:
+            gh_label_pred = __uni2norm(gh_label_pred)
+            gg_label_pred = __uni2norm(gg_label_pred)
         print('google')
-        print(gg_mean_arr)
-        print(gg_abs_arr)
-        print(gg_std_arr)
+        print(np.mean(gg_label_pred, axis=0))
+        print(np.mean(np.abs(gg_label_pred), axis=0))
+        print(np.std(gg_label_pred, axis=0))
         print('github')
-        print(gh_mean_arr)
-        print(gh_abs_arr)
-        print(gh_std_arr)
+        print(np.mean(gh_label_pred, axis=0))
+        print(np.mean(np.abs(gh_label_pred), axis=0))
+        print(np.std(gh_label_pred, axis=0))
 
 
 if __name__ == '__main__':
