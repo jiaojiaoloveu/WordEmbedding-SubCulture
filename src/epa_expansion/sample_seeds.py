@@ -1,10 +1,15 @@
 import csv
 import random
+import numpy as np
+from scipy import special
 from labels import WarrinerColumn
 from labels import LabelSpace
 
 
 csv_path = '../data/epa/Ratings_Warriner_et_al.csv'
+
+label_mean = np.array([0.19571685413316248, -0.6727038433386933, 0.5452512966060962])
+label_std = np.array([1.5079544406893441, 1.2448124114055585, 1.2972247817961575])
 
 
 def _fixed_seeds():
@@ -80,6 +85,17 @@ def __scale_vad_to_epa(vocabulary_vad, max_min_board):
                                                               LabelSpace.Min)
         vocabulary_epa[word] = epa
     return vocabulary_epa
+
+
+def __norm2uni(x, mu=label_mean, sigma=label_std):
+    # map from (-4,4) to (-1,1)
+    y = (x - mu) / sigma
+    return special.erfc(-y / np.sqrt(2)) - 1
+
+
+def __uni2norm(x, mu=label_mean, sigma=label_std):
+    y = -np.sqrt(2) * special.erfcinv(1 + x)
+    return y * sigma + mu
 
 
 def read_warriner_ratings(path):

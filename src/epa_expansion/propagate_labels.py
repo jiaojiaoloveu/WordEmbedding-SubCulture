@@ -2,27 +2,26 @@ import json
 import os
 import argparse
 import numpy as np
-import sample_seeds
 import time
 from labels import LabelSpace
 from labels import Configs
-from scipy import special
 from scipy import spatial
 from gensim.models import KeyedVectors
 from gensim.models.word2vec import Word2Vec
 from scipy.stats.stats import pearsonr
 from gen_data import word_dataset_base, load_github_word_vectors, load_google_word_vectors
 from gen_data import get_tokens
+from sample_seeds import __norm2uni, __uni2norm, get_rand_seeds
 
 
 log_name = 'log_exp%s_enn%s_it%s'
 
 
-def mean_absolute_error(it, real_label, predict_label, log_mask, eval_num, label_mean, label_std):
+def mean_absolute_error(it, real_label, predict_label, log_mask, eval_num):
     assert real_label.shape == predict_label.shape
 
-    real_label_ori = __uni2norm(real_label, label_mean, label_std)
-    predict_label_ori = __uni2norm(predict_label, label_mean, label_std)
+    real_label_ori = __uni2norm(real_label)
+    predict_label_ori = __uni2norm(predict_label)
 
     mae = np.sum(np.absolute(real_label - predict_label), axis=0) / eval_num
     mae_ori = np.sum(np.absolute(real_label_ori - predict_label_ori), axis=0) / eval_num
@@ -121,7 +120,7 @@ def get_github_distance(w1, wlist, wvocab):
 
 def generate():
     # seed_words and eval_words as dictionary of word:epa
-    (seed_words, eval_words) = sample_seeds.get_rand_seeds(Configs.seed, Configs.eval, Configs.epa)
+    (seed_words, eval_words) = get_rand_seeds(Configs.seed, Configs.eval, Configs.epa)
     # github words word:wv
     comparing_words = get_comparing_tokens()
     token_words = set(list(seed_words.keys()) + list(eval_words.keys()) + list(comparing_words.keys()))
@@ -203,22 +202,6 @@ def generate():
     log_data(token_words, list(comparing_words.keys()), seed_words, eval_words, token_label, eval_label, weight_matrix)
 
 
-def __norm2uni(x, mu, sigma):
-    # map from (-4,4) to (-1,1)
-    y = (x - mu) / sigma
-    return special.erfc(-y / np.sqrt(2)) - 1
-
-
-def __uni2norm(x, mu, sigma):
-    y = -np.sqrt(2) * special.erfcinv(1 + x)
-    return y * sigma + mu
-    # y = np.array(x)
-    # y_mask = np.any(y, axis=1)
-    # z = -np.sqrt(2) * special.erfcinv(1 + y[y_mask])
-    # y[y_mask] = z * sigma + mu
-    # return y
-
-
 def train():
     print('start training')
     token_words, compare_words, seed_words, eval_words, token_label, eval_label, weight_matrix = reload_data()
@@ -229,17 +212,10 @@ def train():
     eval_label_mask = np.any(eval_label, axis=1)
     eval_label_ori = eval_label[eval_label_mask]
 
-    # label_mean = np.mean(token_label_ori, axis=0)
-    # label_std = np.std(token_label_ori, axis=0)
-    label_mean = np.array([0.19571685413316248, -0.6727038433386933, 0.5452512966060962])
-    label_std = np.array([1.5079544406893441, 1.2448124114055585, 1.2972247817961575])
-
-    print('mean %s, std %s' % (label_mean, label_std))
-
     print(token_label[token_label_mask])
 
-    token_label[token_label_mask] = __norm2uni(token_label_ori, label_mean, label_std)
-    eval_label[eval_label_mask] = __norm2uni(eval_label_ori, label_mean, label_std)
+    token_label[token_label_mask] = __norm2uni(token_label_ori)
+    eval_label[eval_label_mask] = __norm2uni(eval_label_ori)
 
     token_num = len(token_words)
 
@@ -268,7 +244,7 @@ def train():
     log_window_size = 20
     log_mask = np.random.rand(eval_num) < (1.0 * log_window_size / eval_num)
 
-    mean_absolute_error(-1, eval_label[eval_mask], token_label[eval_mask], log_mask, eval_num, label_mean, label_std)
+    mean_absolute_error(-1, eval_label[eval_mask], token_label[eval_mask], log_mask, eval_num)
     original_token_label = np.array(token_label)
     for it in range(0, Configs.iterations):
         if it % 10 == 0:
@@ -276,9 +252,9 @@ def train():
         transient_token_label = np.matmul(laplacian_matrix, token_label)
         token_label = transient_token_label * np.reshape(label_mask_all, (token_num, 1)) + \
                       Configs.alpha * original_token_label * np.reshape(label_mask, (token_num, 1))
-        mean_absolute_error(it, eval_label[eval_mask], token_label[eval_mask], log_mask, eval_num, label_mean, label_std)
+        mean_absolute_error(it, eval_label[eval_mask], token_label[eval_mask], log_mask, eval_num)
 
-    token_label = __uni2norm(token_label, label_mean, label_std)
+    token_label = __uni2norm(token_label)
     np.save(os.path.join(word_dataset_base, 'token_label_pre'), token_label)
 
     predict_label = list(zip(token_words, token_label.tolist()))

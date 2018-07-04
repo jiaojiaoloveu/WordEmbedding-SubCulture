@@ -51,7 +51,7 @@ def train(wv):
         print('github')
         print(gh_mean_arr)
         print(gh_abs_arr)
-        print(gg_std_arr)
+        print(gh_std_arr)
 
 
 if __name__ == '__main__':
