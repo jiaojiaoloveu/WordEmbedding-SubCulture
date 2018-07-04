@@ -49,7 +49,7 @@ def wv_map():
     #     if w in gg_model.vocab.keys() and w in gh_model.wv.vocab.keys():
     #         gg = gg_model[w]
     #         gh = gh_model.wv[w]
-    #         dic[w] = (gg, gh)
+    #         dic[w] = (gh, gg)
 
     # dic: word -> [wv1, wv2]
     return dic
@@ -110,7 +110,7 @@ def preprocess_data(word_epa_dataset, suffix):
     return wv_feature, epa_label
 
 
-def generate_data(generate, uniform):
+def generate_data(generate, uniform=False):
     if generate < 2:
         if generate == 0:
             feature, label = load_feature_label('all')

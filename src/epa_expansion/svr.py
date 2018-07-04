@@ -43,7 +43,9 @@ def train(wv):
         gg_label_pred = np.transpose(gg_label_pred)
         print('label pred shape')
         print(gh_label_pred.shape)
+        print(gh_label_pred)
         print(gg_label_pred.shape)
+        print(gg_label_pred)
         if uniform:
             gh_label_pred = __uni2norm(gh_label_pred)
             gg_label_pred = __uni2norm(gg_label_pred)

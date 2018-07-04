@@ -10,7 +10,7 @@ from gensim.models import KeyedVectors
 from gensim.models.word2vec import Word2Vec
 from scipy.stats.stats import pearsonr
 from gen_data import word_dataset_base, load_github_word_vectors, load_google_word_vectors
-from gen_data import get_tokens
+from gen_data import wv_map
 from sample_seeds import __norm2uni, __uni2norm, get_rand_seeds
 
 
@@ -91,17 +91,10 @@ def reload_data():
 
 def get_comparing_tokens():
     # dic: str -> np.ndarray
-    github_model_path = '../models/embedding/github/word2vec_sg_0_size_300_mincount_5'
-    github_model = load_github_word_vectors(github_model_path)
-    google_news_model_path = '../models/embedding/GoogleNews-vectors-negative300.bin'
-    google_news_model = load_google_word_vectors(google_news_model_path)
     github_voc = {}
-    tokens_set = set(get_tokens())
-    tokens_list = list(set(google_news_model.vocab.keys()) & set(github_model.wv.vocab.keys()) & tokens_set)
-    for token in tokens_list:
-        github_voc[token] = github_model.wv[token]
-    del github_model
-    del google_news_model
+    token_dic = wv_map()
+    for word in token_dic.keys():
+        github_voc[word] = token_dic[word][0]
     return github_voc
 
 
@@ -190,8 +183,6 @@ def generate():
     print(np.mean(time_arr2))
 
     for ind in range(sub_token_num, token_num - 1):
-        if ind % 10 == 0:
-            print('second half %s / %s' % (ind, token_num))
         weight_matrix[ind, ind + 1: token_num] = get_github_distance(
             comparing_words[token_words[ind]],
             token_words[ind + 1: token_num],
