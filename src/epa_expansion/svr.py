@@ -15,6 +15,8 @@ def train(wv):
     model = args.get('model')
     if model == 'svr':
         clf = SVR(kernel='rbf', epsilon=0.05, gamma='auto', C=10)
+        gg_mean_arr, gg_abs_arr, gg_std_arr = [], [], []
+        gh_mean_arr, gh_abs_arr, gh_std_arr = [], [], []
         for axis in range(0, 3):
             start = time()
             label_train_axis = label_train[:, axis]
@@ -33,18 +35,23 @@ def train(wv):
             for w in wv:
                 label_space.append(clf.predict(wv[w]))
             label_space = np.array(label_space)
-            print(label_space)
             print('time %s' % (time() - start))
-            print('mean google radius')
             gg_radius = label_space[:, 1]
-            print(np.mean(gg_radius))
-            print(np.mean(np.abs(gg_radius)))
-            print(np.std(gg_radius))
-            print('mean github radius')
+            gg_mean_arr.extend(np.mean(gg_radius))
+            gg_abs_arr.extend(np.mean(np.abs(gg_radius)))
+            gg_std_arr.extend(np.std(gg_radius))
             gh_radius = label_space[:, 0]
-            print(np.mean(gh_radius))
-            print(np.mean(np.abs(gh_radius)))
-            print(np.std(gh_radius))
+            gh_mean_arr.extend(np.mean(gh_radius))
+            gh_abs_arr.extend(np.mean(np.abs(gh_radius)))
+            gh_std_arr.extend(np.std(gh_radius))
+        print('google')
+        print(gg_mean_arr)
+        print(gg_abs_arr)
+        print(gg_std_arr)
+        print('github')
+        print(gh_mean_arr)
+        print(gh_abs_arr)
+        print(gg_std_arr)
 
 
 if __name__ == '__main__':
