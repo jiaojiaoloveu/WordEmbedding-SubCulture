@@ -67,7 +67,7 @@ def align_space(source, target):
     model = sgd_model()
     model.fit(source_mat, target_mat, epochs=100, batch_size=5)
     score = model.evaluate(source_mat, target_mat, batch_size=5)
-    print('model train')
+    print('align model train')
     print(score)
     source_pred = model.predict(source_mat)
     cal_cosine_dis(source_pred, target_mat)
@@ -77,7 +77,7 @@ def align_space(source, target):
 def align_models_nn(source, target):
     model = align_space(source, target)
     source_eval, target_eval = get_eval_dataset(source, target)
-    print('model eval')
+    print('align model eval')
     score = model.evaluate(source_eval, target_eval, batch_size=5)
     print(score)
     source_pred = model.predict(source_eval)

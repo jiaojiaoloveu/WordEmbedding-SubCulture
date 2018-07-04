@@ -77,10 +77,12 @@ def train():
     print('nn eval epa')
 
     print('google')
+    print(np.mean(gg_pred, axis=0))
     print(np.mean(np.abs(gg_pred), axis=0))
     print(np.std(gg_pred, axis=0))
 
     print('github')
+    print(np.mean(gh_pred, axis=0))
     print(np.mean(np.abs(gh_pred), axis=0))
     print(np.std(gh_pred, axis=0))
 
