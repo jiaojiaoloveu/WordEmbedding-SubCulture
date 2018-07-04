@@ -62,6 +62,6 @@ if __name__ == '__main__':
     ap = argparse.ArgumentParser('keras deep learning method')
     ap.add_argument('--generate', type=int, required=True)
     ap.add_argument('--model', type=str, required=True)
-    ap.add_argument('--uniform', type=int, required=True)
+    ap.add_argument('--uniform', type=bool, required=True)
     args = vars(ap.parse_args())
     train(wv_map())
