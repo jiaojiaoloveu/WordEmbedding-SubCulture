@@ -2,6 +2,7 @@ import json
 import os
 import argparse
 import numpy as np
+from sample_seeds import __uni2norm
 from keras.models import Sequential
 from keras.layers import Dense, Conv1D, Activation, Dropout, Embedding
 from keras.layers import GlobalMaxPooling1D, MaxPooling1D
@@ -62,7 +63,8 @@ def fit_model(feature_train, label_train, feature_test, label_test, dtype):
 def train():
     generate = args.get('generate')
     model = args.get('model')
-    feature_train, label_train, feature_test, label_test = generate_data(generate)
+    uniform = args.get('uniform')
+    feature_train, label_train, feature_test, label_test = generate_data(generate, uniform)
     model = fit_model(feature_train, label_train, feature_test, label_test, model)
     dic = wv_map()
     gg_eval = []
@@ -74,6 +76,9 @@ def train():
     gg_eval = np.array(gg_eval)
     gh_pred = model.predict(gh_eval, batch_size=5)
     gg_pred = model.predict(gg_eval, batch_size=5)
+    if uniform:
+        gh_pred = __uni2norm(gh_pred)
+        gg_pred = __uni2norm(gg_pred)
     print('nn eval epa')
 
     print('google')
@@ -91,5 +96,6 @@ if __name__ == '__main__':
     ap = argparse.ArgumentParser('keras deep learning method')
     ap.add_argument('--generate', type=int, required=True)
     ap.add_argument('--model', type=str, required=True)
+    ap.add_argument('--uniform', type=bool, required=True)
     args = vars(ap.parse_args())
     train()
