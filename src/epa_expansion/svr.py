@@ -34,6 +34,9 @@ def train(wv):
             label_space = []
             for w in wv:
                 label_space.append(clf.predict(wv[w]))
+            label_space = np.array(label_space)
+            print('label space shape')
+            print(label_space.shape)
             gh_label_pred.append(label_space[:, 0])
             gg_label_pred.append(label_space[:, 1])
         gh_label_pred = np.transpose(gh_label_pred)
