@@ -63,8 +63,8 @@ def fit_model(feature_train, label_train, feature_test, label_test, dtype):
 def train():
     generate = args.get('generate')
     model = args.get('model')
-    uniform = args.get('uniform')
-    feature_train, label_train, feature_test, label_test = generate_data(generate, uniform == 0)
+    uniform = args.get('uniform') == 0
+    feature_train, label_train, feature_test, label_test = generate_data(generate, uniform)
     model = fit_model(feature_train, label_train, feature_test, label_test, model)
     dic = wv_map()
     gg_eval = []

@@ -12,8 +12,8 @@ import argparse
 
 def train(wv):
     generate = args.get('generate')
-    uniform = args.get('uniform')
-    feature_train, label_train, feature_test, label_test = generate_data(generate=generate, uniform=uniform == 0)
+    uniform = args.get('uniform') == 0
+    feature_train, label_train, feature_test, label_test = generate_data(generate=generate, uniform=uniform)
     model = args.get('model')
     if model == 'svr':
         clf = SVR(kernel='rbf', epsilon=0.05, gamma='auto', C=10)
