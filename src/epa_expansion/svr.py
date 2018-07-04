@@ -17,7 +17,7 @@ def train(wv):
     model = args.get('model')
     if model == 'svr':
         clf = SVR(kernel='rbf', epsilon=0.05, gamma='auto', C=10)
-        gg_label_pred, gh_label_pred = []
+        gg_label_pred, gh_label_pred = [], []
         for axis in range(0, 3):
             label_train_axis = label_train[:, axis]
             label_test_axis = label_test[:, axis]
