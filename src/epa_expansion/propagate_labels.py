@@ -108,9 +108,16 @@ def get_comparing_tokens():
 
 def get_github_distance(w1, wlist, wvocab):
     distance_list = []
-    for w2 in wlist:
-        distance_list.append(1 - spatial.distance.cosine(w1, wvocab[w2]))
-    return distance_list
+#     for w2 in wlist:
+#         distance_list.append(1 - spatial.distance.cosine(w1, wvocab[w2]))
+#     return distance_list
+    w2 = np.array([wvocab[w] for w in wlist])
+    print(w2.shape)
+    norm = np.linalg.norm(w1)
+    all_norms = np.linalg.norm(w2, axis=1)
+    dot_products = np.dot(w2, w1)
+    distances = 1 - dot_products / (norm * all_norms)
+    return distances
 
 
 def generate():
