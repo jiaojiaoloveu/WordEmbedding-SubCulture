@@ -3,6 +3,7 @@ from neural_network import generate_data
 from propagate_labels import word_dataset_base
 from gen_data import wv_map
 from time import time
+from sample_seeds import __uni2norm
 import os
 import json
 import numpy as np
@@ -11,7 +12,8 @@ import argparse
 
 def train(wv):
     generate = args.get('generate')
-    feature_train, label_train, feature_test, label_test = generate_data(generate=generate)
+    uniform = args.get('uniform')
+    feature_train, label_train, feature_test, label_test = generate_data(generate=generate, uniform=uniform)
     model = args.get('model')
     if model == 'svr':
         clf = SVR(kernel='rbf', epsilon=0.05, gamma='auto', C=10)
@@ -35,6 +37,8 @@ def train(wv):
             for w in wv:
                 label_space.append(clf.predict(wv[w]))
             label_space = np.array(label_space)
+            if uniform:
+                label_space = __uni2norm(label_space)
             print('time %s' % (time() - start))
             gg_radius = label_space[:, 1]
             gg_mean_arr.append(np.mean(gg_radius))
@@ -58,5 +62,6 @@ if __name__ == '__main__':
     ap = argparse.ArgumentParser('keras deep learning method')
     ap.add_argument('--generate', type=int, required=True)
     ap.add_argument('--model', type=str, required=True)
+    ap.add_argument('--uniform', type=int, required=True)
     args = vars(ap.parse_args())
     train(wv_map())

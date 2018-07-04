@@ -2,6 +2,7 @@ from align_wv_space import get_aligned_wv
 from sample_seeds import read_warriner_ratings, csv_path
 from gensim.models import KeyedVectors
 from gensim.models.word2vec import Word2Vec
+from sample_seeds import __norm2uni
 import numpy as np
 import os
 import json
@@ -109,7 +110,7 @@ def preprocess_data(word_epa_dataset, suffix):
     return wv_feature, epa_label
 
 
-def generate_data(generate):
+def generate_data(generate, uniform):
     if generate < 2:
         if generate == 0:
             feature, label = load_feature_label('all')
@@ -130,4 +131,10 @@ def generate_data(generate):
     else:
         print('generate = %s not supported' % generate)
         raise Exception('generate not supported yet')
+    print('label shape')
+    print(label_train.shape)
+    if uniform:
+        label_train = __norm2uni(label_train)
+        label_test = __norm2uni(label_test)
+    print(label_train.shape)
     return feature_train, label_train, feature_test, label_test
