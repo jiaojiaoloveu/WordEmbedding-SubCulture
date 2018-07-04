@@ -49,6 +49,9 @@ def train(wv):
         if uniform:
             gh_label_pred = __uni2norm(gh_label_pred)
             gg_label_pred = __uni2norm(gg_label_pred)
+        print('after uni2norm')
+        print(gh_label_pred)
+        print(gg_label_pred)
         print('google')
         print(np.mean(gg_label_pred, axis=0))
         print(np.mean(np.abs(gg_label_pred), axis=0))
