@@ -64,7 +64,7 @@ def train():
     generate = args.get('generate')
     model = args.get('model')
     uniform = args.get('uniform')
-    feature_train, label_train, feature_test, label_test = generate_data(generate, uniform)
+    feature_train, label_train, feature_test, label_test = generate_data(generate, uniform == 0)
     model = fit_model(feature_train, label_train, feature_test, label_test, model)
     dic = wv_map()
     gg_eval = []
@@ -98,6 +98,6 @@ if __name__ == '__main__':
     ap = argparse.ArgumentParser('keras deep learning method')
     ap.add_argument('--generate', type=int, required=True)
     ap.add_argument('--model', type=str, required=True)
-    ap.add_argument('--uniform', type=bool, required=True)
+    ap.add_argument('--uniform', type=int, required=True)
     args = vars(ap.parse_args())
     train()

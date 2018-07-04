@@ -13,7 +13,7 @@ import argparse
 def train(wv):
     generate = args.get('generate')
     uniform = args.get('uniform')
-    feature_train, label_train, feature_test, label_test = generate_data(generate=generate, uniform=uniform)
+    feature_train, label_train, feature_test, label_test = generate_data(generate=generate, uniform=uniform == 0)
     model = args.get('model')
     if model == 'svr':
         clf = SVR(kernel='rbf', epsilon=0.05, gamma='auto', C=10)
@@ -66,6 +66,6 @@ if __name__ == '__main__':
     ap = argparse.ArgumentParser('keras deep learning method')
     ap.add_argument('--generate', type=int, required=True)
     ap.add_argument('--model', type=str, required=True)
-    ap.add_argument('--uniform', type=bool, required=True)
+    ap.add_argument('--uniform', type=int, required=True)
     args = vars(ap.parse_args())
     train(wv_map())
