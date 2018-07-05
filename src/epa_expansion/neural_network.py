@@ -65,9 +65,10 @@ def train():
     generate = args.get('generate')
     model = args.get('model')
     uniform = args.get('uniform') == 0
+    align = args.get('align')
     feature_train, label_train, feature_test, label_test = generate_data(generate, uniform)
     model = fit_model(feature_train, label_train, feature_test, label_test, model)
-    dic = wv_map(method='svd')
+    dic = wv_map(method=align)
     gg_eval = []
     gh_eval = []
     for w in dic:
@@ -99,5 +100,6 @@ if __name__ == '__main__':
     ap.add_argument('--generate', type=int, required=True)
     ap.add_argument('--model', type=str, required=True)
     ap.add_argument('--uniform', type=int, required=True)
+    ap.add_argument('--align', type=str, required=True)
     args = vars(ap.parse_args())
     train()
