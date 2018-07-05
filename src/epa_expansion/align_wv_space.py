@@ -28,9 +28,9 @@ def get_training_dataset(source, target):
     return source_mat, target_mat
 
 
-def get_eval_dataset(source, target):
+def get_sample_dataset(source, target, k=1000):
     overlap_words = set(source.vocab.keys()) & set(target.vocab.keys())
-    sample_overlap_words = random.sample(overlap_words, 1000)
+    sample_overlap_words = random.sample(overlap_words, k)
     source_mat = []
     target_mat = []
     for word in sample_overlap_words:
@@ -62,7 +62,7 @@ def cal_cosine_dis(pred, label):
     print(np.std(res))
 
 
-def align_space(source, target):
+def align_nn_model(source, target):
     source_mat, target_mat = get_training_dataset(source, target)
     model = sgd_model()
     model.fit(source_mat, target_mat, epochs=100, batch_size=5)
@@ -74,9 +74,9 @@ def align_space(source, target):
     return model
 
 
-def align_models_nn(source, target):
-    model = align_space(source, target)
-    source_eval, target_eval = get_eval_dataset(source, target)
+def align_nn_train_eval(source, target):
+    model = align_nn_model(source, target)
+    source_eval, target_eval = get_sample_dataset(source, target)
     print('align model eval')
     score = model.evaluate(source_eval, target_eval, batch_size=5)
     print(score)
@@ -85,14 +85,29 @@ def align_models_nn(source, target):
     return model
 
 
-def get_aligned_wv(source, target, tokens):
+def align_svd_model(source_model, target_model):
+    source_dataset, target_dataset = get_sample_dataset(source_model, target_model, k=10000)
+    product = np.matmul(source_dataset.transpose(), target_dataset)
+    U, s, V = np.linalg.svd(product)
+    return np.matmul(U, V)
+
+
+def get_aligned_wv(source, target, tokens, method='nn'):
     aligned_wv = {}
-    model = align_models_nn(source, target)
-    for word in tokens:
-        if word in source.vocab.keys() and word in target.vocab.keys():
-            s_wv = model.predict(np.reshape(source[word], (1, 300)))[0]
-            t_wv = target[word]
-            aligned_wv[word] = np.array([s_wv, t_wv])
+    if method == 'nn':
+        model = align_nn_train_eval(source, target)
+        for word in tokens:
+            if word in source.vocab.keys() and word in target.vocab.keys():
+                s_wv = model.predict(np.reshape(source[word], (1, 300)))[0]
+                t_wv = target[word]
+                aligned_wv[word] = np.array([s_wv, t_wv])
+    elif method == 'svd':
+        w = align_svd_model(source, target)
+        for word in tokens:
+            if word in source.vocab.keys() and word in target.vocab.keys():
+                s_wv = np.matmul(source[word], w)
+                t_wv = target[word]
+                aligned_wv[word] = np.array([s_wv, t_wv])
     return aligned_wv
 
 
@@ -106,4 +121,4 @@ def get_aligned_wv(source, target, tokens):
 if __name__ == '__main__':
     gg_model = KeyedVectors.load_word2vec_format('../models/embedding/GoogleNews-vectors-negative300.bin', binary=True)
     gh_model = Word2Vec.load('../models/embedding/github/word2vec_sg_0_size_300_mincount_5')
-    align_models_nn(gg_model, gh_model.wv)
+    align_nn_train_eval(gg_model, gh_model.wv)

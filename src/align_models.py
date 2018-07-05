@@ -28,7 +28,7 @@ def make_training_datasets(source_model, target_model, overlap_dictionary):
     return np.array(source_matrix), np.array(target_matrix)
 
 
-def align_space(source_model, target_model):
+def align_svd_model(source_model, target_model):
     overlap_dictionary = get_dictionary(source_model.wv.vocab.keys(), target_model.wv.vocab.keys())
     source_dataset, target_dataset = make_training_datasets(source_model, target_model, overlap_dictionary)
     product = np.matmul(source_dataset.transpose(), target_dataset)
@@ -49,8 +49,8 @@ if __name__ == '__main__':
     transform_base = '../models/transform/%s' % model_name
     os.makedirs(transform_base, exist_ok=True)
 
-    w = align_space(tw_model, wk_model)
+    w = align_svd_model(tw_model, wk_model)
     np.save(os.path.join(transform_base, 'tw_wk'), w)
 
-    w = align_space(gh_model, wk_model)
+    w = align_svd_model(gh_model, wk_model)
     np.save(os.path.join(transform_base, 'gh_wk'), w)

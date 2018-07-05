@@ -67,7 +67,7 @@ def train():
     uniform = args.get('uniform') == 0
     feature_train, label_train, feature_test, label_test = generate_data(generate, uniform)
     model = fit_model(feature_train, label_train, feature_test, label_test, model)
-    dic = wv_map()
+    dic = wv_map(method='svd')
     gg_eval = []
     gh_eval = []
     for w in dic:
