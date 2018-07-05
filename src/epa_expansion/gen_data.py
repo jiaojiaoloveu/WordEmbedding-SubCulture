@@ -118,7 +118,7 @@ def generate_data(generate, uniform=False):
             feature, label = preprocess_data(load_all(), 'all')
         (items, dimensions) = feature.shape
         mask = np.random.random_sample(items)
-        train_test_split = 0.4
+        train_test_split = 0.7
         feature_train, label_train = feature[mask < train_test_split], label[mask < train_test_split]
         feature_test, label_test = feature[mask >= train_test_split], label[mask >= train_test_split]
     elif generate < 4:

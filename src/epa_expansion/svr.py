@@ -16,7 +16,11 @@ def train(wv):
     feature_train, label_train, feature_test, label_test = generate_data(generate=generate, uniform=uniform)
     model = args.get('model')
     if model == 'svr':
-        clf = SVR(kernel='sigmoid', epsilon=0.05, C=10)
+        if uniform:
+            kernel = 'sigmoid'
+        else:
+            kernel = 'rbf'
+        clf = SVR(kernel=kernel, epsilon=0.05, C=10)
         gg_label_pred, gh_label_pred = [], []
         for axis in range(0, 3):
             label_train_axis = label_train[:, axis]
