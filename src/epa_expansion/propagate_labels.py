@@ -252,13 +252,26 @@ def train():
     with open(os.path.join(word_dataset_base, 'result'), 'w') as fp:
         json.dump(predict_label, fp)
     result = {}
+    gg, gh = [], []
     for (word, label) in predict_label:
         if word in compare_words:
             if word in result.keys():
                 result[word].append(label)
+                gh.append(label)
             else:
                 result[word] = [label]
+                gg.append(label)
+    gg = np.array(gg)
+    gh = np.array(gh)
     print(result)
+    print('google')
+    print(np.mean(gg, axis=0))
+    print(np.mean(np.abs(gg), axis=0))
+    print(np.std(gg, axis=0))
+    print('github')
+    print(np.mean(gh, axis=0))
+    print(np.mean(np.abs(gh), axis=0))
+    print(np.std(gh, axis=0))
 
 
 if __name__ == '__main__':
