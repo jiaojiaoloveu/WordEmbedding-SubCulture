@@ -106,8 +106,6 @@ def preprocess_data(word_epa_dataset, suffix):
     google_model = get_wv_space()
     google_vocab = set(google_model.vocab.keys())
 
-
-
     for word in word_epa_dataset.keys():
         if word not in google_vocab:
             continue

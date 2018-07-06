@@ -93,19 +93,19 @@ def train():
     if uniform:
         gh_pred = __uni2norm(gh_pred)
         gg_pred = __uni2norm(gg_pred)
-    print(gg_pred)
-    print(gh_pred)
-    print(epa_eval)
+    print(list(zip(gg_pred.tolist(), gh_pred.tolist(), epa_eval.tolist())))
     print('nn eval epa')
 
+    epa_mask = np.any(epa_eval, axis=1)
+
     print('diff gg && gh')
-    __comparison(gg_pred, gh_pred)
+    __comparison(gg_pred[epa_mask], gh_pred[epa_mask])
 
     print('diff gg && epa')
-    __comparison(gg_pred, epa_eval)
+    __comparison(gg_pred[epa_mask], epa_eval[epa_mask])
 
     print('diff gh && epa')
-    __comparison(gh_pred, epa_eval)
+    __comparison(gh_pred[epa_mask], epa_eval[epa_mask])
 
     print('google')
     print(np.mean(gg_pred, axis=0))
@@ -116,8 +116,6 @@ def train():
     print(np.mean(gh_pred, axis=0))
     print(np.mean(np.abs(gh_pred), axis=0))
     print(np.std(gh_pred, axis=0))
-
-
 
 
 if __name__ == '__main__':
