@@ -94,6 +94,11 @@ def train():
     print(np.mean(np.abs(gh_pred), axis=0))
     print(np.std(gh_pred, axis=0))
 
+    diff = gg_pred - gh_pred
+    print(np.mean(diff, axis=0))
+    print(np.mean(np.abs(diff), axis=0))
+    print(np.std(diff, axis=0))
+
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser('keras deep learning method')
