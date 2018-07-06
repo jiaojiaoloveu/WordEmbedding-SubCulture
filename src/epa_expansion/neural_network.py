@@ -70,12 +70,12 @@ def __comparison(arr1, arr2):
 
 def train():
     generate = args.get('generate')
-    model = args.get('model')
+    dtype = args.get('model')
     uniform = args.get('uniform') == 0
     feature_train, label_train, feature_test, label_test = generate_data(generate, uniform)
     for epochs in range(50, 500, 50):
         for batch_size in range(10, 200, 10):
-            model, mae = fit_model(feature_train, label_train, feature_test, label_test, model, epochs, batch_size)
+            model, mae = fit_model(feature_train, label_train, feature_test, label_test, dtype, epochs, batch_size)
             with open(os.path.join(word_dataset_base, 'parameter_tuning'), 'a') as fp:
                 out = [
                     'epochs %s batch %s' % (epochs, batch_size),
