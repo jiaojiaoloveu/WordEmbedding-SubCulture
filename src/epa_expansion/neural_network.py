@@ -8,7 +8,7 @@ from keras.layers import Dense, Conv1D, Activation, Dropout, Embedding
 from keras.layers import GlobalMaxPooling1D, MaxPooling1D
 from keras.wrappers.scikit_learn import KerasRegressor
 from sklearn.model_selection import cross_val_score, KFold
-from gen_data import wv_map, generate_data
+from gen_data import wv_map, generate_data, word_dataset_base
 
 
 def baseline_model(dtype):
@@ -44,21 +44,21 @@ def baseline_model(dtype):
 #    print("Results: %.2f (%.2f) MSE" % (results.mean(), results.std()))
 
 
-def fit_model(feature_train, label_train, feature_test, label_test, dtype):
+def fit_model(feature_train, label_train, feature_test, label_test, dtype, epochs, batch_size):
     if 'cnn' in dtype:
         # channel last
         feature_train = np.reshape(feature_train, feature_train.shape + (1, ))
         feature_test = np.reshape(feature_test, feature_test.shape + (1,))
     model = baseline_model(dtype=dtype)
     print('start training %s %s' % (str(feature_train.shape), str(label_train.shape)))
-    model.fit(feature_train, label_train, epochs=50, batch_size=128)
+    model.fit(feature_train, label_train, epochs=epochs, batch_size=batch_size)
     print('start evaluating %s %s' % (str(feature_test.shape), str(label_test.shape)))
-    score = model.evaluate(feature_test, label_test, batch_size=128)
+    score = model.evaluate(feature_test, label_test, batch_size=batch_size)
     print(score)
     label_pred = model.predict(feature_test)
     mae = np.mean(np.abs(label_pred - label_test), axis=0)
     print('mae %s' % mae)
-    return model
+    return model, mae
 
 
 def __comparison(arr1, arr2):
@@ -72,10 +72,22 @@ def train():
     generate = args.get('generate')
     model = args.get('model')
     uniform = args.get('uniform') == 0
-    align = args.get('align')
     feature_train, label_train, feature_test, label_test = generate_data(generate, uniform)
-    model = fit_model(feature_train, label_train, feature_test, label_test, model)
+    for epochs in range(50, 500, 50):
+        for batch_size in range(10, 200, 10):
+            model, mae = fit_model(feature_train, label_train, feature_test, label_test, model)
+            with open(os.path.join(word_dataset_base, 'parameter_tuning'), 'a') as fp:
+                out = [
+                    'epochs %s batch %s' % (epochs, batch_size),
+                    'mae %s' % mae,
+                ]
+                fp.writelines('%s\n' % line for line in out)
+    # evaluate(model)
 
+
+def evaluate(model):
+    uniform = args.get('uniform') == 0
+    align = args.get('align')
     dic, epa = wv_map(method=align)
     gg_eval = []
     gh_eval = []
@@ -93,7 +105,12 @@ def train():
     if uniform:
         gh_pred = __uni2norm(gh_pred)
         gg_pred = __uni2norm(gg_pred)
-    print(list(zip(gg_pred.tolist(), gh_pred.tolist(), epa_eval.tolist())))
+
+    res = list(zip(epa_eval, gg_pred.tolist(), gh_pred.tolist()))
+
+    for item in res:
+        print(item)
+
     print('nn eval epa')
 
     epa_mask = np.any(epa_eval, axis=1)
