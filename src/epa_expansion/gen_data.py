@@ -124,7 +124,7 @@ def preprocess_data(word_epa_dataset, suffix):
     return wv_feature, epa_label
 
 
-def generate_data(generate, uniform=False):
+def generate_data(generate):
     if generate < 2:
         if generate == 0:
             feature, label = load_feature_label('all')
@@ -145,12 +145,6 @@ def generate_data(generate, uniform=False):
     else:
         print('generate = %s not supported' % generate)
         raise Exception('generate not supported yet')
-    print('label shape')
-    print(label_train.shape)
-    if uniform:
-        label_train = __norm2uni(label_train)
-        label_test = __norm2uni(label_test)
-    print(label_train.shape)
     return feature_train, label_train, feature_test, label_test
 
 

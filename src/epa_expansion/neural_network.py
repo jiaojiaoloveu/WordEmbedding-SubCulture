@@ -9,6 +9,7 @@ from keras.layers import GlobalMaxPooling1D, MaxPooling1D
 from keras.wrappers.scikit_learn import KerasRegressor
 from sklearn.model_selection import cross_val_score, KFold
 from gen_data import wv_map, generate_data, word_dataset_base
+from sample_seeds import __uni2norm, __norm2uni
 
 
 def baseline_model(dtype):
@@ -45,7 +46,10 @@ def baseline_model(dtype):
 #    print("Results: %.2f (%.2f) MSE" % (results.mean(), results.std()))
 
 
-def fit_model(feature_train, label_train, feature_test, label_test, dtype, epochs, batch_size):
+def fit_model(feature_train, label_train, feature_test, label_test, dtype, uniform, epochs, batch_size):
+    if uniform:
+        label_train = __norm2uni(label_train)
+        label_test = __norm2uni(label_test)
     if 'cnn' in dtype:
         # channel last
         feature_train = np.reshape(feature_train, feature_train.shape + (1, ))
@@ -59,6 +63,12 @@ def fit_model(feature_train, label_train, feature_test, label_test, dtype, epoch
     label_pred = model.predict(feature_test)
     mae = np.mean(np.abs(label_pred - label_test), axis=0)
     print('mae %s' % mae)
+    if uniform:
+        label_test = __uni2norm(label_test)
+        label_pred = __uni2norm(label_pred)
+        mae_ori = np.mean(np.abs(label_pred - label_test), axis=0)
+        print('mae ori %s' % mae_ori)
+        mae = np.concatenate(([mae], [mae_ori]))
     return model, mae
 
 
@@ -73,10 +83,11 @@ def train():
     generate = args.get('generate')
     dtype = args.get('model')
     uniform = args.get('uniform') == 0
-    feature_train, label_train, feature_test, label_test = generate_data(generate, uniform)
+    feature_train, label_train, feature_test, label_test = generate_data(generate)
     for epochs in range(50, 500, 50):
         for batch_size in range(10, 200, 10):
-            model, mae = fit_model(feature_train, label_train, feature_test, label_test, dtype, epochs, batch_size)
+            model, mae = fit_model(feature_train, label_train, feature_test, label_test,
+                                   dtype, uniform, epochs, batch_size)
             with open(os.path.join(word_dataset_base, 'parameter_tuning'), 'a') as fp:
                 out = [
                     'epochs %s batch %s' % (epochs, batch_size),

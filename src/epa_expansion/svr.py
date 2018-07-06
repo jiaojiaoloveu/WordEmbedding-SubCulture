@@ -13,7 +13,7 @@ import argparse
 def train(wv):
     generate = args.get('generate')
     uniform = args.get('uniform') == 0
-    feature_train, label_train, feature_test, label_test = generate_data(generate=generate, uniform=uniform)
+    feature_train, label_train, feature_test, label_test = generate_data(generate=generate)
     model = args.get('model')
     if model == 'svr':
         if uniform:
