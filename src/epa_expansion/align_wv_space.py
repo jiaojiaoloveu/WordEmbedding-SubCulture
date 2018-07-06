@@ -14,7 +14,7 @@ from scipy import spatial
 def get_anchor_words():
     anchor = []
     stop_words = stopwords.words('english')
-    anchor.append(stop_words)
+    anchor.extend(stop_words)
     return anchor
 
 
