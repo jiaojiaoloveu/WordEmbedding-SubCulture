@@ -59,19 +59,17 @@ def cal_cosine_dis(pred, label):
     print(np.std(res))
 
 
-def align_nn_train_eval(source, target, model):
+def __nn_eval(source, target, model):
     source_eval, target_eval = get_sample_dataset(source, target)
     score = model.evaluate(source_eval, target_eval, batch_size=5)
-    print('align on independent dataset')
     print(score)
     source_pred = model.predict(source_eval)
     cal_cosine_dis(source_pred, target_eval)
-    return model
 
 
 def align_nn_model(source, target):
     source_mat, target_mat = get_training_dataset(source, target)
-    print('align train datasize %s' % source_mat.shape)
+    print('align train datasize %s' % str(source_mat.shape))
     model = sgd_model()
     model.fit(source_mat, target_mat, epochs=100, batch_size=5)
     score = model.evaluate(source_mat, target_mat, batch_size=5)
@@ -80,15 +78,28 @@ def align_nn_model(source, target):
     print('eval on training dataset')
     source_pred = model.predict(source_mat)
     cal_cosine_dis(source_pred, target_mat)
-    align_nn_train_eval(source, target, model)
+    print('align on testing dataset')
+    __nn_eval(source, target, model)
     return model
 
 
-def align_svd_model(source_model, target_model):
-    source_dataset, target_dataset = get_sample_dataset(source_model, target_model, k=10000)
+def __svd_eval(source, target, w):
+    source_eval, target_eval = get_sample_dataset(source, target)
+    source_pred = np.matmul(source_eval, w)
+    cal_cosine_dis(source_pred, target_eval)
+
+
+def align_svd_model(source, target):
+    source_dataset, target_dataset = get_sample_dataset(source, target, k=10000)
     product = np.matmul(source_dataset.transpose(), target_dataset)
     U, s, V = np.linalg.svd(product)
-    return np.matmul(U, V)
+    w = np.matmul(U, V)
+    print('eval on training dataset')
+    source_pred = np.matmul(source_dataset, w)
+    cal_cosine_dis(source_pred, target_dataset)
+    print('eval on testing dataset')
+    __svd_eval(source, target, w)
+    return w
 
 
 def get_aligned_wv(source, target, tokens, method='nn'):
@@ -121,4 +132,4 @@ def get_aligned_wv(source, target, tokens, method='nn'):
 if __name__ == '__main__':
     gg_model = KeyedVectors.load_word2vec_format('../models/embedding/GoogleNews-vectors-negative300.bin', binary=True)
     gh_model = Word2Vec.load('../models/embedding/github/word2vec_sg_0_size_300_mincount_5')
-    align_nn_train_eval(gg_model, gh_model.wv)
+    __nn_eval(gg_model, gh_model.wv)
