@@ -61,6 +61,13 @@ def fit_model(feature_train, label_train, feature_test, label_test, dtype):
     return model
 
 
+def __comparison(arr1, arr2):
+    diff = arr1 - arr2
+    print(np.mean(diff, axis=0))
+    print(np.mean(np.abs(diff), axis=0))
+    print(np.std(diff, axis=0))
+
+
 def train():
     generate = args.get('generate')
     model = args.get('model')
@@ -69,14 +76,17 @@ def train():
     feature_train, label_train, feature_test, label_test = generate_data(generate, uniform)
     model = fit_model(feature_train, label_train, feature_test, label_test, model)
 
-    dic = wv_map(method=align)
+    dic, epa = wv_map(method=align)
     gg_eval = []
     gh_eval = []
+    epa_eval = []
     for w in dic:
         gh_eval.append(dic[w][0])
         gg_eval.append(dic[w][1])
+        epa_eval.append(epa[w])
     gh_eval = np.array(gh_eval)
     gg_eval = np.array(gg_eval)
+    epa_eval = np.array(epa_eval)
     gh_pred = model.predict(gh_eval, batch_size=5)
     gg_pred = model.predict(gg_eval, batch_size=5)
 
@@ -85,7 +95,18 @@ def train():
         gg_pred = __uni2norm(gg_pred)
     print(gg_pred)
     print(gh_pred)
+    print(epa_eval)
     print('nn eval epa')
+
+    print('diff gg && gh')
+    __comparison(gg_pred, gh_pred)
+
+    print('diff gg && epa')
+    __comparison(gg_pred, epa_eval)
+
+    print('diff gh && epa')
+    __comparison(gh_pred, epa_eval)
+
     print('google')
     print(np.mean(gg_pred, axis=0))
     print(np.mean(np.abs(gg_pred), axis=0))
@@ -96,11 +117,7 @@ def train():
     print(np.mean(np.abs(gh_pred), axis=0))
     print(np.std(gh_pred, axis=0))
 
-    print('diff')
-    diff = gg_pred - gh_pred
-    print(np.mean(diff, axis=0))
-    print(np.mean(np.abs(diff), axis=0))
-    print(np.std(diff, axis=0))
+
 
 
 if __name__ == '__main__':

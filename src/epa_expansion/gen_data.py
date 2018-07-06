@@ -53,6 +53,16 @@ def wv_map(method='nn'):
     #         dic[w] = (gh, gg)
 
     # dic: word -> [wv1, wv2]
+
+    return dic, wv_map_epa(list(dic.keys()))
+
+
+def wv_map_epa(tokens):
+    word_epa_dataset = load_all()
+    dic = {}
+    for word in tokens:
+        if word in word_epa_dataset:
+            dic[word] = __epa2list(word_epa_dataset[word])
     return dic
 
 
@@ -84,14 +94,17 @@ def load_feature_label(suffix):
     return feature, label
 
 
+def __epa2list(epa):
+    return [epa['E'], epa['P'], epa['A']]
+
+
 def preprocess_data(word_epa_dataset, suffix):
     wv_feature = []
     epa_label = []
     google_model = get_wv_space()
     google_vocab = set(google_model.vocab.keys())
 
-    def epa2list(epa):
-        return [epa['E'], epa['P'], epa['A']]
+
 
     for word in word_epa_dataset.keys():
         if word not in google_vocab:
@@ -100,7 +113,7 @@ def preprocess_data(word_epa_dataset, suffix):
         wv_feature.append(feature)
 
         label = word_epa_dataset[word]
-        epa_label.append(epa2list(label))
+        epa_label.append(__epa2list(label))
 
     wv_feature = np.array(wv_feature)
     epa_label = np.array(epa_label)
