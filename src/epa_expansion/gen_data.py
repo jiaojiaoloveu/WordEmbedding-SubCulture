@@ -63,6 +63,8 @@ def wv_map_epa(tokens):
     for word in tokens:
         if word in word_epa_dataset:
             dic[word] = __epa2list(word_epa_dataset[word])
+        else:
+            dic[word] = [0, 0, 0]
     return dic
 
 
