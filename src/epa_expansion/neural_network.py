@@ -17,7 +17,8 @@ def baseline_model(dtype):
     if dtype == 'lr':
         model.add(Dense(32, input_dim=300, kernel_initializer='normal', activation='relu'))
         model.add(Dense(3, kernel_initializer='normal'))
-        model.add(Activation('sigmoid'))
+        # model.add(Activation('sigmoid'))
+        model.add(Activation('tanh'))
     elif dtype == 'cnn':
         model.add(Conv1D(32, 10, padding='valid', activation='relu', strides=1))
         # model.add(MaxPooling1D(pool_size=5))
