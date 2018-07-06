@@ -51,7 +51,7 @@ def fit_model(feature_train, label_train, feature_test, label_test, dtype):
         feature_test = np.reshape(feature_test, feature_test.shape + (1,))
     model = baseline_model(dtype=dtype)
     print('start training %s %s' % (str(feature_train.shape), str(label_train.shape)))
-    model.fit(feature_train, label_train, epochs=10, batch_size=128)
+    model.fit(feature_train, label_train, epochs=50, batch_size=128)
     print('start evaluating %s %s' % (str(feature_test.shape), str(label_test.shape)))
     score = model.evaluate(feature_test, label_test, batch_size=128)
     print(score)
@@ -68,6 +68,7 @@ def train():
     align = args.get('align')
     feature_train, label_train, feature_test, label_test = generate_data(generate, uniform)
     model = fit_model(feature_train, label_train, feature_test, label_test, model)
+
     dic = wv_map(method=align)
     gg_eval = []
     gh_eval = []
@@ -78,6 +79,7 @@ def train():
     gg_eval = np.array(gg_eval)
     gh_pred = model.predict(gh_eval, batch_size=5)
     gg_pred = model.predict(gg_eval, batch_size=5)
+
     if uniform:
         gh_pred = __uni2norm(gh_pred)
         gg_pred = __uni2norm(gg_pred)
@@ -94,6 +96,7 @@ def train():
     print(np.mean(np.abs(gh_pred), axis=0))
     print(np.std(gh_pred, axis=0))
 
+    print('diff')
     diff = gg_pred - gh_pred
     print(np.mean(diff, axis=0))
     print(np.mean(np.abs(diff), axis=0))

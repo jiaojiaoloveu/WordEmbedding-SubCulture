@@ -6,6 +6,7 @@ from sample_seeds import __norm2uni
 import numpy as np
 import os
 import json
+import argparse
 
 
 word_dataset_base = '../result/epa_expansion'
@@ -138,3 +139,10 @@ def generate_data(generate, uniform=False):
         label_test = __norm2uni(label_test)
     print(label_train.shape)
     return feature_train, label_train, feature_test, label_test
+
+
+if __name__ == '__main__':
+    ap = argparse.ArgumentParser('wv map')
+    ap.add_argument('--method', type=str, required=True)
+    args = vars(ap.parse_args())
+    wv_map(args.get('method'))

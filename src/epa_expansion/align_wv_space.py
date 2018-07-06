@@ -38,9 +38,6 @@ def get_sample_dataset(source, target, k=1000):
         target_mat.append(target[word])
     source_mat = np.array(source_mat)
     target_mat = np.array(target_mat)
-    print('shape eval')
-    print(source_mat.shape)
-    print(target_mat.shape)
     return source_mat, target_mat
 
 
@@ -62,26 +59,28 @@ def cal_cosine_dis(pred, label):
     print(np.std(res))
 
 
-def align_nn_model(source, target):
-    source_mat, target_mat = get_training_dataset(source, target)
-    model = sgd_model()
-    model.fit(source_mat, target_mat, epochs=100, batch_size=5)
-    score = model.evaluate(source_mat, target_mat, batch_size=5)
-    print('align model train')
-    print(score)
-    source_pred = model.predict(source_mat)
-    cal_cosine_dis(source_pred, target_mat)
-    return model
-
-
-def align_nn_train_eval(source, target):
-    model = align_nn_model(source, target)
+def align_nn_train_eval(source, target, model):
     source_eval, target_eval = get_sample_dataset(source, target)
-    print('align model eval')
     score = model.evaluate(source_eval, target_eval, batch_size=5)
+    print('align on independent dataset')
     print(score)
     source_pred = model.predict(source_eval)
     cal_cosine_dis(source_pred, target_eval)
+    return model
+
+
+def align_nn_model(source, target):
+    source_mat, target_mat = get_training_dataset(source, target)
+    print('align train datasize %s' % source_mat.shape)
+    model = sgd_model()
+    model.fit(source_mat, target_mat, epochs=100, batch_size=5)
+    score = model.evaluate(source_mat, target_mat, batch_size=5)
+    print('align train score')
+    print(score)
+    print('eval on training dataset')
+    source_pred = model.predict(source_mat)
+    cal_cosine_dis(source_pred, target_mat)
+    align_nn_train_eval(source, target, model)
     return model
 
 
@@ -94,8 +93,9 @@ def align_svd_model(source_model, target_model):
 
 def get_aligned_wv(source, target, tokens, method='nn'):
     aligned_wv = {}
+    print('method type %s' % method)
     if method == 'nn':
-        model = align_nn_train_eval(source, target)
+        model = align_nn_model(source, target)
         for word in tokens:
             if word in source.vocab.keys() and word in target.vocab.keys():
                 s_wv = model.predict(np.reshape(source[word], (1, 300)))[0]
