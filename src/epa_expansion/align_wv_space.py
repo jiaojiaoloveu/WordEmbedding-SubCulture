@@ -11,8 +11,15 @@ from gensim.models.word2vec import Word2Vec
 from scipy import spatial
 
 
-def get_training_dataset(source, target):
+def get_anchor_words():
+    anchor = []
     stop_words = stopwords.words('english')
+    anchor.append(stop_words)
+    return anchor
+
+
+def get_training_dataset(source, target):
+    stop_words = get_anchor_words()
     overlap_words = set(source.vocab.keys()) & set(target.vocab.keys())
     source_mat = []
     target_mat = []
@@ -22,6 +29,9 @@ def get_training_dataset(source, target):
             target_mat.append(target[word])
     source_mat = np.array(source_mat)
     target_mat = np.array(target_mat)
+    source_mat_rand, target_mat_rand = get_sample_dataset(source, target)
+    source_mat = np.concatenate((source_mat, source_mat_rand))
+    target_mat = np.concatenate((target_mat, target_mat_rand))
     print('shape training')
     print(source_mat.shape)
     print(target_mat.shape)
@@ -90,7 +100,7 @@ def __svd_eval(source, target, w):
 
 
 def align_svd_model(source, target):
-    source_dataset, target_dataset = get_sample_dataset(source, target, k=10000)
+    source_dataset, target_dataset = get_sample_dataset(source, target, k=20000)
     product = np.matmul(source_dataset.transpose(), target_dataset)
     U, s, V = np.linalg.svd(product)
     w = np.matmul(U, V)
