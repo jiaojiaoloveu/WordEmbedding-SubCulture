@@ -1,5 +1,6 @@
 import json
 import os
+import time
 import argparse
 import numpy as np
 from sample_seeds import __uni2norm
@@ -12,14 +13,15 @@ from gen_data import wv_map, generate_data, word_dataset_base
 from sample_seeds import __uni2norm, __norm2uni
 
 
-def baseline_model(dtype):
+def baseline_model(dtype, uniform):
     print(dtype)
     model = Sequential()
     if dtype == 'lr':
         model.add(Dense(32, input_dim=300, kernel_initializer='normal', activation='relu'))
         model.add(Dense(3, kernel_initializer='normal'))
         # model.add(Activation('sigmoid'))
-        model.add(Activation('tanh'))
+        if uniform:
+            model.add(Activation('tanh'))
     elif dtype == 'cnn':
         model.add(Conv1D(32, 10, padding='valid', activation='relu', strides=1))
         # model.add(MaxPooling1D(pool_size=5))
@@ -54,7 +56,7 @@ def fit_model(feature_train, label_train, feature_test, label_test, dtype, unifo
         # channel last
         feature_train = np.reshape(feature_train, feature_train.shape + (1, ))
         feature_test = np.reshape(feature_test, feature_test.shape + (1,))
-    model = baseline_model(dtype=dtype)
+    model = baseline_model(dtype=dtype, uniform=uniform)
     print('start training %s %s' % (str(feature_train.shape), str(label_train.shape)))
     model.fit(feature_train, label_train, epochs=epochs, batch_size=batch_size)
     print('start evaluating %s %s' % (str(feature_test.shape), str(label_test.shape)))
@@ -88,7 +90,7 @@ def train():
         for batch_size in range(10, 200, 10):
             model, mae = fit_model(feature_train, label_train, feature_test, label_test,
                                    dtype, uniform, epochs, batch_size)
-            with open(os.path.join(word_dataset_base, 'parameter_tuning'), 'a') as fp:
+            with open(os.path.join(word_dataset_base, 'parameter_tuning%s' % int(time.time())), 'a') as fp:
                 out = [
                     'epochs %s batch %s' % (epochs, batch_size),
                     'mae %s' % mae,
