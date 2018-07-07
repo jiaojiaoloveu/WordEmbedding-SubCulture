@@ -88,17 +88,17 @@ def train():
     feature_train, label_train, feature_test, label_test = generate_data(generate)
     file_name = os.path.join(word_dataset_base, 'parameter_tuning_model%s_uniform%s_%s'
                              % (dtype, uniform, int(time.time())))
-    for epochs in range(2, 20, 2):
-        for batch_size in range(50, 200, 10):
-            model, mae = fit_model(feature_train, label_train, feature_test, label_test,
-                                   dtype, uniform, epochs, batch_size)
-            with open(file_name, 'a') as fp:
-                out = [
-                    'epochs %s batch %s' % (epochs, batch_size),
-                    'mae %s' % mae,
-                ]
-                fp.writelines('%s\n' % line for line in out)
-    # evaluate(model)
+    epochs = 10
+    batch_size = 100
+    model, mae = fit_model(feature_train, label_train, feature_test, label_test,
+                           dtype, uniform, epochs, batch_size)
+    with open(file_name, 'a') as fp:
+        out = [
+            'epochs %s batch %s' % (epochs, batch_size),
+            'mae %s' % mae,
+        ]
+        fp.writelines('%s\n' % line for line in out)
+    evaluate(model)
 
 
 def evaluate(model):
