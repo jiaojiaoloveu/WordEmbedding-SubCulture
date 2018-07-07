@@ -86,9 +86,10 @@ def train():
     dtype = args.get('model')
     uniform = args.get('uniform') == 0
     feature_train, label_train, feature_test, label_test = generate_data(generate)
-    file_name = os.path.join(word_dataset_base, 'parameter_tuning%s' % int(time.time()))
-    for epochs in range(50, 500, 50):
-        for batch_size in range(10, 200, 10):
+    file_name = os.path.join(word_dataset_base, 'parameter_tuning_model%s_uniform%s_%s'
+                             % (dtype, uniform, int(time.time())))
+    for epochs in range(5, 50, 5):
+        for batch_size in range(100, 500, 20):
             model, mae = fit_model(feature_train, label_train, feature_test, label_test,
                                    dtype, uniform, epochs, batch_size)
             with open(file_name, 'a') as fp:
