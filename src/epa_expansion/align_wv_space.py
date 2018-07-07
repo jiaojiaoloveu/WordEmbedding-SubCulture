@@ -2,6 +2,7 @@
 import numpy as np
 import copy
 import random
+import argparse
 from nltk.corpus import stopwords
 from keras import optimizers
 from keras.models import Sequential
@@ -89,7 +90,7 @@ def align_nn_model(source, target):
     source_mat, target_mat = get_training_dataset(source, target)
     print('align train datasize %s' % str(source_mat.shape))
     model = sgd_model()
-    model.fit(source_mat, target_mat, epochs=50, batch_size=50)
+    model.fit(source_mat, target_mat, epochs=50, batch_size=100)
     score = model.evaluate(source_mat, target_mat, batch_size=5)
     print('align train score')
     print(score)
@@ -148,6 +149,14 @@ def get_aligned_wv(source, target, tokens, method='nn'):
 
 
 if __name__ == '__main__':
+    ap = argparse.ArgumentParser("align wv space")
+    ap.add_argument('--method', type=str, required=True)
+    args = vars(ap.parse_args())
     gg_model = KeyedVectors.load_word2vec_format('../models/embedding/GoogleNews-vectors-negative300.bin', binary=True)
     gh_model = Word2Vec.load('../models/embedding/github/word2vec_sg_0_size_300_mincount_5')
-    __nn_eval(gg_model, gh_model.wv)
+    w_list = ['happy']
+    wv_dict = get_aligned_wv(gh_model, gg_model, w_list, method=args.get('method'))
+    for w in wv_dict.keys():
+        wv = wv_dict[w]
+        dis = spatial.distance.cosine(wv[0], wv[1])
+        print('%s: %s' % (w, dis))
