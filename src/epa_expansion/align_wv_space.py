@@ -37,7 +37,7 @@ def get_training_dataset(source, target):
             target_mat.append(target[word])
     source_mat = np.array(source_mat)
     target_mat = np.array(target_mat)
-    source_mat_rand, target_mat_rand = get_sample_dataset(source, target, k=5000)
+    source_mat_rand, target_mat_rand = get_sample_dataset(source, target, k=20000)
     source_mat = np.concatenate((source_mat, source_mat_rand))
     target_mat = np.concatenate((target_mat, target_mat_rand))
     print('shape training')
@@ -154,7 +154,8 @@ if __name__ == '__main__':
     args = vars(ap.parse_args())
     gg_model = KeyedVectors.load_word2vec_format('../models/embedding/GoogleNews-vectors-negative300.bin', binary=True)
     gh_model = Word2Vec.load('../models/embedding/github/word2vec_sg_0_size_300_mincount_5')
-    w_list = ['happy']
+
+    w_list = ['happy', 'sad', 'one', 'single', 'take', 'reject', 'push']
     wv_dict = get_aligned_wv(gh_model.wv, gg_model, w_list, method=args.get('method'))
     for w in wv_dict.keys():
         wv = wv_dict[w]
