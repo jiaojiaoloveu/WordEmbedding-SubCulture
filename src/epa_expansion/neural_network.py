@@ -99,10 +99,12 @@ def evaluate(model):
     uniform = args.get('uniform') == 0
     align = args.get('align')
     dic, epa = wv_map(method=align)
+    w_eval = []
     gg_eval = []
     gh_eval = []
     epa_eval = []
     for w in dic:
+        w_eval.append(w)
         gh_eval.append(dic[w][0])
         gg_eval.append(dic[w][1])
         epa_eval.append(epa[w])
@@ -116,7 +118,7 @@ def evaluate(model):
         gh_pred = __uni2norm(gh_pred)
         gg_pred = __uni2norm(gg_pred)
 
-    res = list(zip(epa_eval, gg_pred.tolist(), gh_pred.tolist()))
+    res = list(zip(w_eval, epa_eval.tolist(), gg_pred.tolist(), gh_pred.tolist()))
 
     for item in res:
         print(item)
