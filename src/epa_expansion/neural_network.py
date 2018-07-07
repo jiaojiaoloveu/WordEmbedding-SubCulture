@@ -11,6 +11,7 @@ from keras.wrappers.scikit_learn import KerasRegressor
 from sklearn.model_selection import cross_val_score, KFold
 from gen_data import wv_map, generate_data, word_dataset_base
 from sample_seeds import __uni2norm, __norm2uni
+from align_wv_space import __comparison
 
 
 def baseline_model(dtype, uniform):
@@ -72,13 +73,6 @@ def fit_model(feature_train, label_train, feature_test, label_test, dtype, unifo
         print('mae ori %s' % mae_ori)
         mae = np.concatenate(([mae], [mae_ori]))
     return model, mae
-
-
-def __comparison(arr1, arr2):
-    diff = arr1 - arr2
-    print(np.mean(diff, axis=0))
-    print(np.mean(np.abs(diff), axis=0))
-    print(np.std(diff, axis=0))
 
 
 def train():

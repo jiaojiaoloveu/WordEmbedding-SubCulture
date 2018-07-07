@@ -11,6 +11,13 @@ from gensim.models.word2vec import Word2Vec
 from scipy import spatial
 
 
+def __comparison(arr1, arr2):
+    diff = arr1 - arr2
+    print(np.mean(diff, axis=0))
+    print(np.mean(np.abs(diff), axis=0))
+    print(np.std(diff, axis=0))
+
+
 def get_anchor_words():
     anchor = []
     stop_words = stopwords.words('english')
@@ -74,6 +81,7 @@ def __nn_eval(source, target, model):
     score = model.evaluate(source_eval, target_eval, batch_size=5)
     print(score)
     source_pred = model.predict(source_eval)
+    print('distance')
     cal_cosine_dis(source_pred, target_eval)
 
 
@@ -81,7 +89,7 @@ def align_nn_model(source, target):
     source_mat, target_mat = get_training_dataset(source, target)
     print('align train datasize %s' % str(source_mat.shape))
     model = sgd_model()
-    model.fit(source_mat, target_mat, epochs=100, batch_size=5)
+    model.fit(source_mat, target_mat, epochs=50, batch_size=50)
     score = model.evaluate(source_mat, target_mat, batch_size=5)
     print('align train score')
     print(score)
