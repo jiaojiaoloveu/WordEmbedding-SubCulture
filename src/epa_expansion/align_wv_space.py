@@ -29,7 +29,7 @@ def get_training_dataset(source, target):
             target_mat.append(target[word])
     source_mat = np.array(source_mat)
     target_mat = np.array(target_mat)
-    source_mat_rand, target_mat_rand = get_sample_dataset(source, target)
+    source_mat_rand, target_mat_rand = get_sample_dataset(source, target, k=5000)
     source_mat = np.concatenate((source_mat, source_mat_rand))
     target_mat = np.concatenate((target_mat, target_mat_rand))
     print('shape training')
