@@ -13,9 +13,19 @@ github_model_path = '../models/embedding/github/fasttext_sg_0_size_300_mincount_
 def get_word_vector(tokens):
     wv_model = KeyedVectors.load_word2vec_format(google_news_model_path, binary=True)
     wv = list()
+    counter = 0
     for line in tokens:
-        wv.append([wv_model[w] if w in wv_model.vocab.keys() else print(w) for w in line])
+        wv_svo = list()
+        for w in line:
+            if w in wv_model.vocab.keys():
+                wv_svo.append(wv_model[w])
+            else:
+                counter += 1
+                wv.append(np.zeros(300))
+        wv.append(wv_svo)
+        # wv.append([wv_model[w] if w in wv_model.vocab.keys() else print(w) for w in line])
     del wv_model
+    print('%s words not in wv space' % counter)
     return wv
 
 
