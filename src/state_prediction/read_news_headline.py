@@ -14,7 +14,7 @@ def get_word_vector(tokens):
     wv_model = KeyedVectors.load_word2vec_format(google_news_model_path, binary=True)
     wv = list()
     for line in tokens:
-        wv.append([wv_model[w] if w in wv_model.vocab().keys() else print(w) for w in line])
+        wv.append([wv_model[w] if w in wv_model.vocab.keys() else print(w) for w in line])
     del wv_model
     return wv
 
@@ -38,6 +38,7 @@ def read_epa():
             object_epa = [row['O_e'], row['O_p'], row['O_a']]
             epa.append([event_epa, subject_epa, verb_epa, object_epa])
     svo_wv = np.array(get_word_vector(svo))
+    svo_mask = np.all(np.all(svo_wv, axis=2), axis=1)
     svo, epa = np.array(svo), np.array(epa)
     print('svo shape %s' % str(svo.shape))
     print('svo wv shape %s' % str(svo_wv.shape))
