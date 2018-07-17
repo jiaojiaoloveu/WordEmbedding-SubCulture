@@ -14,7 +14,7 @@ def get_word_vector(tokens):
     wv_model = KeyedVectors.load_word2vec_format(google_news_model_path, binary=True)
     wv = list()
     for line in tokens:
-        wv.append([wv_model[w] for w in line])
+        wv.append([wv_model[w] if w in wv_model.vocab() else print(w) for w in line])
     return wv
 
 
