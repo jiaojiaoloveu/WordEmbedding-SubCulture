@@ -4,8 +4,8 @@ from gensim.models import KeyedVectors
 from gensim.models.word2vec import Word2Vec
 
 
-data_epa_path = '../../data/NH_dataset/NewsHeadlines_EPA.csv'
-data_valence_path = '../../data/NH_dataset/NewsHeadlines_Valence.csv'
+data_epa_path = '../data/NH_dataset/NewsHeadlines_EPA.csv'
+data_valence_path = '../data/NH_dataset/NewsHeadlines_Valence.csv'
 google_news_model_path = '../models/embedding/GoogleNews-vectors-negative300.bin'
 github_model_path = '../models/embedding/github/fasttext_sg_0_size_300_mincount_5'
 
