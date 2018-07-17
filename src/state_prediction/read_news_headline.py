@@ -21,7 +21,7 @@ def get_word_vector(tokens):
                 wv_svo.append(wv_model[w])
             else:
                 counter += 1
-                wv.append(np.zeros(300))
+                wv_svo.append(np.zeros(300))
         wv.append(wv_svo)
         # wv.append([wv_model[w] if w in wv_model.vocab.keys() else print(w) for w in line])
     del wv_model
