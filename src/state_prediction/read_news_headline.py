@@ -13,19 +13,16 @@ github_model_path = '../models/embedding/github/fasttext_sg_0_size_300_mincount_
 def get_word_vector(tokens):
     wv_model = KeyedVectors.load_word2vec_format(google_news_model_path, binary=True)
     wv = list()
-    counter = 0
     for line in tokens:
         wv_svo = list()
         for w in line:
             if w in wv_model.vocab.keys():
                 wv_svo.append(wv_model[w])
             else:
-                counter += 1
                 wv_svo.append(np.zeros(300))
         wv.append(wv_svo)
         # wv.append([wv_model[w] if w in wv_model.vocab.keys() else print(w) for w in line])
     del wv_model
-    print('%s words not in wv space' % counter)
     return wv
 
 
@@ -49,10 +46,9 @@ def read_epa():
             epa.append([event_epa, subject_epa, verb_epa, object_epa])
     svo_wv = np.array(get_word_vector(svo))
     svo_mask = np.all(np.all(svo_wv, axis=2), axis=1)
-    svo, epa = np.array(svo), np.array(epa)
+    svo_wv = svo_wv[svo_mask]
+    svo, epa = np.array(svo)[svo_mask], np.array(epa)[svo_mask]
     print('svo shape %s' % str(svo.shape))
-    print('svo wv shape %s' % str(svo_wv.shape))
-    print('svo mask shape %s' % str(svo_mask.shape))
     print('svo count %s' % str(np.sum(svo_mask)))
     print('epa shape %s' % str(epa.shape))
     return svo, svo_wv, epa
