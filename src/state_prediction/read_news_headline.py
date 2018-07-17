@@ -47,7 +47,7 @@ def read_epa():
     svo_wv = np.array(get_word_vector(svo))
     svo_mask = np.all(np.all(svo_wv, axis=2), axis=1)
     svo_wv = svo_wv[svo_mask]
-    svo, epa = np.array(svo)[svo_mask], np.array(epa)[svo_mask]
+    svo, epa = np.array(svo)[svo_mask], np.array(epa)[svo_mask].astype(np.float)
     print('svo shape %s' % str(svo.shape))
     print('svo wv shape %s' % str(svo_wv.shape))
     print('epa shape %s' % str(epa.shape))
