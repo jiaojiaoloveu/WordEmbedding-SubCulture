@@ -49,7 +49,7 @@ def read_epa():
     svo_wv = svo_wv[svo_mask]
     svo, epa = np.array(svo)[svo_mask], np.array(epa)[svo_mask]
     print('svo shape %s' % str(svo.shape))
-    print('svo count %s' % str(np.sum(svo_mask)))
+    print('svo wv shape %s' % str(svo_wv.shape))
     print('epa shape %s' % str(epa.shape))
     return svo, svo_wv, epa
 
