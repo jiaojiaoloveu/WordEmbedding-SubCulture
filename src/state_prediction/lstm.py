@@ -6,9 +6,7 @@ import numpy as np
 
 def baseline_model():
     model = Sequential()
-    model.add(LSTM(300, dropout=0.2, recurrent_dropout=0.2, input_shape=(3, 300)))
-    model.add(LSTM(300))
-    model.add(LSTM(3, return_sequences=True))
+    model.add(LSTM(3, dropout=0.2, recurrent_dropout=0.2, input_shape=(3, 300)))
     model.compile(loss='mean_absolute_error', optimizer='adam', metrics=['accuracy'])
     model.summary()
     return model
