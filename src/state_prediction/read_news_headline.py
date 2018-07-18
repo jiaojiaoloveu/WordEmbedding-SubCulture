@@ -63,7 +63,7 @@ def read_valence():
         for row in reader:
             headline.append(row['NewsHeadline'])
             valence.append(row['Valence'])
-    headline, valence = np.array(headline), np.array(valence)
+    headline, valence = np.array(headline), np.array(valence).astype(np.float)
     print('headline shape %s' % str(headline.shape))
     print('valence shape %s' % str(valence.shape))
     return headline, valence
@@ -71,4 +71,4 @@ def read_valence():
 
 if __name__ == '__main__':
     read_epa()
-    read_valence()
+    # read_valence()

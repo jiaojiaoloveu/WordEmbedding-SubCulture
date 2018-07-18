@@ -17,8 +17,14 @@ def train():
     print('svo shape %s' % str(svo.shape))
     print('svo wv shape %s' % str(svo_wv.shape))
     print('epa shape %s' % str(epa.shape))
-    model = baseline_model()
-    model.fit(svo_wv, epa[:, 0, :], epochs=10, batch_size=50)
+
+    for axis in range(0, 4):
+        model = baseline_model()
+        label = epa[:,axis,:]
+        model.fit(svo_wv, label, epochs=10, batch_size=50)
+        pred = model.predict(svo_wv)
+        mae = np.mean(np.abs(pred - label), axis=0)
+        print('axis %s, mae %s' % (axis, mae))
 
 
 if __name__ == '__main__':
