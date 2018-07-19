@@ -38,10 +38,9 @@ def get_tokens():
     return tokens
 
 
-def wv_map(method='nn'):
+def wv_map(method='nn', culture='github'):
     gg_model = load_google_word_vectors('../models/embedding/GoogleNews-vectors-negative300.bin')
-    # gh_model = load_github_word_vectors('../models/embedding/github/word2vec_sg_0_size_300_mincount_5')
-    gh_model = load_github_word_vectors('../models/embedding/github/fasttext_sg_0_size_300_mincount_5')
+    gh_model = load_github_word_vectors('../models/embedding/%s/fasttext_sg_0_size_300_mincount_5' % culture)
     print('align wv space')
     # tokens = get_tokens()
     tokens = list(set(gg_model.vocab.keys()) & set(gh_model.wv.vocab.keys()))

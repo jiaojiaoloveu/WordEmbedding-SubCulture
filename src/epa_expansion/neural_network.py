@@ -94,13 +94,15 @@ def train():
     #     ]
     #     fp.writelines('%s\n' % line for line in out)
 
-    evaluate(model)
+    evaluate(model, 'github')
+    evaluate(model, 'twitter')
 
 
-def evaluate(model):
+def evaluate(model, culture):
     uniform = args.get('uniform') == 0
     align = args.get('align')
-    dic, epa = wv_map(method=align)
+    dic, epa = wv_map(method=align, culture=culture)
+    print('evaluate tokens size on two corpus %s' % len(dic.keys()))
     w_eval = []
     gg_eval = []
     gh_eval = []
@@ -120,18 +122,19 @@ def evaluate(model):
         gh_pred = __uni2norm(gh_pred)
         gg_pred = __uni2norm(gg_pred)
 
-
     print('nn eval epa')
 
     epa_mask = np.any(epa_eval, axis=1)
+    print('number of words in epa datasets')
+    print(np.sum(epa_mask))
 
-    print('diff gg && gh')
+    print('diff gg && %s' % culture)
     __comparison(gg_pred[epa_mask], gh_pred[epa_mask])
 
     print('diff gg && epa')
     __comparison(gg_pred[epa_mask], epa_eval[epa_mask])
 
-    print('diff gh && epa')
+    print('diff %s && epa' % culture)
     __comparison(gh_pred[epa_mask], epa_eval[epa_mask])
 
     print('google')
@@ -139,21 +142,22 @@ def evaluate(model):
     print(np.mean(np.abs(gg_pred), axis=0))
     print(np.std(gg_pred, axis=0))
 
-    print('github')
+    print(culture)
     print(np.mean(gh_pred, axis=0))
     print(np.mean(np.abs(gh_pred), axis=0))
     print(np.std(gh_pred, axis=0))
 
     with open(os.path.join(word_dataset_base, 'nn_result_%s' % dtype), 'w') as fp:
         res = list(zip(w_eval, epa_eval.tolist(), gg_pred.tolist(), gh_pred.tolist()))
+        res = dict((line[0], line[1:]) for line in res)
         json.dump(res, fp)
 
-    with open(os.path.join(word_dataset_base, 'nn_result_%s_github' % dtype), 'w') as fp:
-        res = list(zip(w_eval, gh_pred.tolist()))
+    with open(os.path.join(word_dataset_base, 'nn_result_%s_%s' % (dtype, culture)), 'w') as fp:
+        res = dict(list(zip(w_eval, gh_pred.tolist())))
         json.dump(res, fp)
 
     with open(os.path.join(word_dataset_base, 'nn_result_%s_google' % dtype), 'w') as fp:
-        res = list(zip(w_eval, gg_pred.tolist()))
+        res = dict(list(zip(w_eval, gg_pred.tolist())))
         json.dump(res, fp)
 
 
