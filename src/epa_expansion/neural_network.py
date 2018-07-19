@@ -66,6 +66,11 @@ def fit_model(feature_train, label_train, feature_test, label_test, dtype, unifo
     label_pred = model.predict(feature_test)
     mae = np.mean(np.abs(label_pred - label_test), axis=0)
     print('mae %s' % mae)
+    print('distribution on random set')
+    print(np.mean(label_pred, axis=0))
+    print(np.mean(np.abs(label_pred), axis=0))
+    print(np.std(label_pred, axis=0))
+
     if uniform:
         label_test = __uni2norm(label_test)
         label_pred = __uni2norm(label_pred)
@@ -166,9 +171,10 @@ def evaluate(model, culture):
 
 def main():
     model = train()
-    for culture in ['github', 'twitter']:
-        s_dic = evaluate(model, culture)
-        expansion(model, s_dic, culture)
+
+    # for culture in ['github', 'twitter']:
+    #     s_dic = evaluate(model, culture)
+    #     expansion(model, s_dic, culture)
 
 
 if __name__ == '__main__':
