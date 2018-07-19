@@ -111,7 +111,7 @@ def read_bayesact_epa():
                 reader = csv.reader(csvfile)
                 for row in reader:
                     word = row[0]
-                    epa = {'E': row[1], 'P': row[2], 'A': row[3]}
+                    epa = {'E': float(row[1]), 'P': float(row[2]), 'A': float(row[3])}
                     vocabulary_epa[word] = epa
     return vocabulary_epa
 
