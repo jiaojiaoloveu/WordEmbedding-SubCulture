@@ -147,16 +147,16 @@ def evaluate(model, culture):
     print(np.mean(np.abs(gh_pred), axis=0))
     print(np.std(gh_pred, axis=0))
 
-    with open(os.path.join(word_dataset_base, 'nn_result_%s' % dtype), 'w') as fp:
+    with open(os.path.join(word_dataset_base, 'nn_result_%s_%s_all' % (dtype, culture)), 'w') as fp:
         res = list(zip(w_eval, epa_eval.tolist(), gg_pred.tolist(), gh_pred.tolist()))
         res = dict((line[0], line[1:]) for line in res)
         json.dump(res, fp)
 
-    with open(os.path.join(word_dataset_base, 'nn_result_%s_%s' % (dtype, culture)), 'w') as fp:
+    with open(os.path.join(word_dataset_base, 'nn_result_%s_%s_%s' % (dtype, culture, culture)), 'w') as fp:
         res = dict(list(zip(w_eval, gh_pred.tolist())))
         json.dump(res, fp)
 
-    with open(os.path.join(word_dataset_base, 'nn_result_%s_google' % dtype), 'w') as fp:
+    with open(os.path.join(word_dataset_base, 'nn_result_%s_%s_google' % (dtype, culture)), 'w') as fp:
         res = dict(list(zip(w_eval, gg_pred.tolist())))
         json.dump(res, fp)
 
