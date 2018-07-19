@@ -24,10 +24,6 @@ def load_github_word_vectors(model_path):
 
 
 def get_tokens():
-    tokens = []
-    # with open(os.path.join(word_dataset_base, 'wikitext-wordlist'), 'r') as fp:
-    #     tokens = json.load(fp)
-    # print('comparing %s' % len(tokens))
     tokens = ['good', 'nice', 'excellent', 'positive', 'warm', 'correct', 'superior',
               'bad', 'awful', 'nasty', 'negative', 'cold', 'wrong', 'inferior',
               'powerful', 'strong', 'potent', 'dominant', 'big', 'forceful', 'hard',

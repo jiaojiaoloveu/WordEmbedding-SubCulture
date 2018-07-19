@@ -90,7 +90,7 @@ def align_nn_model(source, target):
     source_mat, target_mat = get_training_dataset(source, target)
     print('align train datasize %s' % str(source_mat.shape))
     model = sgd_model()
-    model.fit(source_mat, target_mat, epochs=50, batch_size=100)
+    model.fit(source_mat, target_mat, epochs=10, batch_size=100)
     score = model.evaluate(source_mat, target_mat, batch_size=5)
     print('align train score')
     print(score)
