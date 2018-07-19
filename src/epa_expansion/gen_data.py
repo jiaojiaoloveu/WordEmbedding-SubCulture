@@ -1,5 +1,5 @@
 from align_wv_space import get_aligned_wv
-from sample_seeds import read_warriner_ratings, csv_path
+from sample_seeds import read_warriner_ratings, read_bayesact_epa
 from gensim.models import KeyedVectors
 from gensim.models.word2vec import Word2Vec
 from sample_seeds import __norm2uni
@@ -78,7 +78,8 @@ def load_test():
 
 
 def load_all():
-    return read_warriner_ratings(csv_path)
+    # return read_warriner_ratings(warinner_csv_path)
+    return read_bayesact_epa()
 
 
 def get_wv_space():

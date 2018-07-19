@@ -1,12 +1,15 @@
 import csv
+import json
 import random
+import os
 import numpy as np
 from scipy import special
 from labels import WarrinerColumn
 from labels import LabelSpace
 
 
-csv_path = '../data/epa/Ratings_Warriner_et_al.csv'
+bayesact_dat_folder = '../data/epa/bayesact'
+warinner_csv_path = '../data/epa/Ratings_Warriner_et_al.csv'
 
 label_mean = np.array([0.19571685413316248, -0.6727038433386933, 0.5452512966060962])
 label_std = np.array([1.5079544406893441, 1.2448124114055585, 1.2972247817961575])
@@ -100,7 +103,20 @@ def __uni2norm(x, mu=label_mean, sigma=label_std):
     return y * sigma + mu
 
 
-def read_warriner_ratings(path):
+def read_bayesact_epa():
+    vocabulary_epa = {}
+    for (dirpath, dirnames, filenames) in os.walk(bayesact_dat_folder):
+        for names in filenames:
+            with open(os.path.join(dirpath, names)) as csvfile:
+                reader = csv.reader(csvfile)
+                for row in reader:
+                    word = row[0]
+                    epa = {'E': row[1], 'P': row[2], 'A': row[3]}
+                    vocabulary_epa[word] = epa
+    return vocabulary_epa
+
+
+def read_warriner_ratings():
     # read as vad and scale to epa
     # return as {"word": {'E': 0, 'P': 0, 'A':0}}
     vocabulary_vad = {}
@@ -109,7 +125,7 @@ def read_warriner_ratings(path):
         LabelSpace.A: WarrinerColumn.get_min_max_dic(),
         LabelSpace.D: WarrinerColumn.get_min_max_dic()
     }
-    with open(path) as csvfile:
+    with open(warinner_csv_path) as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             word = row[WarrinerColumn.Word]
@@ -131,15 +147,20 @@ def read_warriner_ratings(path):
 
 def get_rand_seeds(seed_size=100, eval_size=500, threshold=2.0):
     # return (dic, dic)
-    voc = read_warriner_ratings(csv_path)
+    voc = read_warriner_ratings()
     return __get_rand_seeds(voc, seed_size, eval_size, threshold)
 
 
 def get_fixed_seeds(eval_size=500):
-    voc = read_warriner_ratings(csv_path)
+    voc = read_warriner_ratings()
     return __get_fixed_seeds(voc, eval_size)
 
 
 if __name__ == '__main__':
-    get_rand_seeds()
+    # get_rand_seeds()
     # get_fixed_seeds()
+    # res = read_warriner_ratings(warinner_csv_path)
+    # new_csv_path = '../data/epa/Ratings_Warriner_et_al_epa'
+    # with open(new_csv_path, 'w') as fp:
+    #     json.dump(res, fp)
+    print(len(read_bayesact_epa().keys()))
