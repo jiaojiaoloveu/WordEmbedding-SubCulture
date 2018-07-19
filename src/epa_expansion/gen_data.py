@@ -43,8 +43,8 @@ def wv_map(method, culture):
     gh_model = load_github_word_vectors('../models/embedding/%s/fasttext_sg_0_size_300_mincount_5' % culture)
     print('align wv space')
     tokens = get_tokens()
-    # tokens = list(set(gg_model.vocab.keys()) & set(gh_model.wv.vocab.keys()))
-    dic = get_aligned_wv(gh_model.wv, gg_model, tokens, method)
+    # pred_tokens = list(set(gg_model.vocab.keys()) & set(gh_model.wv.vocab.keys()))
+    dic, s_dic = get_aligned_wv(gh_model.wv, gg_model, tokens, method)
     # gh_model, gg_model = align_models(gh_model, gg_model)
     # print('align done')
     # for w in get_tokens():
@@ -55,7 +55,7 @@ def wv_map(method, culture):
 
     # dic: word -> [wv1, wv2]
 
-    return dic, wv_map_epa(list(dic.keys()))
+    return dic, s_dic, wv_map_epa(list(dic.keys()))
 
 
 def wv_map_epa(tokens):
@@ -153,4 +153,4 @@ if __name__ == '__main__':
     ap = argparse.ArgumentParser('wv map')
     ap.add_argument('--method', type=str, required=True)
     args = vars(ap.parse_args())
-    wv_map(args.get('method'))
+    wv_map(args.get('method'), culture='github')

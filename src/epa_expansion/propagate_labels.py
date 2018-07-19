@@ -92,7 +92,7 @@ def reload_data():
 def get_comparing_tokens():
     # dic: str -> np.ndarray
     github_voc = {}
-    token_dic = wv_map()
+    token_dic, _, _ = wv_map(method='nn', culture='github')
     for word in token_dic.keys():
         github_voc[word] = token_dic[word][0]
     return github_voc

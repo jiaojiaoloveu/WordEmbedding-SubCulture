@@ -10,7 +10,7 @@ import numpy as np
 import argparse
 
 
-def train(wv):
+def train(wv, s_dic, wv_map_epa):
     generate = args.get('generate')
     uniform = args.get('uniform') == 0
     feature_train, label_train, feature_test, label_test = generate_data(generate=generate)
@@ -72,4 +72,4 @@ if __name__ == '__main__':
     ap.add_argument('--model', type=str, required=True)
     ap.add_argument('--uniform', type=int, required=True)
     args = vars(ap.parse_args())
-    train(wv_map())
+    train(wv_map(method='nn', culture='github'))

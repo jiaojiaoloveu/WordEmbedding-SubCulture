@@ -94,14 +94,23 @@ def train():
     #     ]
     #     fp.writelines('%s\n' % line for line in out)
 
-    evaluate(model, 'github')
-    evaluate(model, 'twitter')
+    return model
+
+
+def expansion(model, dic, culture):
+    tokens = dic.keys()
+    token_wv = np.array([dic[w] for w in tokens])
+    token_epa = model.predict(token_wv, batch_size=5)
+
+    with open(os.path.join(word_dataset_base, 'nn_result_%s_all' % culture), 'w') as fp:
+        res = dict(list(zip(tokens, token_epa.tolist())))
+        json.dump(res, fp)
 
 
 def evaluate(model, culture):
     uniform = args.get('uniform') == 0
     align = args.get('align')
-    dic, epa = wv_map(method=align, culture=culture)
+    dic, s_dic, epa = wv_map(method=align, culture=culture)
     print('evaluate tokens size on two corpus %s' % len(dic.keys()))
     w_eval = []
     gg_eval = []
@@ -147,18 +156,19 @@ def evaluate(model, culture):
     print(np.mean(np.abs(gh_pred), axis=0))
     print(np.std(gh_pred, axis=0))
 
-    with open(os.path.join(word_dataset_base, 'nn_result_%s_%s_all' % (dtype, culture)), 'w') as fp:
+    with open(os.path.join(word_dataset_base, 'nn_result_%s_google_%s' % (dtype, culture)), 'w') as fp:
         res = list(zip(w_eval, epa_eval.tolist(), gg_pred.tolist(), gh_pred.tolist()))
         res = dict((line[0], line[1:]) for line in res)
         json.dump(res, fp)
 
-    with open(os.path.join(word_dataset_base, 'nn_result_%s_%s_%s' % (dtype, culture, culture)), 'w') as fp:
-        res = dict(list(zip(w_eval, gh_pred.tolist())))
-        json.dump(res, fp)
+    return s_dic
 
-    with open(os.path.join(word_dataset_base, 'nn_result_%s_%s_google' % (dtype, culture)), 'w') as fp:
-        res = dict(list(zip(w_eval, gg_pred.tolist())))
-        json.dump(res, fp)
+
+def main():
+    model = train()
+    for culture in ['github', 'twitter']:
+        s_dic = evaluate(model, culture)
+        expansion(model, s_dic, culture)
 
 
 if __name__ == '__main__':
@@ -169,4 +179,5 @@ if __name__ == '__main__':
     ap.add_argument('--align', type=str, required=True)
     args = vars(ap.parse_args())
     dtype = args.get('model')
-    train()
+
+    main()

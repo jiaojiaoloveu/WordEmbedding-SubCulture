@@ -123,6 +123,7 @@ def align_svd_model(source, target):
 
 def get_aligned_wv(source, target, tokens, method='nn'):
     aligned_wv = {}
+    aligned_source_wv = {}
     print('method type %s' % method)
     if method == 'nn':
         model = align_nn_model(source, target)
@@ -131,14 +132,20 @@ def get_aligned_wv(source, target, tokens, method='nn'):
                 s_wv = model.predict(np.reshape(source[word], (1, 300)))[0]
                 t_wv = target[word]
                 aligned_wv[word] = np.array([s_wv, t_wv])
+        for word in source.vocab.keys():
+            s_wv = model.predict(np.reshape(source[word], (1, 300)))[0]
+            aligned_source_wv[word] = s_wv
     elif method == 'svd':
-        w = align_svd_model(source, target)
+        w_mat = align_svd_model(source, target)
         for word in tokens:
             if word in source.vocab.keys() and word in target.vocab.keys():
-                s_wv = np.matmul(source[word], w)
+                s_wv = np.matmul(source[word], w_mat)
                 t_wv = target[word]
                 aligned_wv[word] = np.array([s_wv, t_wv])
-    return aligned_wv
+        for word in source.vocab.keys():
+            s_wv = np.matmul(source[word], w_mat)
+            aligned_source_wv[word] = s_wv
+    return aligned_wv, aligned_source_wv
 
 
 # def align_models(source, target):
