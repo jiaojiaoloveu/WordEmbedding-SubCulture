@@ -44,7 +44,7 @@ def wv_map(method='nn'):
     gh_model = load_github_word_vectors('../models/embedding/github/fasttext_sg_0_size_300_mincount_5')
     print('align wv space')
     # tokens = get_tokens()
-    tokens = list(set(gg_model.vocab.keys()) & set(gh_model.vocab.keys()))
+    tokens = list(set(gg_model.vocab.keys()) & set(gh_model.wv.vocab.keys()))
     dic = get_aligned_wv(gh_model.wv, gg_model, tokens, method)
     # gh_model, gg_model = align_models(gh_model, gg_model)
     # print('align done')
