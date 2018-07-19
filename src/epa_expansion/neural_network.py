@@ -9,7 +9,7 @@ from keras.layers import Dense, Conv1D, Activation, Dropout, Embedding
 from keras.layers import GlobalMaxPooling1D, MaxPooling1D
 from keras.wrappers.scikit_learn import KerasRegressor
 from sklearn.model_selection import cross_val_score, KFold
-from gen_data import wv_map, generate_data, word_dataset_base
+from gen_data import wv_map, generate_data, word_dataset_base, get_tokens, get_rand_tokens, get_token_wv
 from sample_seeds import __uni2norm, __norm2uni
 from align_wv_space import __comparison
 
@@ -66,10 +66,6 @@ def fit_model(feature_train, label_train, feature_test, label_test, dtype, unifo
     label_pred = model.predict(feature_test)
     mae = np.mean(np.abs(label_pred - label_test), axis=0)
     print('mae %s' % mae)
-    print('distribution on random set')
-    print(np.mean(label_pred, axis=0))
-    print(np.mean(np.abs(label_pred), axis=0))
-    print(np.std(label_pred, axis=0))
 
     if uniform:
         label_test = __uni2norm(label_test)
@@ -169,9 +165,27 @@ def evaluate(model, culture):
     return s_dic
 
 
+def validate(model):
+    extreme_tokens_wv = get_token_wv(get_tokens())
+    neutral_tokens = get_token_wv(get_rand_tokens())
+    extreme_pred = model.predict(extreme_tokens_wv, batch_size=5)
+    neutral_pred = model.predict(neutral_tokens, batch_size=5)
+    print('extreme')
+    print(np.mean(extreme_pred, axis=0))
+    print(np.mean(np.abs(extreme_pred), axis=0))
+    print(np.std(extreme_pred, axis=0))
+
+    print('neutral')
+    print(np.mean(neutral_pred, axis=0))
+    print(np.mean(np.abs(neutral_pred), axis=0))
+    print(np.std(neutral_pred, axis=0))
+
+
+
 def main():
     model = train()
 
+    validate(model)
     # for culture in ['github', 'twitter']:
     #     s_dic = evaluate(model, culture)
     #     expansion(model, s_dic, culture)

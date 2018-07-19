@@ -6,6 +6,7 @@ from sample_seeds import __norm2uni
 import numpy as np
 import os
 import json
+import random
 import argparse
 
 
@@ -32,6 +33,22 @@ def get_tokens():
               'quiet', 'clam', 'inactive', 'slow', 'stagnant', 'inoperative', 'passive'
               ]
     return tokens
+
+
+def get_rand_tokens():
+    gg_model = load_google_word_vectors('../models/embedding/GoogleNews-vectors-negative300.bin')
+    tokens = list(random.sample(gg_model.vocab.keys(), 50))
+    del gg_model
+    return tokens
+
+
+def get_token_wv(tokens):
+    gg_model = load_google_word_vectors('../models/embedding/GoogleNews-vectors-negative300.bin')
+    wv = []
+    for token in tokens:
+        if token in gg_model.vocab.keys():
+            wv.append(gg_model[token])
+    return np.array(wv)
 
 
 def wv_map(method, culture):
@@ -82,12 +99,6 @@ def load_all():
     return read_bayesact_epa()
 
 
-def get_wv_space():
-    google_news_model_path = '../models/embedding/GoogleNews-vectors-negative300.bin'
-    model = load_google_word_vectors(google_news_model_path)
-    return model
-
-
 def load_feature_label(suffix):
     feature = np.load(os.path.join(word_dataset_base, 'feature_' + suffix + '.npy'))
     label = np.load(os.path.join(word_dataset_base, 'label_' + suffix + '.npy'))
@@ -101,7 +112,7 @@ def __epa2list(epa):
 def preprocess_data(word_epa_dataset, suffix):
     wv_feature = []
     epa_label = []
-    google_model = get_wv_space()
+    google_model = load_google_word_vectors('../models/embedding/GoogleNews-vectors-negative300.bin')
     google_vocab = set(google_model.vocab.keys())
 
     for word in word_epa_dataset.keys():
