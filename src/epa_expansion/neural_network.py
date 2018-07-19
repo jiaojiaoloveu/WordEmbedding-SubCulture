@@ -77,21 +77,23 @@ def fit_model(feature_train, label_train, feature_test, label_test, dtype, unifo
 
 def train():
     generate = args.get('generate')
-    dtype = args.get('model')
     uniform = args.get('uniform') == 0
     feature_train, label_train, feature_test, label_test = generate_data(generate)
-    file_name = os.path.join(word_dataset_base, 'parameter_tuning_model%s_uniform%s_%s'
-                             % (dtype, uniform, int(time.time())))
     epochs = 10
     batch_size = 100
     model, mae = fit_model(feature_train, label_train, feature_test, label_test,
                            dtype, uniform, epochs, batch_size)
-    with open(file_name, 'a') as fp:
-        out = [
-            'epochs %s batch %s' % (epochs, batch_size),
-            'mae %s' % mae,
-        ]
-        fp.writelines('%s\n' % line for line in out)
+
+    # file_name = os.path.join(word_dataset_base, 'parameter_tuning_model%s_uniform%s_%s'
+    #                         % (dtype, uniform, int(time.time())))
+    #
+    # with open(file_name, 'a') as fp:
+    #     out = [
+    #         'epochs %s batch %s' % (epochs, batch_size),
+    #         'mae %s' % mae,
+    #     ]
+    #     fp.writelines('%s\n' % line for line in out)
+
     evaluate(model)
 
 
@@ -118,10 +120,6 @@ def evaluate(model):
         gh_pred = __uni2norm(gh_pred)
         gg_pred = __uni2norm(gg_pred)
 
-    res = list(zip(w_eval, epa_eval.tolist(), gg_pred.tolist(), gh_pred.tolist()))
-
-    for item in res:
-        print(item)
 
     print('nn eval epa')
 
@@ -146,6 +144,18 @@ def evaluate(model):
     print(np.mean(np.abs(gh_pred), axis=0))
     print(np.std(gh_pred, axis=0))
 
+    with open(os.path.join(word_dataset_base, 'nn_result_%s' % dtype), 'w') as fp:
+        res = list(zip(w_eval, epa_eval.tolist(), gg_pred.tolist(), gh_pred.tolist()))
+        json.dump(res, fp)
+
+    with open(os.path.join(word_dataset_base, 'nn_result_%s_github' % dtype), 'w') as fp:
+        res = list(zip(w_eval, gh_pred.tolist()))
+        json.dump(res, fp)
+
+    with open(os.path.join(word_dataset_base, 'nn_result_%s_google' % dtype), 'w') as fp:
+        res = list(zip(w_eval, gg_pred.tolist()))
+        json.dump(res, fp)
+
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser('keras deep learning method')
@@ -154,4 +164,5 @@ if __name__ == '__main__':
     ap.add_argument('--uniform', type=int, required=True)
     ap.add_argument('--align', type=str, required=True)
     args = vars(ap.parse_args())
+    dtype = args.get('model')
     train()
