@@ -167,9 +167,9 @@ def evaluate(model, culture):
 
 def validate(model):
     extreme_tokens_wv = get_token_wv(get_tokens())
-    neutral_tokens = get_token_wv(get_rand_tokens())
+    neutral_tokens_wv = get_token_wv(get_rand_tokens())
     extreme_pred = model.predict(extreme_tokens_wv, batch_size=5)
-    neutral_pred = model.predict(neutral_tokens, batch_size=5)
+    neutral_pred = model.predict(neutral_tokens_wv, batch_size=5)
     print('extreme')
     print(np.mean(extreme_pred, axis=0))
     print(np.mean(np.abs(extreme_pred), axis=0))
@@ -185,10 +185,11 @@ def validate(model):
 def main():
     model = train()
 
-    validate(model)
-    # for culture in ['github', 'twitter']:
-    #     s_dic = evaluate(model, culture)
-    #     expansion(model, s_dic, culture)
+    # validate(model)
+
+    for culture in ['github', 'twitter']:
+        s_dic = evaluate(model, culture)
+        # expansion(model, s_dic, culture)
 
 
 if __name__ == '__main__':

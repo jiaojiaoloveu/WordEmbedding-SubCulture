@@ -163,7 +163,7 @@ if __name__ == '__main__':
     gh_model = Word2Vec.load('../models/embedding/github/word2vec_sg_0_size_300_mincount_5')
 
     w_list = ['happy', 'sad', 'one', 'single', 'take', 'reject', 'push']
-    wv_dict = get_aligned_wv(gh_model.wv, gg_model, w_list, method=args.get('method'))
+    wv_dict, _ = get_aligned_wv(gh_model.wv, gg_model, w_list, method=args.get('method'))
     for w in wv_dict.keys():
         wv = wv_dict[w]
         dis = spatial.distance.cosine(wv[0], wv[1])
