@@ -50,6 +50,7 @@ def get_token_wv(tokens):
     for token in tokens:
         if token in gg_model.vocab.keys():
             wv.append(gg_model[token])
+    del gg_model
     return np.array(wv)
 
 
@@ -70,6 +71,7 @@ def wv_map(method, culture):
 
     # dic: word -> [wv1, wv2]
 
+    del gg_model, gh_model
     return dic, s_dic, wv_map_epa(list(dic.keys()))
 
 
@@ -128,6 +130,7 @@ def preprocess_data(word_epa_dataset, suffix):
     print(epa_label.shape)
     np.save(os.path.join(word_dataset_base, 'feature_' + suffix), wv_feature)
     np.save(os.path.join(word_dataset_base, 'label_' + suffix), epa_label)
+    del google_model
     return wv_feature, epa_label
 
 

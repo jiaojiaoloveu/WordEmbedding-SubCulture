@@ -44,6 +44,7 @@ def baseline_model(dtype, uniform):
         model.add(Dense(3))
 
     model.compile(loss='mean_absolute_error', optimizer='adam', metrics=['accuracy'])
+    model.summary()
     return model
 
 
@@ -200,7 +201,7 @@ def main():
 
 def main2():
     model = train()
-    validate(model)
+    # validate(model)
 
 
 if __name__ == '__main__':
