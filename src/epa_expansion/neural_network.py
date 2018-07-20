@@ -55,6 +55,7 @@ def kfold_test(feature, label, epoch, batch_size):
     estimator = KerasRegressor(build_fn=baseline_model, epochs=epoch, batch_size=batch_size, verbose=0)
     kfold = KFold(n_splits=5, random_state=seed)
     results = cross_val_score(estimator, feature, label, cv=kfold)
+    print(results)
     print("Results: %.2f (%.2f) MSE" % (results.mean(), results.std()))
     estimator.fit(feature, label)
     return estimator
@@ -219,4 +220,4 @@ if __name__ == '__main__':
     args = vars(ap.parse_args())
     dtype = args.get('model')
 
-    main2()
+    main()
