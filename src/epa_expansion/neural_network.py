@@ -32,15 +32,15 @@ def baseline_model(dtype, uniform):
         if uniform:
             model.add(Activation('tanh'))
     elif dtype == 'cnn':
-        model.add(Conv1D(32, 10, padding='valid', activation='tanh', strides=1, input_shape=(1, 300)))
+        model.add(Conv1D(32, 10, padding='valid', activation='tanh', strides=1, input_shape=(300, 1)))
         # model.add(MaxPooling1D(pool_size=5))
         model.add(GlobalMaxPooling1D())
         model.add(Dense(16))
         model.add(Dropout(0.2))
-        model.add(Activation('relu'))
+        model.add(Activation('tanh'))
         model.add(Dense(3))
     elif dtype == 'cnn2':
-        model.add(Conv1D(4, 10, padding='valid', activation='relu', strides=1))
+        model.add(Conv1D(4, 10, padding='valid', activation='tanh', strides=1, input_shape=(300, 1)))
         model.add(GlobalMaxPooling1D())
         model.add(Dense(3))
 
@@ -64,6 +64,7 @@ def fit_model(feature_train, label_train, feature_test, label_test, dtype, unifo
         label_test = __norm2uni(label_test)
     if 'cnn' in dtype:
         # channel last
+        print('cnn here!!!!')
         feature_train = np.reshape(feature_train, feature_train.shape + (1, ))
         feature_test = np.reshape(feature_test, feature_test.shape + (1,))
     model = baseline_model(dtype=dtype, uniform=uniform)
