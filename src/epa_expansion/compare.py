@@ -25,11 +25,11 @@ if __name__ == '__main__':
     dis_p = sorted(dis_p, key=dis_p.get, reverse=True)
     dis_a = sorted(dis_a, key=dis_a.get, reverse=True)
     dis_ave = sorted(dis_ave, key=dis_ave.get, reverse=True)
-    with open('../result/epa_expansion/comparison_e') as fp:
+    with open('../result/epa_expansion/comparison_e', 'r') as fp:
         json.dump(dis_e, fp)
-    with open('../result/epa_expansion/comparison_p') as fp:
+    with open('../result/epa_expansion/comparison_p', 'r') as fp:
         json.dump(dis_p, fp)
-    with open('../result/epa_expansion/comparison_a') as fp:
+    with open('../result/epa_expansion/comparison_a', 'r') as fp:
         json.dump(dis_a, fp)
-    with open('../result/epa_expansion/comparison_ave') as fp:
+    with open('../result/epa_expansion/comparison_ave', 'r') as fp:
         json.dump(dis_ave, fp)
