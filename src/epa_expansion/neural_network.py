@@ -18,7 +18,14 @@ def baseline_model(dtype, uniform):
     print(dtype)
     model = Sequential()
     if dtype == 'lr':
-        model.add(Dense(32, input_dim=300, kernel_initializer='normal', activation='relu'))
+        model.add(Dense(32, input_dim=300, kernel_initializer='normal', activation='tanh'))
+        model.add(Dense(3, kernel_initializer='normal'))
+        # model.add(Activation('sigmoid'))
+        if uniform:
+            model.add(Activation('tanh'))
+    if dtype == 'lr2':
+        model.add(Dense(128, input_dim=300, kernel_initializer='normal', activation='tanh'))
+        model.add(Dense(32, kernel_initializer='normal', activation='tanh'))
         model.add(Dense(3, kernel_initializer='normal'))
         # model.add(Activation('sigmoid'))
         if uniform:
@@ -191,6 +198,11 @@ def main():
         expansion(model, s_dic, culture)
 
 
+def main2():
+    model = train()
+    validate(model)
+
+
 if __name__ == '__main__':
     ap = argparse.ArgumentParser('keras deep learning method')
     ap.add_argument('--generate', type=int, required=True)
@@ -200,4 +212,4 @@ if __name__ == '__main__':
     args = vars(ap.parse_args())
     dtype = args.get('model')
 
-    main()
+    main2()
