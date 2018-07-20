@@ -12,6 +12,8 @@ import argparse
 
 word_dataset_base = '../result/epa_expansion'
 os.makedirs(word_dataset_base, exist_ok=True)
+google_model_path = '../models/embedding/GoogleNews-vectors-negative300.bin'
+compare_model_path = '../models/embedding/%s/fasttext_sg_0_size_300_mincount_5'
 
 
 def load_google_word_vectors(model_path):
@@ -36,14 +38,14 @@ def get_tokens():
 
 
 def get_rand_tokens():
-    gg_model = load_google_word_vectors('../models/embedding/GoogleNews-vectors-negative300.bin')
+    gg_model = load_google_word_vectors(google_model_path)
     tokens = list(random.sample(gg_model.vocab.keys(), 50))
     del gg_model
     return tokens
 
 
 def get_token_wv(tokens):
-    gg_model = load_google_word_vectors('../models/embedding/GoogleNews-vectors-negative300.bin')
+    gg_model = load_google_word_vectors(google_model_path)
     wv = []
     for token in tokens:
         if token in gg_model.vocab.keys():
@@ -52,8 +54,8 @@ def get_token_wv(tokens):
 
 
 def wv_map(method, culture):
-    gg_model = load_google_word_vectors('../models/embedding/GoogleNews-vectors-negative300.bin')
-    gh_model = load_github_word_vectors('../models/embedding/%s/fasttext_sg_0_size_300_mincount_5' % culture)
+    gg_model = load_google_word_vectors(google_model_path)
+    gh_model = load_github_word_vectors(compare_model_path % culture)
     print('align wv space')
     tokens = get_tokens()
     # pred_tokens = list(set(gg_model.vocab.keys()) & set(gh_model.wv.vocab.keys()))
@@ -76,7 +78,7 @@ def wv_map_epa(tokens):
     dic = {}
     for word in tokens:
         if word in word_epa_dataset:
-            dic[word] = __epa2list(word_epa_dataset[word])
+            dic[word] = word_epa_dataset[word]
         else:
             dic[word] = [0, 0, 0]
     return dic
@@ -105,14 +107,10 @@ def load_feature_label(suffix):
     return feature, label
 
 
-def __epa2list(epa):
-    return [epa['E'], epa['P'], epa['A']]
-
-
 def preprocess_data(word_epa_dataset, suffix):
     wv_feature = []
     epa_label = []
-    google_model = load_google_word_vectors('../models/embedding/GoogleNews-vectors-negative300.bin')
+    google_model = load_google_word_vectors(google_model_path)
     google_vocab = set(google_model.vocab.keys())
 
     for word in word_epa_dataset.keys():
@@ -122,7 +120,7 @@ def preprocess_data(word_epa_dataset, suffix):
         wv_feature.append(feature)
 
         label = word_epa_dataset[word]
-        epa_label.append(__epa2list(label))
+        epa_label.append(label)
 
     wv_feature = np.array(wv_feature)
     epa_label = np.array(epa_label)
@@ -135,6 +133,7 @@ def preprocess_data(word_epa_dataset, suffix):
 
 def generate_data(generate):
     if generate < 2:
+        # random sample from datasets
         if generate == 0:
             feature, label = load_feature_label('all')
         else:
@@ -145,6 +144,7 @@ def generate_data(generate):
         feature_train, label_train = feature[mask < train_test_split], label[mask < train_test_split]
         feature_test, label_test = feature[mask >= train_test_split], label[mask >= train_test_split]
     elif generate < 4:
+        # select items with large EPA values as training
         if generate == 2:
             feature_train, label_train = load_feature_label('train')
             feature_test, label_test = load_feature_label('test')

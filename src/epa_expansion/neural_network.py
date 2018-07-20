@@ -80,7 +80,7 @@ def train():
     generate = args.get('generate')
     uniform = args.get('uniform') == 0
     feature_train, label_train, feature_test, label_test = generate_data(generate)
-    epochs = 30
+    epochs = 10
     batch_size = 100
     model, mae = fit_model(feature_train, label_train, feature_test, label_test,
                            dtype, uniform, epochs, batch_size)

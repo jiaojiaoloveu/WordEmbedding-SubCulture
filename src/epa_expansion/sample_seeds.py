@@ -17,12 +17,12 @@ label_std = np.array([1.5079544406893441, 1.2448124114055585, 1.2972247817961575
 
 def _fixed_seeds():
     voc = ['good', 'nice', 'excellent', 'positive', 'warm', 'correct', 'superior',
-            'bad', 'awful', 'nasty', 'negative', 'cold', 'wrong', 'inferior',
-            'powerful', 'strong', 'potent', 'dominant', 'big', 'forceful', 'hard',
-            'powerless', 'weak', 'impotent', 'small', 'incapable', 'hopeless', 'soft',
-            'active', 'fast', 'noisy', 'lively', 'energetic', 'dynamic', 'quick', 'vital',
-            'quiet', 'clam', 'inactive', 'slow', 'stagnant', 'inoperative', 'passive'
-            ]
+           'bad', 'awful', 'nasty', 'negative', 'cold', 'wrong', 'inferior',
+           'powerful', 'strong', 'potent', 'dominant', 'big', 'forceful', 'hard',
+           'powerless', 'weak', 'impotent', 'small', 'incapable', 'hopeless', 'soft',
+           'active', 'fast', 'noisy', 'lively', 'energetic', 'dynamic', 'quick', 'vital',
+           'quiet', 'clam', 'inactive', 'slow', 'stagnant', 'inoperative', 'passive'
+           ]
     return voc
 
 
@@ -43,15 +43,15 @@ def __get_fixed_seeds(vocabulary, eval_size):
 
 
 def __get_rand_seeds(vocabulary, seed_size, eval_size, threshold):
-    seeds_poll = {'E': [], 'P': [], 'A': []}
+    seeds_poll = [[], [], []]
     for word in vocabulary.keys():
         epa = vocabulary[word]
-        for axis in epa.keys():
+        for axis in range(0, 3):
             if abs(epa[axis]) > threshold:
                 seeds_poll[axis].append(word)
     word_seeds = []
     print('eval size %s' % seed_size)
-    for axis in seeds_poll.keys():
+    for axis in range(0, 3):
         word_seeds.extend(random.sample(seeds_poll[axis], int(seed_size / 3)))
         print('axis %s size %s' % (axis, len(seeds_poll[axis])))
         print('current size %s' % len(word_seeds))
@@ -63,11 +63,7 @@ def __get_rand_seeds(vocabulary, seed_size, eval_size, threshold):
 
 
 def __get_mapping_epa(vocabulary, word_seeds):
-    word_epa = {}
-    for word in word_seeds:
-        if word in vocabulary.keys():
-            word_epa[word] = vocabulary[word]
-    return word_epa
+    return dict((w, vocabulary[w]) for w in set(word_seeds) & vocabulary.keys())
 
 
 def __max_min_scaling(x, maxA, minA, maxB, minB):
@@ -75,20 +71,23 @@ def __max_min_scaling(x, maxA, minA, maxB, minB):
     # return 1.0 * (x - 1) / 8 * 8.6 - 4.3
 
 
-def __scale_vad_to_epa(vocabulary_vad, max_min_board):
-    print(max_min_board)
-    vocabulary_epa = {}
-    for word in vocabulary_vad.keys():
-        vad = vocabulary_vad[word]
-        epa = {}
-        for axis in vad.keys():
-            epa[LabelSpace.get_epa(axis)] = __max_min_scaling(vad[axis],
-                                                              max_min_board[axis][WarrinerColumn.Max],
-                                                              max_min_board[axis][WarrinerColumn.Min],
-                                                              LabelSpace.Max,
-                                                              LabelSpace.Min)
-        vocabulary_epa[word] = epa
-    return vocabulary_epa
+def __scale_vad_to_epa(vocab_vad):
+    vocab_epa = {}
+    vad = np.array(list(vocab_vad.values()))
+    vad_max, vad_min = np.max(vad, axis=0), np.min(vad, axis=0)
+    for word in vocab_vad.keys():
+        vocab_epa[word] = ((vocab_vad[word] - vad_min) / (vad_max - vad_min) * 4.3 * 2 - 4.3).tolist()
+    # for word in vad.keys():
+    #     vad = vad[word]
+    #     epa = {}
+    #     for axis in vad.keys():
+    #         epa[LabelSpace.get_epa(axis)] = __max_min_scaling(vad[axis],
+    #                                                           max_min_board[axis][WarrinerColumn.Max],
+    #                                                           max_min_board[axis][WarrinerColumn.Min],
+    #                                                           LabelSpace.Max,
+    #                                                           LabelSpace.Min)
+    #     vocab_epa[word] = epa
+    return vocab_epa
 
 
 def __norm2uni(x, mu=label_mean, sigma=label_std):
@@ -119,31 +118,21 @@ def read_bayesact_epa():
 
 def read_warriner_ratings():
     # read as vad and scale to epa
-    # return as {"word": {'E': 0, 'P': 0, 'A':0}}
+    # return as {"word": [E, P, A]}
     vocabulary_vad = {}
-    max_min_board = {
-        LabelSpace.V: WarrinerColumn.get_min_max_dic(),
-        LabelSpace.A: WarrinerColumn.get_min_max_dic(),
-        LabelSpace.D: WarrinerColumn.get_min_max_dic()
-    }
     with open(warinner_csv_path) as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             word = row[WarrinerColumn.Word]
             if not word.isalpha():
                 continue
-            vad = {LabelSpace.V: float(row[WarrinerColumn.V]),
-                   LabelSpace.A: float(row[WarrinerColumn.A]),
-                   LabelSpace.D: float(row[WarrinerColumn.D])
-                   }
+            # vad = {LabelSpace.V: float(row[WarrinerColumn.V]),
+            #        LabelSpace.A: float(row[WarrinerColumn.A]),
+            #        LabelSpace.D: float(row[WarrinerColumn.D])
+            #        }
+            vad = [float(row[WarrinerColumn.V]), float(row[WarrinerColumn.D]), float(row[WarrinerColumn.A])]
             vocabulary_vad[word] = vad
-            for axis in vad.keys():
-                if max_min_board[axis][WarrinerColumn.Min] > vad[axis]:
-                    max_min_board[axis][WarrinerColumn.Min] = vad[axis]
-                if max_min_board[axis][WarrinerColumn.Max] < vad[axis]:
-                    max_min_board[axis][WarrinerColumn.Max] = vad[axis]
-
-    return __scale_vad_to_epa(vocabulary_vad, max_min_board)
+    return __scale_vad_to_epa(vocabulary_vad)
 
 
 def get_rand_seeds(seed_size=5000, eval_size=8000, threshold=2.0):

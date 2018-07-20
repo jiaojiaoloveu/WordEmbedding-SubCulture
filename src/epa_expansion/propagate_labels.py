@@ -143,14 +143,10 @@ def generate():
     for ind in range(0, sub_token_num):
         word = token_words[ind]
         if word in seed_words.keys():
-            token_label[ind] = [seed_words[word][LabelSpace.E],
-                                seed_words[word][LabelSpace.P],
-                                seed_words[word][LabelSpace.A]]
+            token_label[ind] = seed_words[word]
             seeds_in_token += 1
         if word in eval_words.keys():
-            eval_label[ind] = [eval_words[word][LabelSpace.E],
-                               eval_words[word][LabelSpace.P],
-                               eval_words[word][LabelSpace.A]]
+            eval_label[ind] = eval_words[word]
             eval_in_token += 1
 
     print('%s/%s seeds in token words' % (seeds_in_token, Configs.seed))
