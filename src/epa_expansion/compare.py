@@ -17,7 +17,8 @@ if __name__ == '__main__':
     common_tokens = set(github.keys()) & set(twitter.keys())
     dis_e, dis_p, dis_a, dis_ave = {}, {}, {}, {}
     for token in common_tokens:
-        diff = list(map(abs, github[token] - twitter[token]))
+        # diff = list(map(abs, github[token] - twitter[token]))
+        diff = np.abs(np.array(github[token]) - np.array(twitter[token])).tolist()
         dis_e[token], dis_p[token], dis_a[token] = diff[0], diff[1], diff[2]
         dis_ave[token] = np.mean(diff).item()
     dis_e = sorted(dis_e, key=dis_e.get, reverse=True)
