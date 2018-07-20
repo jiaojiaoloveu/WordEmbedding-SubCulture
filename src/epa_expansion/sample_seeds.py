@@ -66,11 +66,6 @@ def __get_mapping_epa(vocabulary, word_seeds):
     return dict((w, vocabulary[w]) for w in set(word_seeds) & vocabulary.keys())
 
 
-def __max_min_scaling(x, maxA, minA, maxB, minB):
-    return 1.0 * (x - minA) / (maxA - minA) * (maxB - minB) + minB
-    # return 1.0 * (x - 1) / 8 * 8.6 - 4.3
-
-
 def __scale_vad_to_epa(vocab_vad):
     return vocab_vad
 
@@ -78,7 +73,7 @@ def __scale_vad_to_epa(vocab_vad):
     vad = np.array(list(vocab_vad.values()))
     vad_max, vad_min = np.max(vad, axis=0), np.min(vad, axis=0)
     for word in vocab_vad.keys():
-        vocab_epa[word] = ((vocab_vad[word] - vad_min) / (vad_max - vad_min) * 4.3 * 2 - 4.3).tolist()
+        vocab_epa[word] = ((vocab_vad[word] - vad_min) / (vad_max - vad_min) * 4.3 * 2).tolist()
     # for word in vad.keys():
     #     vad = vad[word]
     #     epa = {}
