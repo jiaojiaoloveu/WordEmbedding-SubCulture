@@ -95,8 +95,8 @@ def load_test():
 
 
 def load_all():
-    # return read_warriner_ratings(warinner_csv_path)
-    return read_bayesact_epa()
+    return read_warriner_ratings()
+    # return read_bayesact_epa()
 
 
 def load_feature_label(suffix):
