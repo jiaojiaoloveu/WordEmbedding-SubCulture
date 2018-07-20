@@ -152,7 +152,7 @@ def generate_data(generate):
             feature_train, label_train = load_feature_label('train')
             feature_test, label_test = load_feature_label('test')
         else:
-            (seed_words, eval_words) = get_rand_seeds()
+            (seed_words, eval_words) = get_rand_seeds(seed_size=9000, eval_size=4000, threshold=2)
             feature_train, label_train = preprocess_data(seed_words, 'train')
             feature_test, label_test = preprocess_data(eval_words, 'test')
     else:

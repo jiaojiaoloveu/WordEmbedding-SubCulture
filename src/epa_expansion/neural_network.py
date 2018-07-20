@@ -18,7 +18,8 @@ def baseline_model(dtype, uniform):
     print(dtype)
     model = Sequential()
     if dtype == 'lr':
-        model.add(Dense(32, input_dim=300, kernel_initializer='normal', activation='tanh'))
+        model.add(Dense(128, input_dim=300, kernel_initializer='normal', activation='tanh'))
+        model.add(Dense(32, kernel_initializer='normal', activation='tanh'))
         model.add(Dense(3, kernel_initializer='normal'))
         # model.add(Activation('sigmoid'))
         if uniform:
@@ -31,7 +32,7 @@ def baseline_model(dtype, uniform):
         if uniform:
             model.add(Activation('tanh'))
     elif dtype == 'cnn':
-        model.add(Conv1D(32, 10, padding='valid', activation='relu', strides=1))
+        model.add(Conv1D(32, 10, padding='valid', activation='tanh', strides=1, input_shape=(1, 300)))
         # model.add(MaxPooling1D(pool_size=5))
         model.add(GlobalMaxPooling1D())
         model.add(Dense(16))
