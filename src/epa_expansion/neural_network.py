@@ -9,7 +9,6 @@ from keras.layers import Dense, Conv1D, Activation, Dropout, Embedding
 from keras.layers import GlobalMaxPooling1D, MaxPooling1D
 from keras.wrappers.scikit_learn import KerasRegressor
 from sklearn.model_selection import cross_val_score, KFold
-from sklearn.metrics import accuracy_score
 from gen_data import wv_map, generate_data, word_dataset_base, get_tokens, get_rand_tokens, get_token_wv
 from sample_seeds import __uni2norm, __norm2uni
 from align_wv_space import __comparison
@@ -81,8 +80,6 @@ def fit_model(feature_train, label_train, feature_test, label_test, dtype, unifo
     label_pred = model.predict(feature_test)
     mae = np.mean(np.abs(label_pred - label_test), axis=0)
     print('mae %s' % mae)
-    for axis in range(0, 3):
-        accuracy_score(label_test[:, axis], label_pred[:, axis])
 
     if uniform:
         label_test = __uni2norm(label_test)
