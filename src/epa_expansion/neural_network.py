@@ -81,7 +81,8 @@ def fit_model(feature_train, label_train, feature_test, label_test, dtype, unifo
     label_pred = model.predict(feature_test)
     mae = np.mean(np.abs(label_pred - label_test), axis=0)
     print('mae %s' % mae)
-    accuracy_score(label_test, label_pred)
+    for axis in range(0, 3):
+        accuracy_score(label_test[:, axis], label_pred[:, axis])
 
     if uniform:
         label_test = __uni2norm(label_test)
