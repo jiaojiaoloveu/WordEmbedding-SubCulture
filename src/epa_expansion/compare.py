@@ -1,6 +1,7 @@
 import json
 import numpy as np
 from sample_seeds import read_warriner_ratings
+from collections import OrderedDict
 
 tokens = ['male', 'female', 'adult', 'mom', 'father']
 
@@ -22,9 +23,9 @@ if __name__ == '__main__':
         diff = np.abs(np.array(github[token]) - np.array(twitter[token])).tolist()
         dis_e[token], dis_p[token], dis_a[token] = diff[0], diff[1], diff[2]
         dis_ave[token] = np.mean(diff).item()
-    dis_e = sorted(dis_e, key=dis_e.get, reverse=True)
-    dis_p = sorted(dis_p, key=dis_p.get, reverse=True)
-    dis_a = sorted(dis_a, key=dis_a.get, reverse=True)
+    dis_e = OrderedDict(sorted(dis_e, key=dis_e.get, reverse=True))
+    dis_p = OrderedDict(sorted(dis_p, key=dis_p.get, reverse=True))
+    dis_a = OrderedDict(sorted(dis_a, key=dis_a.get, reverse=True))
     dis_ave = sorted(dis_ave, key=dis_ave.get, reverse=True)
     with open('../result/epa_expansion/comparison_e', 'w') as fp:
         json.dump(dis_e, fp)
