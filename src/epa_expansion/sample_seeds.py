@@ -67,8 +67,6 @@ def __get_mapping_epa(vocabulary, word_seeds):
 
 
 def __scale_vad_to_epa(vocab_vad):
-    return vocab_vad
-
     vocab_epa = {}
     vad = np.array(list(vocab_vad.values()))
     vad_max, vad_min = np.max(vad, axis=0), np.min(vad, axis=0)
