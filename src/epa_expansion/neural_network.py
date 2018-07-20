@@ -181,7 +181,6 @@ def validate(model):
     print(np.std(neutral_pred, axis=0))
 
 
-
 def main():
     model = train()
 
@@ -189,7 +188,7 @@ def main():
 
     for culture in ['github', 'twitter']:
         s_dic = evaluate(model, culture)
-        # expansion(model, s_dic, culture)
+        expansion(model, s_dic, culture)
 
 
 if __name__ == '__main__':
