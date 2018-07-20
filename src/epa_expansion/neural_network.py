@@ -9,12 +9,13 @@ from keras.layers import Dense, Conv1D, Activation, Dropout, Embedding
 from keras.layers import GlobalMaxPooling1D, MaxPooling1D
 from keras.wrappers.scikit_learn import KerasRegressor
 from sklearn.model_selection import cross_val_score, KFold
+from sklearn.metrics import accuracy_score
 from gen_data import wv_map, generate_data, word_dataset_base, get_tokens, get_rand_tokens, get_token_wv
 from sample_seeds import __uni2norm, __norm2uni
 from align_wv_space import __comparison
 
 
-def baseline_model(dtype, uniform):
+def baseline_model(dtype='lr', uniform=False):
     print(dtype)
     model = Sequential()
     if dtype == 'lr':
@@ -49,13 +50,15 @@ def baseline_model(dtype, uniform):
     return model
 
 
-#def kfold_est(feature, label):
-#    seed = 10
-#    np.random.seed(seed)
-#    estimator = KerasRegressor(build_fn=baseline_model, epochs=100, batch_size=5, verbose=0)
-#    kfold = KFold(n_splits=10, random_state=seed)
-#    results = cross_val_score(estimator, feature, label, cv=kfold)
-#    print("Results: %.2f (%.2f) MSE" % (results.mean(), results.std()))
+def kfold_test(feature, label, epoch, batch_size):
+    seed = 10
+    np.random.seed(seed)
+    estimator = KerasRegressor(build_fn=baseline_model, epochs=epoch, batch_size=batch_size, verbose=0)
+    kfold = KFold(n_splits=5, random_state=seed)
+    results = cross_val_score(estimator, feature, label, cv=kfold)
+    print("Results: %.2f (%.2f) MSE" % (results.mean(), results.std()))
+    estimator.fit(feature, label)
+    return estimator
 
 
 def fit_model(feature_train, label_train, feature_test, label_test, dtype, uniform, epochs, batch_size):
@@ -66,15 +69,19 @@ def fit_model(feature_train, label_train, feature_test, label_test, dtype, unifo
         # channel last
         feature_train = np.reshape(feature_train, feature_train.shape + (1, ))
         feature_test = np.reshape(feature_test, feature_test.shape + (1,))
-    model = baseline_model(dtype=dtype, uniform=uniform)
-    print('start training %s %s' % (str(feature_train.shape), str(label_train.shape)))
-    model.fit(feature_train, label_train, epochs=epochs, batch_size=batch_size)
-    print('start evaluating %s %s' % (str(feature_test.shape), str(label_test.shape)))
-    score = model.evaluate(feature_test, label_test, batch_size=batch_size)
-    print(score)
+
+    # model = baseline_model(dtype=dtype, uniform=uniform)
+    # print('start training %s %s' % (str(feature_train.shape), str(label_train.shape)))
+    # model.fit(feature_train, label_train, epochs=epochs, batch_size=batch_size)
+    # print('start evaluating %s %s' % (str(feature_test.shape), str(label_test.shape)))
+    # score = model.evaluate(feature_test, label_test, batch_size=batch_size)
+    # print(score)
+
+    model = kfold_test(feature_train, label_train, epochs, batch_size)
     label_pred = model.predict(feature_test)
     mae = np.mean(np.abs(label_pred - label_test), axis=0)
     print('mae %s' % mae)
+    accuracy_score(label_test, label_pred)
 
     if uniform:
         label_test = __uni2norm(label_test)
