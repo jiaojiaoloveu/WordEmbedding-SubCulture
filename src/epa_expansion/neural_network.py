@@ -64,7 +64,6 @@ def fit_model(feature_train, label_train, feature_test, label_test, dtype, unifo
         label_test = __norm2uni(label_test)
     if 'cnn' in dtype:
         # channel last
-        print('cnn here!!!!')
         feature_train = np.reshape(feature_train, feature_train.shape + (1, ))
         feature_test = np.reshape(feature_test, feature_test.shape + (1,))
     model = baseline_model(dtype=dtype, uniform=uniform)

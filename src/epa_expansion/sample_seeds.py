@@ -72,6 +72,8 @@ def __max_min_scaling(x, maxA, minA, maxB, minB):
 
 
 def __scale_vad_to_epa(vocab_vad):
+    return vocab_vad
+
     vocab_epa = {}
     vad = np.array(list(vocab_vad.values()))
     vad_max, vad_min = np.max(vad, axis=0), np.min(vad, axis=0)
@@ -111,7 +113,7 @@ def read_bayesact_epa():
                 reader = csv.reader(csvfile)
                 for row in reader:
                     word = row[0]
-                    epa = {'E': float(row[1]), 'P': float(row[2]), 'A': float(row[3])}
+                    epa = [float(row[1]), float(row[2]), float(row[3])]
                     vocabulary_epa[word] = epa
     return vocabulary_epa
 
@@ -126,10 +128,6 @@ def read_warriner_ratings():
             word = row[WarrinerColumn.Word]
             if not word.isalpha():
                 continue
-            # vad = {LabelSpace.V: float(row[WarrinerColumn.V]),
-            #        LabelSpace.A: float(row[WarrinerColumn.A]),
-            #        LabelSpace.D: float(row[WarrinerColumn.D])
-            #        }
             vad = [float(row[WarrinerColumn.V]), float(row[WarrinerColumn.D]), float(row[WarrinerColumn.A])]
             vocabulary_vad[word] = vad
     return __scale_vad_to_epa(vocabulary_vad)
