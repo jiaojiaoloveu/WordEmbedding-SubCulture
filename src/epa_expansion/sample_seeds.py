@@ -11,8 +11,8 @@ from labels import LabelSpace
 bayesact_dat_folder = '../data/epa/bayesact'
 warinner_csv_path = '../data/epa/Ratings_Warriner_et_al.csv'
 
-label_mean = np.array([0.19571685413316248, -0.6727038433386933, 0.5452512966060962])
-label_std = np.array([1.5079544406893441, 1.2448124114055585, 1.2972247817961575])
+label_mean = np.array([0.19571685413316248, 0.5452512966060962, -0.6727038433386933])
+label_std = np.array([1.5079544406893441, 1.2972247817961575, 1.2448124114055585])
 
 
 def _fixed_seeds():
