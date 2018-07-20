@@ -71,7 +71,7 @@ def __scale_vad_to_epa(vocab_vad):
     vad = np.array(list(vocab_vad.values()))
     vad_max, vad_min = np.max(vad, axis=0), np.min(vad, axis=0)
     for word in vocab_vad.keys():
-        vocab_epa[word] = ((vocab_vad[word] - vad_min) / (vad_max - vad_min) * 4.3 * 2).tolist()
+        vocab_epa[word] = ((vocab_vad[word] - vad_min) / (vad_max - vad_min) * 4.3 * 2 - 4.3).tolist()
     # for word in vad.keys():
     #     vad = vad[word]
     #     epa = {}
