@@ -184,7 +184,7 @@ def validate(model):
 def main():
     model = train()
 
-    # validate(model)
+    validate(model)
 
     for culture in ['github', 'twitter']:
         s_dic = evaluate(model, culture)

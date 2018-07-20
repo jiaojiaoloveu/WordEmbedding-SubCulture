@@ -9,8 +9,8 @@ class LabelSpace:
     Max = 4.3
     Min = -4.3
     mapping_epa = {V: E,
-                   A: P,
-                   D: A
+                   A: A,
+                   D: P
                    }
 
     @classmethod

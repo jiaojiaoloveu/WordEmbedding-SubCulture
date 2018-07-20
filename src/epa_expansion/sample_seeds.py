@@ -72,6 +72,7 @@ def __get_mapping_epa(vocabulary, word_seeds):
 
 def __max_min_scaling(x, maxA, minA, maxB, minB):
     return 1.0 * (x - minA) / (maxA - minA) * (maxB - minB) + minB
+    # return 1.0 * (x - 1) / 8 * 8.6 - 4.3
 
 
 def __scale_vad_to_epa(vocabulary_vad, max_min_board):
@@ -145,7 +146,7 @@ def read_warriner_ratings():
     return __scale_vad_to_epa(vocabulary_vad, max_min_board)
 
 
-def get_rand_seeds(seed_size=100, eval_size=500, threshold=2.0):
+def get_rand_seeds(seed_size=5000, eval_size=8000, threshold=2.0):
     # return (dic, dic)
     voc = read_warriner_ratings()
     return __get_rand_seeds(voc, seed_size, eval_size, threshold)
@@ -159,8 +160,8 @@ def get_fixed_seeds(eval_size=500):
 if __name__ == '__main__':
     # get_rand_seeds()
     # get_fixed_seeds()
-    # res = read_warriner_ratings(warinner_csv_path)
-    # new_csv_path = '../data/epa/Ratings_Warriner_et_al_epa'
-    # with open(new_csv_path, 'w') as fp:
-    #     json.dump(res, fp)
-    print(len(read_bayesact_epa().keys()))
+    res = read_warriner_ratings()
+    new_csv_path = '../data/epa/Ratings_Warriner_et_al_epa_test'
+    with open(new_csv_path, 'w') as fp:
+        json.dump(res, fp)
+    # print(len(read_bayesact_epa().keys()))

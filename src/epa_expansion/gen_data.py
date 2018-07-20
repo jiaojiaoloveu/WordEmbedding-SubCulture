@@ -1,5 +1,5 @@
 from align_wv_space import get_aligned_wv
-from sample_seeds import read_warriner_ratings, read_bayesact_epa
+from sample_seeds import read_warriner_ratings, read_bayesact_epa, get_rand_seeds
 from gensim.models import KeyedVectors
 from gensim.models.word2vec import Word2Vec
 from sample_seeds import __norm2uni
@@ -149,8 +149,9 @@ def generate_data(generate):
             feature_train, label_train = load_feature_label('train')
             feature_test, label_test = load_feature_label('test')
         else:
-            feature_train, label_train = preprocess_data(load_train(), 'train')
-            feature_test, label_test = preprocess_data(load_test(), 'test')
+            (seed_words, eval_words) = get_rand_seeds()
+            feature_train, label_train = preprocess_data(seed_words, 'train')
+            feature_test, label_test = preprocess_data(eval_words, 'test')
     else:
         print('generate = %s not supported' % generate)
         raise Exception('generate not supported yet')
