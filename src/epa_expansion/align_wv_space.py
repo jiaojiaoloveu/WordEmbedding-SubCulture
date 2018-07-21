@@ -62,8 +62,10 @@ def get_sample_dataset(source, target, k=1000):
 def sgd_model():
     model = Sequential()
     model.add(Dense(300, kernel_initializer='normal', input_dim=300))
-    sgd = optimizers.SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
+    model.add(Dense(300, kernel_initializer='normal', input_dim=300))
+    sgd = optimizers.SGD(lr=0.1, decay=1e-6, momentum=0.5, nesterov=True)
     model.compile(loss='mean_squared_error', optimizer=sgd, metrics=['accuracy'])
+    model.summary()
     return model
 
 
