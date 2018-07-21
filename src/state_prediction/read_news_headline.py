@@ -7,7 +7,7 @@ from gensim.models.word2vec import Word2Vec
 data_epa_path = '../data/NH_dataset/NewsHeadlines_EPA.csv'
 data_valence_path = '../data/NH_dataset/NewsHeadlines_Valence.csv'
 google_news_model_path = '../models/embedding/GoogleNews-vectors-negative300.bin'
-github_model_path = '../models/embedding/github/fasttext_sg_0_size_300_mincount_5'
+compare_model_path = '../models/embedding/%s/fasttext_sg_0_size_300_mincount_5'
 
 
 def get_word_vector(tokens):
@@ -27,7 +27,7 @@ def get_word_vector(tokens):
 
 
 def get_gh_word_vector():
-    github_model = Word2Vec.load(github_model_path)
+    github_model = Word2Vec.load(compare_model_path % 'github')
 
 
 def read_epa():
