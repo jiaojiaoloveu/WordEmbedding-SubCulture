@@ -2,6 +2,7 @@ import csv
 import numpy as np
 from gensim.models import KeyedVectors
 from gensim.models.word2vec import Word2Vec
+from normalization import Norm
 
 
 data_epa_path = '../data/NH_dataset/NewsHeadlines_EPA.csv'
