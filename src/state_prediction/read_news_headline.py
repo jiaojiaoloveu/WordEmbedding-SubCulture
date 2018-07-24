@@ -26,8 +26,19 @@ def get_word_vector(tokens):
     return wv
 
 
-def get_gh_word_vector():
-    github_model = Word2Vec.load(compare_model_path % 'github')
+def get_comp_word_vector(tokens, culture):
+    comp_model = Word2Vec.load(compare_model_path % culture)
+    wv = list()
+    for line in tokens:
+        wv_svo = list()
+        for w in line:
+            if w in comp_model.wv.vocab.keys():
+                wv_svo.append(comp_model.wv[w])
+            else:
+                wv_svo.append(np.zeros(300))
+        wv.append(wv_svo)
+    del comp_model
+    return wv
 
 
 def read_epa():
