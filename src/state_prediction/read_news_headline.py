@@ -2,7 +2,7 @@ import csv
 import numpy as np
 from gensim.models import KeyedVectors
 from gensim.models.word2vec import Word2Vec
-from normalization import Norm
+from epa_expansion.align_wv_space import get_aligned_wv
 
 
 data_epa_path = '../data/NH_dataset/NewsHeadlines_EPA.csv'
@@ -29,12 +29,14 @@ def get_word_vector(tokens):
 
 def get_comp_word_vector(tokens, culture):
     comp_model = Word2Vec.load(compare_model_path % culture)
+    base_model = KeyedVectors.load_word2vec_format(google_news_model_path, binary=True)
+    _, comp_vocab = get_aligned_wv(comp_model.wv, base_model, [], 'nn')
     wv = list()
     for line in tokens:
         wv_svo = list()
         for w in line:
-            if w in comp_model.wv.vocab.keys():
-                wv_svo.append(comp_model.wv[w])
+            if w in comp_vocab.keys():
+                wv_svo.append(comp_vocab[w])
             else:
                 wv_svo.append(np.zeros(300))
         wv.append(wv_svo)
