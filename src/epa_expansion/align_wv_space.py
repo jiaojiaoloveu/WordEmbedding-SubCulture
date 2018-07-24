@@ -166,7 +166,11 @@ if __name__ == '__main__':
 
     w_list = get_anchor_words()
     wv_dict, _ = get_aligned_wv(gh_model.wv, gg_model, w_list, method=args.get('method'))
+    distance = list()
     for w in wv_dict.keys():
         wv = wv_dict[w]
         dis = spatial.distance.cosine(wv[0], wv[1])
+        distance.append(dis)
         print('%s: %s' % (w, dis))
+    print(np.mean(distance))
+    print(np.std(distance))
