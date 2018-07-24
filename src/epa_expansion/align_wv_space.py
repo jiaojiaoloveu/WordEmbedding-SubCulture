@@ -164,7 +164,7 @@ if __name__ == '__main__':
     gg_model = KeyedVectors.load_word2vec_format('../models/embedding/GoogleNews-vectors-negative300.bin', binary=True)
     gh_model = Word2Vec.load('../models/embedding/github/word2vec_sg_0_size_300_mincount_5')
 
-    w_list = ['happy', 'sad', 'one', 'single', 'take', 'reject', 'push']
+    w_list = get_anchor_words()
     wv_dict, _ = get_aligned_wv(gh_model.wv, gg_model, w_list, method=args.get('method'))
     for w in wv_dict.keys():
         wv = wv_dict[w]
