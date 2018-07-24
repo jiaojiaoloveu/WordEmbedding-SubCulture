@@ -41,6 +41,7 @@ def get_comp_word_vector(tokens, culture):
                 wv_svo.append(np.zeros(300))
         wv.append(wv_svo)
     del comp_model
+    del base_model
     return wv
 
 
