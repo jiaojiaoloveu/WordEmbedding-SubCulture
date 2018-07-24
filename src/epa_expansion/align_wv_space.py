@@ -62,8 +62,8 @@ def get_sample_dataset(source, target, k=1000):
 def sgd_model():
     model = Sequential()
     model.add(Dense(300, kernel_initializer='normal', input_dim=300))
-    model.add(Dense(300, kernel_initializer='normal', input_dim=300))
-    sgd = optimizers.SGD(lr=0.1, decay=1e-6, momentum=0.5, nesterov=True)
+    # model.add(Dense(300, kernel_initializer='normal', input_dim=300))
+    sgd = optimizers.SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
     model.compile(loss='mean_squared_error', optimizer=sgd, metrics=['accuracy'])
     model.summary()
     return model
@@ -92,7 +92,7 @@ def align_nn_model(source, target):
     source_mat, target_mat = get_training_dataset(source, target)
     print('align train datasize %s' % str(source_mat.shape))
     model = sgd_model()
-    model.fit(source_mat, target_mat, epochs=50, batch_size=100)
+    model.fit(source_mat, target_mat, epochs=20, batch_size=100)
     score = model.evaluate(source_mat, target_mat, batch_size=5)
     print('align train score')
     print(score)
