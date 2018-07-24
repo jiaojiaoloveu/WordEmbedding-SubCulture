@@ -13,7 +13,6 @@ def baseline_model():
     model.add(Dense(300, activation='tanh'))
     model.add(Dense(3))
     model.compile(loss='mean_absolute_error', optimizer='adam', metrics=['accuracy'])
-    model.summary()
     return model
 
 
@@ -46,7 +45,7 @@ def train():
         models.append(model)
 
     with open('../result/state_prediction/epa', 'w') as fp:
-        json.dump(epa, fp)
+        json.dump(epa.tolist(), fp)
 
     evaluate(models, svo, epa, svo_wv, 'general')
     evaluate(models, svo, epa, np.array(get_comp_word_vector(svo, 'github')), 'github')
