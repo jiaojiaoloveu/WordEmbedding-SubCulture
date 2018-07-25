@@ -37,7 +37,7 @@ def train():
     with open('../result/state_prediction/epa', 'w') as fp:
         json.dump(epa.tolist(), fp)
     with open('../result/state_prediction/svo_epa', 'w') as fp:
-        zipped = zip(svo.tolist(), epa.tolist)
+        zipped = zip(svo.tolist(), epa.tolist())
         json.dump(list(zipped), fp)
 
     epa_mean = np.mean(epa, axis=0)
