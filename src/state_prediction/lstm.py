@@ -62,7 +62,7 @@ def evaluate(model_list, wv, name, epa_mean, epa_std):
     wv = wv[wv_mask]
     for axis in range(0, 4):
         model = model_list[axis]
-        pred_epa = model.predict(wv) * epa_std[:, axis] + epa_mean[:, axis]
+        pred_epa = model.predict(wv) * epa_std[axis, :] + epa_mean[axis, :]
         print(np.mean(pred_epa, axis=0))
         with open('../result/state_prediction/%s_%s' % (name, axis), 'w') as fp:
             json.dump(pred_epa.tolist(), fp)
