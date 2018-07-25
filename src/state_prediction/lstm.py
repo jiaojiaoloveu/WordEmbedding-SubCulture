@@ -53,6 +53,8 @@ def train():
         pred = model.predict(svo_wv)
         mae = np.mean(np.abs(pred - label), axis=0)
         print('axis %s, mae %s' % (axis, mae))
+        rmse = np.sqrt(np.mean(np.square(pred - label), axis=0))
+        print('axis %s, rmse %s' % (axis, rmse))
         models.append(model)
 
     evaluate(models, svo, svo_wv, 'general', epa_mean, epa_std)
