@@ -73,6 +73,11 @@ def evaluate(model_list, svo, wv, name, epa_mean, epa_std):
         pred.append(pred_epa.tolist())
         with open('../result/state_prediction/%s_%s' % (name, axis), 'w') as fp:
             json.dump(pred_epa.tolist(), fp)
+    pred = np.array(pred)
+    print(pred.shape)
+    pred = np.transpose(pred, (1, 0, 2))
+    print(pred.shape)
+
     with open('../result/state_prediction/svo_%s' % name, 'w') as fp:
         zipped = zip(svo.tolist(), pred)
         json.dump(list(zipped), fp)
