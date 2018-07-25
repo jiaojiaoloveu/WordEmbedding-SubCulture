@@ -36,6 +36,9 @@ def train():
 
     with open('../result/state_prediction/epa', 'w') as fp:
         json.dump(epa.tolist(), fp)
+    with open('../result/state_prediction/svo_epa', 'w') as fp:
+        zipped = zip(svo.tolist(), epa.tolist)
+        json.dump(list(zipped), fp)
 
     epa_mean = np.mean(epa, axis=0)
     epa_std = np.std(epa, axis=0)
@@ -52,20 +55,27 @@ def train():
         print('axis %s, mae %s' % (axis, mae))
         models.append(model)
 
-    evaluate(models, svo_wv, 'general', epa_mean, epa_std)
-    evaluate(models, np.array(get_comp_word_vector(svo, 'github')), 'github', epa_mean, epa_std)
-    evaluate(models, np.array(get_comp_word_vector(svo, 'twitter')), 'twitter', epa_mean, epa_std)
+    evaluate(models, svo, svo_wv, 'general', epa_mean, epa_std)
+    evaluate(models, svo, np.array(get_comp_word_vector(svo, 'github')), 'github', epa_mean, epa_std)
+    evaluate(models, svo, np.array(get_comp_word_vector(svo, 'twitter')), 'twitter', epa_mean, epa_std)
 
 
-def evaluate(model_list, wv, name, epa_mean, epa_std):
+def evaluate(model_list, svo, wv, name, epa_mean, epa_std):
     wv_mask = np.all(np.all(wv, axis=2), axis=1)
     wv = wv[wv_mask]
+    svo = svo[wv_mask]
+    pred = []
     for axis in range(0, 4):
         model = model_list[axis]
         pred_epa = model.predict(wv) * epa_std[axis, :] + epa_mean[axis, :]
         print(np.mean(pred_epa, axis=0))
+        print(np.std(pred_epa, axis=0))
+        pred.append(pred_epa.tolist())
         with open('../result/state_prediction/%s_%s' % (name, axis), 'w') as fp:
             json.dump(pred_epa.tolist(), fp)
+    with open('../result/state_prediction/svo_%s' % name, 'w') as fp:
+        zipped = zip(svo.tolist(), pred)
+        json.dump(list(zipped), fp)
 
 
 if __name__ == '__main__':
