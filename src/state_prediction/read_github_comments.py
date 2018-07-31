@@ -15,13 +15,16 @@ basic_sentiment = ['aggressive', 'angry', 'calm', 'careless',
 def main():
     # pull_request_id,id,comment_id,body,
     # Thanks,Sorry,Calm,Nervous,Careless,Cautious,Agressive,Defensive,Happy,Angry,pull_request_status
-    svo_pred = list()
+    with open(github_comments_svo_pred_path, 'r') as fp:
+        svo_pred = json.load(fp)
     senti_vec = list()
     with open(github_comments_path, 'r') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            svo_pred.append(get_pred_svo(svo_pred, row['body']))
-            senti_vec.append([row[sent] for sent in basic_sentiment])
+            sent = row['body']
+            if sent in svo_pred.keys() and len(svo_pred[sent]) > 0:
+                svo_pred.append(svo_pred[sent][0])
+                senti_vec.append([row[sent] for sent in basic_sentiment])
     print(svo_pred)
     print(senti_vec)
 

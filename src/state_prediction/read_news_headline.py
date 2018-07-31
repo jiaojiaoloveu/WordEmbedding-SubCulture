@@ -58,7 +58,7 @@ def get_pred_svo(svo, sentence):
     return svo_dic
 
 
-def read_epa():
+def read_epa(use_pred):
     # return as np arr
     # #,NewsHeadline,Subject,Verb,Object,E_e,E_p,E_a,S_e,S_p,S_a,V_e,V_p,V_a,O_e,O_p,O_a
     svo = list()
@@ -68,7 +68,7 @@ def read_epa():
         reader = csv.DictReader(csvfile)
         for row in reader:
             sent = row['NewsHeadline']
-            if sent in svo_pred.keys() and len(svo_pred[sent]) > 0:
+            if use_pred and sent in svo_pred.keys() and len(svo_pred[sent]) > 0:
                 svo.append([svo_pred[sent]['subject'][0], svo_pred[sent]['predicate'][0], svo_pred[sent]['object'][0]])
             else:
                 svo.append([row['Subject'], row['Verb'], row['Object']])

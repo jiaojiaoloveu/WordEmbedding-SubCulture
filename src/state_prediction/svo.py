@@ -170,7 +170,7 @@ class SVO(object):
 
 if __name__=="__main__":
     svo = SVO()
-    sentence = "Andreas loves soccer. He is also very good at it. Barack Obama likes the legislation"
+    sentence = "I agree, but this will bring other changes.  Marked as a todo"
     root = svo.get_parse_tree(sentence)
     print(svo.process_parse_tree(next(root)))
 

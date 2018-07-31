@@ -5,6 +5,7 @@ import numpy as np
 from keras.wrappers.scikit_learn import KerasRegressor
 from sklearn.model_selection import cross_val_score, KFold
 import json
+import argparse
 
 
 def baseline_model():
@@ -29,7 +30,7 @@ def kfold_test(feature, label, epoch, batch_size):
 
 
 def train():
-    svo, svo_wv, epa = read_epa()
+    svo, svo_wv, epa = read_epa(args.get('svo')==1)
     print('svo shape %s' % str(svo.shape))
     print('svo wv shape %s' % str(svo_wv.shape))
     print('epa shape %s' % str(epa.shape))
@@ -86,4 +87,7 @@ def evaluate(model_list, svo, wv, name, epa_mean, epa_std):
 
 
 if __name__ == '__main__':
+    ap = argparse.ArgumentParser("sentence epa lstm")
+    ap.add_argument('--svo', type=int, required=True)
+    args = vars(ap)
     train()
