@@ -1,5 +1,6 @@
 import json
 import csv
+import numpy as np
 from svo import SVO
 from read_news_headline import get_pred_svo
 
@@ -12,21 +13,27 @@ basic_sentiment = ['aggressive', 'angry', 'calm', 'careless',
                    ]
 
 
-def main():
+def read_gh_comments():
     # pull_request_id,id,comment_id,body,
     # Thanks,Sorry,Calm,Nervous,Careless,Cautious,Agressive,Defensive,Happy,Angry,pull_request_status
     with open(github_comments_svo_pred_path, 'r') as fp:
         svo_pred = json.load(fp)
+    svo = list()
     senti_vec = list()
     with open(github_comments_path, 'r') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             sent = row['body']
             if sent in svo_pred.keys() and len(svo_pred[sent]) > 0:
-                svo_pred.append(svo_pred[sent][0])
-                senti_vec.append([row[sent] for sent in basic_sentiment])
-    print(svo_pred)
-    print(senti_vec)
+                for item in svo_pred[sent]:
+                    if len(item) > 0:
+                        svo.append([item['subject'], item['predicate'], item['object']])
+                        senti_vec.append([row[sent.capitalize()] for sent in basic_sentiment])
+    svo = np.array(svo)
+    senti_vec = np.array(senti_vec)
+    print(svo.shape)
+    print(senti_vec.shape)
+    return svo
 
 
 def pred_github_svo():
@@ -47,4 +54,6 @@ def pred_github_svo():
 
 
 if __name__ == '__main__':
-    pred_github_svo()
+    # pred_github_svo()
+    read_gh_comments()
+
