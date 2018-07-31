@@ -17,7 +17,6 @@ def main():
     # Thanks,Sorry,Calm,Nervous,Careless,Cautious,Agressive,Defensive,Happy,Angry,pull_request_status
     svo_pred = list()
     senti_vec = list()
-    svo_splitter = SVO()
     with open(github_comments_path, 'r') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:

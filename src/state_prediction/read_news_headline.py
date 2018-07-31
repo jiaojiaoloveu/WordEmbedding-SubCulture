@@ -68,7 +68,7 @@ def read_epa():
         reader = csv.DictReader(csvfile)
         for row in reader:
             sent = row['NewsHeadline']
-            if sent in svo_pred.keys():
+            if sent in svo_pred.keys() and len(svo_pred[sent]) > 0:
                 svo.append([svo_pred[sent]['subject'][0], svo_pred[sent]['predicate'][0], svo_pred[sent]['object'][0]])
             else:
                 svo.append([row['Subject'], row['Verb'], row['Object']])
