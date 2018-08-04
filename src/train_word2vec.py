@@ -36,6 +36,7 @@ if __name__ == '__main__':
 
     for size in range(200, 401, 50):
         for mincount in range(0, 21, 5):
+            print('size %s mincount %s' % (size, mincount))
             train_word_vectors(modeltype=modeltype,
                                sentences=token_matrix,
                                path=('../models/embedding/%s/%s_sg_%s_size_%s_mincount_%s' %
