@@ -33,9 +33,15 @@ if __name__ == '__main__':
     corpustype = args.get("corpus")
 
     token_matrix = read_all_wordlist('../data/%s-wordlist-all' % corpustype)
-    train_word_vectors(modeltype=modeltype,
-                       sentences=token_matrix,
-                       path=('../models/embedding/%s/%s_sg_%s_size_%s_mincount_%s' %
-                             (corpustype, modeltype, sg, size, mincount)),
-                       sg=sg, size=size, mincount=mincount)
+
+    for size in range(200, 401, 50):
+        for mincount in range(0, 21, 5):
+            train_word_vectors(modeltype=modeltype,
+                               sentences=token_matrix,
+                               path=('../models/embedding/%s/%s_sg_%s_size_%s_mincount_%s' %
+                                     (corpustype, modeltype, sg, size, mincount)),
+                               sg=sg,
+                               size=size,
+                               mincount=mincount
+                               )
 
