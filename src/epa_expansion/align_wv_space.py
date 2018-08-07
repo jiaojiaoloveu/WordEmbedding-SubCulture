@@ -167,7 +167,7 @@ if __name__ == '__main__':
 
     w_list = ['happy', 'sad']
 
-    for seed_count in range(2000, 30001, 2000):
+    for seed_count in range(2000, 25000, 2000):
         print('seed %s' % seed_count)
         wv_dict, _ = get_aligned_wv(gh_model.wv, gg_model, w_list, method=args.get('method'), seed_count=seed_count)
         distance = list()
