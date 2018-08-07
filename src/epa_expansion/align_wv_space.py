@@ -26,7 +26,7 @@ def get_anchor_words():
     return anchor
 
 
-def get_training_dataset(source, target):
+def get_training_dataset(source, target, seed_count=20000):
     stop_words = get_anchor_words()
     overlap_words = set(source.vocab.keys()) & set(target.vocab.keys())
     source_mat = []
@@ -37,7 +37,8 @@ def get_training_dataset(source, target):
             target_mat.append(target[word])
     source_mat = np.array(source_mat)
     target_mat = np.array(target_mat)
-    source_mat_rand, target_mat_rand = get_sample_dataset(source, target, k=20000)
+    # source_mat_rand, target_mat_rand = get_sample_dataset(source, target, k=20000)
+    source_mat_rand, target_mat_rand = get_sample_dataset(source, target, k=seed_count)
     source_mat = np.concatenate((source_mat, source_mat_rand))
     target_mat = np.concatenate((target_mat, target_mat_rand))
     print('shape training')
@@ -88,8 +89,8 @@ def __nn_eval(source, target, model):
     cal_cosine_dis(source_pred, target_eval)
 
 
-def align_nn_model(source, target):
-    source_mat, target_mat = get_training_dataset(source, target)
+def align_nn_model(source, target, seed_count=20000):
+    source_mat, target_mat = get_training_dataset(source, target, seed_count)
     print('align train datasize %s' % str(source_mat.shape))
     model = sgd_model()
     model.fit(source_mat, target_mat, epochs=20, batch_size=100)
@@ -110,8 +111,8 @@ def __svd_eval(source, target, w):
     cal_cosine_dis(source_pred, target_eval)
 
 
-def align_svd_model(source, target):
-    source_dataset, target_dataset = get_sample_dataset(source, target, k=20000)
+def align_svd_model(source, target, seed_count=20000):
+    source_dataset, target_dataset = get_sample_dataset(source, target, k=seed_count)
     product = np.matmul(source_dataset.transpose(), target_dataset)
     U, s, V = np.linalg.svd(product)
     w = np.matmul(U, V)
@@ -123,12 +124,12 @@ def align_svd_model(source, target):
     return w
 
 
-def get_aligned_wv(source, target, tokens, method='nn'):
+def get_aligned_wv(source, target, tokens, method='nn', seed_count=20000):
     aligned_wv = {}
     aligned_source_wv = {}
     print('method type %s' % method)
     if method == 'nn':
-        model = align_nn_model(source, target)
+        model = align_nn_model(source, target, seed_count)
         for word in tokens:
             if word in source.vocab.keys() and word in target.vocab.keys():
                 s_wv = model.predict(np.reshape(source[word], (1, 300)))[0]
@@ -138,7 +139,7 @@ def get_aligned_wv(source, target, tokens, method='nn'):
             s_wv = model.predict(np.reshape(source[word], (1, 300)))[0]
             aligned_source_wv[word] = s_wv
     elif method == 'svd':
-        w_mat = align_svd_model(source, target)
+        w_mat = align_svd_model(source, target, seed_count)
         for word in tokens:
             if word in source.vocab.keys() and word in target.vocab.keys():
                 s_wv = np.matmul(source[word], w_mat)
@@ -164,13 +165,17 @@ if __name__ == '__main__':
     gg_model = KeyedVectors.load_word2vec_format('../models/embedding/GoogleNews-vectors-negative300.bin', binary=True)
     gh_model = Word2Vec.load('../models/embedding/github/word2vec_sg_0_size_300_mincount_5')
 
-    w_list = get_anchor_words()
-    wv_dict, _ = get_aligned_wv(gh_model.wv, gg_model, w_list, method=args.get('method'))
-    distance = list()
-    for w in wv_dict.keys():
-        wv = wv_dict[w]
-        dis = spatial.distance.cosine(wv[0], wv[1])
-        distance.append(dis)
-        print('%s: %s' % (w, dis))
-    print(np.mean(distance))
-    print(np.std(distance))
+    w_list = ['happy', 'sad']
+
+    for seed_count in range(2000, 30001, 2000):
+        print('seed %s' % seed_count)
+        wv_dict, _ = get_aligned_wv(gh_model.wv, gg_model, w_list, method=args.get('method'), seed_count=seed_count)
+        distance = list()
+        for w in wv_dict.keys():
+            wv = wv_dict[w]
+            dis = spatial.distance.cosine(wv[0], wv[1])
+            distance.append(dis)
+            print('%s: %s' % (w, dis))
+        print(np.mean(distance))
+        print(np.std(distance))
+
