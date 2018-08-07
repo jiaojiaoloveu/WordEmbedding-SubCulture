@@ -10,6 +10,7 @@ def main():
                 for mincount in range(0, 21, 5):
                     model_name = '%s_sg_%s_size_%s_mincount_%s' % (method, sg, size, mincount)
                     model_path = '../models/embedding/%s/%s' % (corpus_type, model_name)
+                    print(model_path)
                     model = load_model(model_path=model_path)
                     result_path = '../result/%s/%s' % (corpus_type, model_name)
                     os.makedirs(os.path.dirname(result_path), exist_ok=True)
@@ -27,6 +28,7 @@ def main():
                     ]
                     with open(result_path, 'w+') as fp:
                         fp.writelines("%s\n" % line for line in result_content)
+                    del model
 
 
 if __name__ == '__main__':
