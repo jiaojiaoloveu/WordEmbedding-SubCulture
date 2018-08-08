@@ -20,10 +20,11 @@ def align(source, target, method):
 
 if __name__ == '__main__':
     gg_model = KeyedVectors.load_word2vec_format('../models/embedding/GoogleNews-vectors-negative300.bin', binary=True)
-    gh_model = Word2Vec.load('../models/embedding/github/word2vec_sg_0_size_300_mincount_5')
+    model_name = 'word2vec_sg_0_size_300_mincount_5'
+    gh_model = Word2Vec.load('../models/embedding/github/%s' % model_name)
     gh_vec_new = align(gh_model.wv, gg_model, 'svd')
     gh_model_new = copy.deepcopy(gh_model)
-    gh_model_new.wv.vectors = gh_model_new
+    gh_model_new.wv.vectors = gh_vec_new
 
     w_list = list(set(gh_model_new.wv.vocab.keys()) & set(gg_model.vocab.keys()))
 
@@ -36,5 +37,6 @@ if __name__ == '__main__':
     os.makedirs(cmp_path, exist_ok=True)
     with open(os.path.join(cmp_path, 'github'), 'w') as fp:
         json.dump(distance_ordered, fp)
-    os.makedirs('../models/embedding/github_aligned', exist_ok=True)
-    gh_model_new.save('../models/embedding/github_aligned/word2vec_sg_0_size_300_mincount_5')
+    model_path = '../models/embedding/github_aligned'
+    os.makedirs(model_path, exist_ok=True)
+    gh_model_new.save(os.path.join(model_path, '/word2vec_sg_0_size_300_mincount_5'))
