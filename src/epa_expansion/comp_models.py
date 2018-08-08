@@ -39,4 +39,4 @@ if __name__ == '__main__':
         json.dump(distance_ordered, fp)
     model_path = '../models/embedding/github_aligned'
     os.makedirs(model_path, exist_ok=True)
-    gh_model_new.save(os.path.join(model_path, '/word2vec_sg_0_size_300_mincount_5'))
+    gh_model_new.save(os.path.join(model_path, 'word2vec_sg_0_size_300_mincount_5'))
