@@ -1,6 +1,7 @@
 import os
 import argparse
 from utils import load_model
+import json
 
 
 def main():
@@ -15,19 +16,17 @@ def main():
                     result_path = '../result/%s/%s' % (corpus_type, model_name)
                     os.makedirs(os.path.dirname(result_path), exist_ok=True)
 
-                    wordsim = model.wv.evaluate_word_pairs('../data/word353/wordsim353.tsv')
+                    pearson, spearman, oov_ratio = model.wv.evaluate_word_pairs('../data/word353/wordsim353.tsv')
                     question = model.wv.accuracy('../data/question/questions-words.txt')[-1]
                     result_content = [
-                        model_path,
-                        str(model.wv.vectors.shape),
-                        str(wordsim),
-                        question,
-                        question['section'],
+                        pearson,
+                        spearman,
+                        oov_ratio,
                         len(question['correct']),
                         len(question['incorrect']),
                     ]
                     with open(result_path, 'w+') as fp:
-                        fp.writelines("%s\n" % line for line in result_content)
+                        json.dump(result_content, fp)
                     del model
 
 
