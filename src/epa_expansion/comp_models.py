@@ -7,6 +7,7 @@ import os
 import json
 import copy
 import numpy as np
+from nltk.corpus import wordnet as wn
 
 
 def align(source, target, method):
@@ -49,9 +50,10 @@ def cmp():
     gg_model = KeyedVectors.load_word2vec_format('../models/embedding/GoogleNews-vectors-negative300.bin', binary=True)
     model_name = 'word2vec_sg_0_size_300_mincount_20'
     gh_model = Word2Vec.load('../models/embedding/github_aligned/%s' % model_name)
-    tokens = ['bug', 'debug', 'commit', 'push', 'pull', 'thread', 'crash', 'fix', 'git', 'merge', 'password',
-              'happy', 'glad', 'sad', 'sorry', 'regret', 'reject', 'angry', 'proud', 'cautious', 'excited',
-              'man', 'woman', 'male', 'female', 'boy', 'girl', 'programmer', 'sex', 'gay', 'civic']
+    # tokens = ['bug', 'debug', 'commit', 'push', 'pull', 'thread', 'crash', 'fix', 'git', 'merge', 'password',
+    #           'happy', 'glad', 'sad', 'sorry', 'regret', 'reject', 'angry', 'proud', 'cautious', 'excited',
+    #           'man', 'woman', 'male', 'female', 'boy', 'girl', 'programmer', 'sex', 'gay', 'civic']
+    tokens = ['worried', 'difficult', 'important', 'significantly', 'efficient']
     for w in tokens:
         print('==========')
         print(w)
@@ -62,5 +64,29 @@ def cmp():
         print(gh_model.wv.most_similar(w, topn=20))
 
 
+def cmp2():
+    with open('../result/cmp/github', 'r') as fp:
+        words_list = json.load(fp)
+
+    words_list_pos = {
+        wn.VERB: [],
+        wn.NOUN: [],
+        wn.ADV: [],
+        wn.ADJ: []
+    }
+
+    for word in words_list.keys():
+        for pos in words_list_pos.keys():
+            if word in set(w.name().split('.', 1)[0] for w in wn.synsets(word, pos=pos)):
+                words_list_pos[pos].append(words_list[word])
+
+    for pos in words_list_pos.keys():
+        print(pos)
+        vc = np.array(words_list_pos[pos])
+        print(vc.shape)
+        print(np.mean(vc))
+        print(np.std(vc))
+
+
 if __name__ == '__main__':
-    cmp()
+    cmp2()
