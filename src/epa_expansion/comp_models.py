@@ -80,9 +80,9 @@ def cmp2():
             if word in set(w.name().split('.', 1)[0] for w in wn.synsets(word, pos=pos)):
                 words_list_pos[pos].append(words_list[word])
 
-    words_list_pos[wn.ADV] = words_list_pos[wn.ADV].extend(words_list_pos[wn.ADJ])
+    words_list_pos[wn.ADV].extend(words_list_pos[wn.ADJ])
 
-    for pos in words_list_pos.keys():
+    for pos in [wn.VERB, wn.NOUN, wn.ADV]:
         print(pos)
         vc = np.array(words_list_pos[pos])
         print(vc.shape)
