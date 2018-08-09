@@ -20,7 +20,7 @@ def align(source, target, method):
 
 if __name__ == '__main__':
     gg_model = KeyedVectors.load_word2vec_format('../models/embedding/GoogleNews-vectors-negative300.bin', binary=True)
-    model_name = 'word2vec_sg_0_size_300_mincount_5'
+    model_name = 'word2vec_sg_0_size_300_mincount_20'
     gh_model = Word2Vec.load('../models/embedding/github/%s' % model_name)
     gh_vec_new = align(gh_model.wv, gg_model, 'svd')
     gh_model_new = copy.deepcopy(gh_model)
@@ -39,4 +39,4 @@ if __name__ == '__main__':
         json.dump(distance_ordered, fp)
     model_path = '../models/embedding/github_aligned'
     os.makedirs(model_path, exist_ok=True)
-    gh_model_new.save(os.path.join(model_path, 'word2vec_sg_0_size_300_mincount_5'))
+    gh_model_new.save(os.path.join(model_path, model_name))
