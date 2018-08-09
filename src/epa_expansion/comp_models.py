@@ -11,10 +11,10 @@ import numpy as np
 
 def align(source, target, method):
     if method == 'nn':
-        model = align_nn_model(source, target, 20000)
+        model = align_nn_model(source, target, 10000)
         return model.predict(source.vectors)
     elif method == 'svd':
-        w = align_svd_model(source, target, 20000)
+        w = align_svd_model(source, target, 10000)
         return np.matmul(source.vectors, w)
 
 
