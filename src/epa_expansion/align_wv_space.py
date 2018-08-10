@@ -10,6 +10,7 @@ from keras.layers import Dense
 from gensim.models import KeyedVectors
 from gensim.models.word2vec import Word2Vec
 from scipy import spatial
+import json
 
 
 def __comparison(arr1, arr2):
@@ -78,6 +79,7 @@ def cal_cosine_dis(pred, label):
     res = np.array(res)
     print(np.mean(res))
     print(np.std(res))
+    return res.tolist()
 
 
 def __nn_eval(source, target, model):
@@ -108,7 +110,7 @@ def align_nn_model(source, target, seed_count=20000):
 def __svd_eval(source, target, w):
     source_eval, target_eval = get_sample_dataset(source, target)
     source_pred = np.matmul(source_eval, w)
-    cal_cosine_dis(source_pred, target_eval)
+    return cal_cosine_dis(source_pred, target_eval)
 
 
 def align_svd_model(source, target, seed_count=20000):
@@ -118,9 +120,11 @@ def align_svd_model(source, target, seed_count=20000):
     w = np.matmul(U, V)
     print('eval on training dataset')
     source_pred = np.matmul(source_dataset, w)
-    cal_cosine_dis(source_pred, target_dataset)
+    train = cal_cosine_dis(source_pred, target_dataset)
     print('eval on testing dataset')
-    __svd_eval(source, target, w)
+    test = __svd_eval(source, target, w)
+    with open('../result/align_space/svd/%s' % seed_count, 'w') as fp:
+        json.dump((train, test), fp)
     return w
 
 
