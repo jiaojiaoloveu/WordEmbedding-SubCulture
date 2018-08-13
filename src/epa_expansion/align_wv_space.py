@@ -88,7 +88,7 @@ def __nn_eval(source, target, model):
     print(score)
     source_pred = model.predict(source_eval)
     print('distance')
-    cal_cosine_dis(source_pred, target_eval)
+    return cal_cosine_dis(source_pred, target_eval)
 
 
 def align_nn_model(source, target, seed_count=20000):
@@ -101,9 +101,11 @@ def align_nn_model(source, target, seed_count=20000):
     print(score)
     print('eval on training dataset')
     source_pred = model.predict(source_mat)
-    cal_cosine_dis(source_pred, target_mat)
+    train = cal_cosine_dis(source_pred, target_mat)
     print('align on testing dataset')
-    __nn_eval(source, target, model)
+    test = __nn_eval(source, target, model)
+    with open('../result/align_space/nn/%s' % seed_count, 'w') as fp:
+        json.dump((train, test), fp)
     return model
 
 
