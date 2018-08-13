@@ -23,7 +23,7 @@ def main():
     gg_model = KeyedVectors.load_word2vec_format('../models/embedding/GoogleNews-vectors-negative300.bin', binary=True)
     model_name = 'word2vec_sg_0_size_300_mincount_20'
     gh_model = Word2Vec.load('../models/embedding/github/%s' % model_name)
-    gh_vec_new = align(gh_model.wv, gg_model, 'svd')
+    gh_vec_new = align(gh_model.wv, gg_model, 'nn')
     gh_model_new = copy.deepcopy(gh_model)
     gh_model_new.wv.vectors = gh_vec_new
 
@@ -50,10 +50,10 @@ def cmp():
     gg_model = KeyedVectors.load_word2vec_format('../models/embedding/GoogleNews-vectors-negative300.bin', binary=True)
     model_name = 'word2vec_sg_0_size_300_mincount_20'
     gh_model = Word2Vec.load('../models/embedding/github_aligned/%s' % model_name)
-    # tokens = ['bug', 'debug', 'commit', 'push', 'pull', 'thread', 'crash', 'fix', 'git', 'merge', 'password',
-    #           'happy', 'glad', 'sad', 'sorry', 'regret', 'reject', 'angry', 'proud', 'cautious', 'excited',
-    #           'man', 'woman', 'male', 'female', 'boy', 'girl', 'programmer', 'sex', 'gay', 'civic']
-    tokens = ['worried', 'difficult', 'important', 'significantly', 'efficient']
+    tokens = ['bug', 'debug', 'commit', 'push', 'pull', 'thread', 'crash', 'fix', 'git', 'merge', 'password',
+              'happy', 'glad', 'sad', 'sorry', 'regret', 'reject', 'angry', 'proud', 'cautious', 'excited',
+              'man', 'woman', 'male', 'female', 'boy', 'girl', 'programmer', 'sex', 'gay', 'civic',
+              'worried', 'difficult', 'important', 'significantly', 'efficient']
     for w in tokens:
         print('==========')
         print(w)
@@ -62,6 +62,8 @@ def cmp():
         print(gg_model.most_similar(w, topn=20))
         print('github')
         print(gh_model.wv.most_similar(w, topn=20))
+    del gg_model
+    del gh_model
 
 
 def cmp2():
@@ -91,4 +93,10 @@ def cmp2():
 
 
 if __name__ == '__main__':
+    import os
+    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+    os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
+    main()
+    cmp()
     cmp2()
