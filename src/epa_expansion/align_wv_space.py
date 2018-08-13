@@ -163,6 +163,10 @@ def get_aligned_wv(source, target, tokens, method='nn', seed_count=20000):
 
 
 if __name__ == '__main__':
+    import os
+    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+    os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
     ap = argparse.ArgumentParser("align wv space")
     ap.add_argument('--method', type=str, required=True)
     args = vars(ap.parse_args())
