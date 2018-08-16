@@ -114,8 +114,10 @@ def get_github_distance(w1, wlist, wvocab):
 def generate():
     # seed_words and eval_words as dictionary of word:epa
     (seed_words, eval_words) = get_rand_seeds(Configs.seed, Configs.eval, Configs.epa)
+
     # github words word:wv
     comparing_words = get_comparing_tokens()
+
     token_words = set(list(seed_words.keys()) + list(eval_words.keys()) + list(comparing_words.keys()))
 
     # append wikitext words to network
@@ -187,6 +189,67 @@ def generate():
     del google_news_model
 
     log_data(token_words, list(comparing_words.keys()), seed_words, eval_words, token_label, eval_label, weight_matrix)
+
+
+def generate2():
+    # seed_words and eval_words as dictionary of word:epa
+    (seed_words, eval_words) = get_rand_seeds(Configs.seed, Configs.eval, Configs.epa)
+
+    token_words = set(list(seed_words.keys()) + list(eval_words.keys()))
+
+    # append wikitext words to enlarge the network size
+    with open(os.path.join(word_dataset_base, 'wikitext-wordlist'), 'r') as fp:
+        corpus_words = set(json.load(fp))
+    token_words.update(corpus_words)
+
+    # use trained model to calculate distance
+    google_news_model_path = '../models/embedding/GoogleNews-vectors-negative300.bin'
+    google_news_model = load_google_word_vectors(google_news_model_path)
+    # use token word in the wv space
+    all_token_words = set(google_news_model.vocab.keys())
+    token_words = list(token_words & all_token_words)
+    token_num = len(token_words)
+
+    # training matrix
+    token_label = np.zeros((token_num, LabelSpace.Dimension), dtype=np.double)
+    # eval matrix
+    eval_label = np.array(token_label)
+
+    # update label info
+    seeds_in_token, eval_in_token = 0, 0
+    for ind in range(0, token_num):
+        word = token_words[ind]
+        if word in seed_words.keys():
+            token_label[ind] = seed_words[word]
+            seeds_in_token += 1
+        if word in eval_words.keys():
+            eval_label[ind] = eval_words[word]
+            eval_in_token += 1
+
+    print('%s/%s seeds in token words' % (seeds_in_token, Configs.seed))
+    print('%s/%s eval in token words' % (eval_in_token, Configs.eval))
+    print('token number %s' % token_num)
+
+    start_time = time.time()
+    # update weight info
+    weight_matrix = np.zeros((token_num, token_num), dtype=np.double)
+    for ind in range(0, token_num - 1):
+        # fully connected graph
+        # weight between nodes positive
+        # distance = 1 - cosine-dis
+        distance_matrix = google_news_model.distances(token_words[ind], token_words[ind + 1: token_num])
+        weight_matrix[ind, ind + 1: token_num] = distance_matrix
+    del google_news_model
+
+    print('time cost %s' % (time.time() - start_time))
+
+    os.makedirs(word_dataset_base, exist_ok=True)
+    log_json(os.path.join(word_dataset_base, 'token'), token_words)
+    log_json(os.path.join(word_dataset_base, 'seed'), seed_words)
+    log_json(os.path.join(word_dataset_base, 'eval'), eval_words)
+    log_np(os.path.join(word_dataset_base, 'token_label'), token_label)
+    log_np(os.path.join(word_dataset_base, 'eval_label'), eval_label)
+    log_np(os.path.join(word_dataset_base, 'matrix'), weight_matrix)
 
 
 def train():
@@ -303,12 +366,12 @@ if __name__ == '__main__':
         Configs.epa = args.get('epa')
 
     if args.get("generate") == 0:
-        generate()
+        generate2()
 
-    log_name = log_name % (Configs.exp, Configs.enn, Configs.iterations)
+    # log_name = log_name % (Configs.exp, Configs.enn, Configs.iterations)
 
-    log_path = os.path.join(word_dataset_base, log_name)
-    if os.path.exists(log_path):
-        os.remove(log_path)
+    # log_path = os.path.join(word_dataset_base, log_name)
+    # if os.path.exists(log_path):
+    #     os.remove(log_path)
 
-    train()
+    # train()

@@ -128,6 +128,7 @@ def read_warriner_ratings():
 
 def get_rand_seeds(seed_size=5000, eval_size=8000, threshold=2.0):
     # return (dic, dic)
+    # dic = (w, [e,p,a])
     voc = read_warriner_ratings()
     return __get_rand_seeds(voc, seed_size, eval_size, threshold)
 
