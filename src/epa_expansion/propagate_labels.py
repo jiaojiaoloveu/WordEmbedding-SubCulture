@@ -319,16 +319,13 @@ def generate():
 def generate_github():
     aligned_github_model_path = '../models/embedding/github_aligned/word2vec_sg_0_size_300_mincount_5'
     github_model = load_github_word_vectors(aligned_github_model_path)
-    github_token_words = github_model.wv.vocab.keys()
+    github_token_words = list(github_model.wv.vocab.keys())
     github_token_num = len(github_token_words)
 
     start_time = time.time()
     # update weight info
     github_weight_matrix = np.zeros((github_token_num, github_token_num), dtype=np.double)
     for ind in range(0, github_token_num - 1):
-        # fully connected graph
-        # weight between nodes positive
-        # distance = 1 - cosine-dis
         distance_matrix = github_model.wv.distances(github_token_words[ind], github_token_words[ind + 1: github_token_num])
         github_weight_matrix[ind, ind + 1: github_token_num] = distance_matrix
     print('time cost %s' % (time.time() - start_time))
@@ -383,7 +380,8 @@ def train():
                      ]
         }
 
-    logging_info = list(log_item(-1, eval_label[eval_label_mask], train_label[eval_label_mask]))
+    logging_info = list()
+    logging_info.append(log_item(-1, eval_label[eval_label_mask], train_label[eval_label_mask]))
 
     original_train_label = np.array(train_label)
 
@@ -405,7 +403,7 @@ def train():
     with open(os.path.join(word_dataset_base, log_name), 'w') as fp:
         json.dump(logging_info, fp)
 
-    with open(os.path.join(word_dataset_base, 'result'), 'w') as fp:
+    with open(os.path.join(word_dataset_base, log_name + '_' + 'lexicon'), 'w') as fp:
         predict_label = list(zip(token_words, train_label.tolist()))
         json.dump(predict_label, fp)
 
