@@ -329,7 +329,7 @@ def generate_github():
         # fully connected graph
         # weight between nodes positive
         # distance = 1 - cosine-dis
-        distance_matrix = github_model.distances(github_token_words[ind], github_token_words[ind + 1: github_token_num])
+        distance_matrix = github_model.wv.distances(github_token_words[ind], github_token_words[ind + 1: github_token_num])
         github_weight_matrix[ind, ind + 1: github_token_num] = distance_matrix
     print('time cost %s' % (time.time() - start_time))
     del github_model
@@ -469,4 +469,5 @@ if __name__ == '__main__':
 
     log_name = log_name % (Configs.exp, Configs.enn, Configs.iterations, int(Configs.uni))
 
-    train()
+    # train()
+    generate_github()
