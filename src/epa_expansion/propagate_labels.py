@@ -307,13 +307,15 @@ def generate():
 
     print('time cost %s' % (time.time() - start_time))
 
-    os.makedirs(word_dataset_base, exist_ok=True)
-    log_json(os.path.join(word_dataset_base, 'token'), token_words)
-    log_json(os.path.join(word_dataset_base, 'seed'), seed_words)
-    log_json(os.path.join(word_dataset_base, 'eval'), eval_words)
-    log_np(os.path.join(word_dataset_base, 'train_label'), train_label)
-    log_np(os.path.join(word_dataset_base, 'eval_label'), eval_label)
-    log_np(os.path.join(word_dataset_base, 'matrix'), weight_matrix)
+    file_path = os.path.join(word_dataset_base, 'seed_%s_eval_%s_epa_%s' % (Configs.seed, Configs.eval, Configs.epa))
+    os.makedirs(file_path, exist_ok=True)
+
+    log_json(os.path.join(file_path, 'token'), token_words)
+    log_json(os.path.join(file_path, 'seed'), seed_words)
+    log_json(os.path.join(file_path, 'eval'), eval_words)
+    log_np(os.path.join(file_path, 'train_label'), train_label)
+    log_np(os.path.join(file_path, 'eval_label'), eval_label)
+    log_np(os.path.join(file_path, 'matrix'), weight_matrix)
 
 
 def generate_github():
@@ -338,11 +340,12 @@ def generate_github():
 def train():
     print('start training')
 
-    with open(os.path.join(word_dataset_base, 'token'), 'r') as fp:
+    file_path = os.path.join(word_dataset_base, 'seed_%s_eval_%s_epa_%s' % (Configs.seed, Configs.eval, Configs.epa))
+    with open(os.path.join(file_path, 'token'), 'r') as fp:
         token_words = json.load(fp)
-    train_label = np.load(os.path.join(word_dataset_base, 'train_label.npy'))
-    eval_label = np.load(os.path.join(word_dataset_base, 'eval_label.npy'))
-    weight_matrix = np.load(os.path.join(word_dataset_base, 'matrix.npy'))
+    train_label = np.load(os.path.join(file_path, 'train_label.npy'))
+    eval_label = np.load(os.path.join(file_path, 'eval_label.npy'))
+    weight_matrix = np.load(os.path.join(file_path, 'matrix.npy'))
 
     train_label_mask = np.any(train_label, axis=1)
     eval_label_mask = np.any(eval_label, axis=1)
@@ -400,14 +403,19 @@ def train():
         logging_info.append(log_item(Configs.iterations + 1,
                                      eval_label[eval_label_mask], train_label[eval_label_mask]))
 
-    with open(os.path.join(word_dataset_base, log_name), 'w') as fp:
+    result_file_path = os.path.join(file_path,
+                                    'it_%s_enn_%s_exp_%s_alpha_%s_uni_%s' %
+                                    (Configs.iterations, Configs.enn, Configs.exp, Configs.alpha, Configs.uni)
+                                    )
+    os.makedirs(result_file_path, exist_ok=True)
+    with open(os.path.join(result_file_path, log_name), 'w') as fp:
         json.dump(logging_info, fp)
 
-    with open(os.path.join(word_dataset_base, log_name + '_' + 'lexicon'), 'w') as fp:
+    with open(os.path.join(result_file_path, log_name + '_' + 'lexicon'), 'w') as fp:
         predict_label = list(zip(token_words, train_label.tolist()))
         json.dump(predict_label, fp)
 
-    np.save(os.path.join(word_dataset_base, 'train_label_2'), train_label)
+    np.save(os.path.join(result_file_path, 'train_label_expanded'), train_label)
 
 
 def predict():
@@ -428,15 +436,18 @@ def predict():
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser("semi-supervised training using graph")
+    ap.add_argument('--generate', type=int, required=True)
+
     ap.add_argument('--seed', type=int, required=True)
     ap.add_argument('--eval', type=int, required=True)
     ap.add_argument('--epa', type=float, required=True)
-    ap.add_argument('--generate', type=int, required=True)
+
     ap.add_argument('--alpha', type=float, required=True)
     ap.add_argument('--iteration', type=int, required=True)
     ap.add_argument('--enn', type=float, required=True)
     ap.add_argument('--exp', type=float, required=True)
     ap.add_argument('--uni', type=int, required=True)
+
     args = vars(ap.parse_args())
     if args.get("alpha") is not None:
         Configs.alpha = args.get("alpha")
@@ -467,5 +478,5 @@ if __name__ == '__main__':
 
     log_name = log_name % (Configs.exp, Configs.enn, Configs.iterations, int(Configs.uni))
 
-    # train()
-    generate_github()
+    train()
+    # generate_github()
