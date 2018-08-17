@@ -14,44 +14,7 @@ from gen_data import wv_map
 from sample_seeds import __norm2uni, __uni2norm, get_rand_seeds
 
 
-log_name = 'log_exp%s_enn%s_it%s'
-
-
-def mean_absolute_error(it, real_label, predict_label, log_mask, eval_num):
-    assert real_label.shape == predict_label.shape
-
-    real_label_ori = __uni2norm(real_label)
-    predict_label_ori = __uni2norm(predict_label)
-
-    mae = np.sum(np.absolute(real_label - predict_label), axis=0) / eval_num
-    mae_ori = np.sum(np.absolute(real_label_ori - predict_label_ori), axis=0) / eval_num
-
-    with open(os.path.join(word_dataset_base, log_name), 'a') as fp:
-        out = [
-            'iteration #%s/%s' % (it, Configs.iterations),
-            'real',
-            str(real_label[log_mask]),
-            'predict',
-            str(predict_label[log_mask]),
-            'real_ori',
-            str(real_label_ori[log_mask]),
-            'predict_ori',
-            str(predict_label_ori[log_mask]),
-            'mae',
-            mae,
-            'mae',
-            mae_ori,
-            'corr',
-            str(pearsonr(real_label[:, 0], predict_label[:, 0])),
-            str(pearsonr(real_label[:, 1], predict_label[:, 1])),
-            str(pearsonr(real_label[:, 2], predict_label[:, 2])),
-            'corr_ori',
-            str(pearsonr(real_label_ori[:, 0], predict_label_ori[:, 0])),
-            str(pearsonr(real_label_ori[:, 1], predict_label_ori[:, 1])),
-            str(pearsonr(real_label_ori[:, 2], predict_label_ori[:, 2])),
-        ]
-        fp.writelines('%s\n' % line for line in out)
-    return mae
+log_name = 'log_exp%s_enn%s_it%s_uni%s'
 
 
 def log_json(path, arr):
@@ -109,6 +72,29 @@ def get_github_distance(w1, wlist, wvocab):
     dot_products = np.dot(w2, w1)
     distances = 1 - dot_products / (norm * all_norms)
     return distances
+
+
+def mean_absolute_error(it, real_label, predict_label, log_mask, eval_num):
+    assert real_label.shape == predict_label.shape
+
+    mae = np.sum(np.absolute(real_label - predict_label), axis=0) / eval_num
+
+    with open(os.path.join(word_dataset_base, log_name), 'a') as fp:
+        out = [
+            'iteration #%s/%s' % (it, Configs.iterations),
+            'real',
+            str(real_label[log_mask]),
+            'predict',
+            str(predict_label[log_mask]),
+            'mae',
+            mae,
+            'corr',
+            str(pearsonr(real_label[:, 0], predict_label[:, 0])),
+            str(pearsonr(real_label[:, 1], predict_label[:, 1])),
+            str(pearsonr(real_label[:, 2], predict_label[:, 2])),
+        ]
+        fp.writelines('%s\n' % line for line in out)
+    return mae
 
 
 def generate2():
@@ -357,26 +343,17 @@ def train():
 
     with open(os.path.join(word_dataset_base, 'token'), 'r') as fp:
         token_words = json.load(fp)
-    with open(os.path.join(word_dataset_base, 'seed'), 'r') as fp:
-        seed_words = json.load(fp)
-    with open(os.path.join(word_dataset_base, 'eval'), 'r') as fp:
-        eval_words = json.load(fp)
     train_label = np.load(os.path.join(word_dataset_base, 'train_label.npy'))
     eval_label = np.load(os.path.join(word_dataset_base, 'eval_label.npy'))
     weight_matrix = np.load(os.path.join(word_dataset_base, 'matrix.npy'))
 
     train_label_mask = np.any(train_label, axis=1)
-    train_label_ori = train_label[train_label_mask]
-
     eval_label_mask = np.any(eval_label, axis=1)
-    eval_label_ori = eval_label[eval_label_mask]
-
-    print(train_label[train_label_mask])
 
     # uniform labels
-    if uniform == 1:
-        train_label[train_label_mask] = __norm2uni(train_label_ori)
-        eval_label[eval_label_mask] = __norm2uni(eval_label_ori)
+    if Configs.uni:
+        train_label[train_label_mask] = __norm2uni(train_label[train_label_mask])
+        eval_label[eval_label_mask] = __norm2uni(eval_label[eval_label_mask])
 
     token_num = len(token_words)
 
@@ -392,34 +369,47 @@ def train():
     np.save(os.path.join(word_dataset_base, 'lap'), laplacian_matrix)
 
     print('generate eval mat')
-
     label_mask = np.array(train_label_mask)
     label_mask_inv = np.logical_not(label_mask)
     label_mask_all = (1 - Configs.alpha) * label_mask + label_mask_inv
 
-    eval_num = np.sum(eval_label_mask)
-    log_window_size = 20
-    log_mask = np.random.rand(eval_num) < (1.0 * log_window_size / eval_num)
+    def log_item(it, pred, eval):
+        return {
+            'it': it,
+            'mae': np.mean(np.abs(pred - eval), axis=0),
+            'corr': [pearsonr(pred[:, 0], eval[:, 0]),
+                     pearsonr(pred[:, 1], eval[:, 1]),
+                     pearsonr(pred[:, 2], eval[:, 2])
+                     ]
+        }
 
-    mean_absolute_error(-1, eval_label[eval_label_mask], train_label[eval_label_mask], log_mask, eval_num)
+    logging_info = list(log_item(-1, eval_label[eval_label_mask], train_label[eval_label_mask]))
+
     original_train_label = np.array(train_label)
 
     for it in range(0, Configs.iterations):
-        if it % 10 == 0:
+        if it % 5 == 0:
             print('round %s/%s' % (it, Configs.iterations))
         transient_token_label = np.matmul(laplacian_matrix, train_label)
         train_label = transient_token_label * np.reshape(label_mask_all, (token_num, 1)) + \
                       Configs.alpha * original_train_label * np.reshape(label_mask, (token_num, 1))
+        logging_info.append(log_item(it, eval_label[eval_label_mask], train_label[eval_label_mask]))
 
-        mean_absolute_error(it, eval_label[eval_label_mask], train_label[eval_label_mask], log_mask, eval_num)
+    if Configs.uni:
+        train_label_mask_new = np.any(train_label, axis=1)
+        train_label[train_label_mask_new] = __uni2norm(train_label[train_label_mask_new])
+        eval_label[eval_label_mask] = __uni2norm(eval_label[eval_label_mask])
+        logging_info.append(log_item(Configs.iterations + 1,
+                                     eval_label[eval_label_mask], train_label[eval_label_mask]))
 
-    if uniform == 1:
-        train_label = __uni2norm(train_label)
-    np.save(os.path.join(word_dataset_base, 'train_label_2'), train_label)
+    with open(os.path.join(word_dataset_base, log_name), 'w') as fp:
+        json.dump(logging_info, fp)
 
-    predict_label = list(zip(token_words, train_label.tolist()))
     with open(os.path.join(word_dataset_base, 'result'), 'w') as fp:
+        predict_label = list(zip(token_words, train_label.tolist()))
         json.dump(predict_label, fp)
+
+    np.save(os.path.join(word_dataset_base, 'train_label_2'), train_label)
 
 
 def predict():
@@ -471,15 +461,12 @@ if __name__ == '__main__':
     if args.get('epa') is not None:
         Configs.epa = args.get('epa')
 
-    uniform = args.get('uni')
+    if args.get('uni') is not None:
+        Configs.uni = (args.get('uni') == 1)
 
     if args.get("generate") == 0:
         generate()
 
-    log_name = log_name % (Configs.exp, Configs.enn, Configs.iterations)
-
-    log_path = os.path.join(word_dataset_base, log_name)
-    if os.path.exists(log_path):
-        os.remove(log_path)
+    log_name = log_name % (Configs.exp, Configs.enn, Configs.iterations, int(Configs.uni))
 
     train()

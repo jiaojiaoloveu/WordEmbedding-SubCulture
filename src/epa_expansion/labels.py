@@ -40,6 +40,8 @@ class Configs:
     enn = 0.6
     exp = 1
 
+    uni = False
+
     seed = 5000
     eval = 8000
     epa = 2
