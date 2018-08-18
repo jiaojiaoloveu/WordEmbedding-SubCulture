@@ -90,18 +90,11 @@ def fit_model(feature_train, label_train, feature_test, label_test, dtype, unifo
         label_pred = __uni2norm(label_pred)
         mae_ori = np.mean(np.abs(label_pred - label_test), axis=0)
         print('mae ori %s' % mae_ori)
-        mae = np.concatenate(([mae], [mae_ori]))
-    return model, mae
+    return model, [mae, mae_ori]
 
 
-def train():
-    seed_size = args.get('seed')
-    eval_size = args.get('eval')
-    epa = args.get('epa')
+def train(generate, seed_size, eval_size, epa, epochs, batch_size):
     feature_train, label_train, feature_test, label_test = generate_data(generate, seed_size, eval_size, epa)
-    # param tuning
-    epochs = epoch
-    batch_size = batch
 
     model, mae = fit_model(feature_train, label_train, feature_test, label_test,
                            dtype, uniform, epochs, batch_size)
@@ -232,11 +225,12 @@ if __name__ == '__main__':
     args = vars(ap.parse_args())
 
     dtype = args.get('model')
-    generate = args.get('generate')
+    gen = args.get('generate')
     uniform = (args.get('uniform') == 1)
     align = args.get('align')
-    epoch = args.get('epoch')
-    batch = args.get('batch')
 
+    for epa in range(30, -1, -5):
+        generate_data(3, 600, 1000, 0.1 * epa)
 
-    main2()
+    for seed in range(500, 5001, 500):
+        generate_data(3, 5000, 8000, 2)
