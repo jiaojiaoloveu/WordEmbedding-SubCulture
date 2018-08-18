@@ -80,7 +80,7 @@ def generate():
     token_words = set(list(seed_words.keys()) + list(eval_words.keys()))
 
     # append wikitext words to enlarge the network size
-    with open(os.path.join(word_dataset_base, 'wikitext-wordlist'), 'r') as fp:
+    with open('../result/epa_expansion/wikitext-wordlist', 'r') as fp:
         corpus_words = set(json.load(fp))
     token_words.update(corpus_words)
 
