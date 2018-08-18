@@ -94,9 +94,9 @@ def fit_model(feature_train, label_train, feature_test, label_test, dtype, unifo
         print('mae ori %s' % mae_ori)
         rsme_ori = np.sqrt(np.mean((label_pred - label_test) ** 2, axis=0))
         print('rsme ori %s' % rsme_ori)
-        return model, [mae, rsme, mae_ori, rsme_ori]
+        return model, np.array([mae, rsme, mae_ori, rsme_ori]).tolist()
     else:
-        return model, [mae, rsme]
+        return model, np.array([mae, rsme]).tolist()
 
 
 def train(generate, seed_size, eval_size, epa, epochs, batch_size):

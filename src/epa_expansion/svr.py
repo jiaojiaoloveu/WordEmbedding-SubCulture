@@ -32,9 +32,9 @@ def train(seed_size, eval_size, epa, uniform):
         label_pred = __uni2norm(label_pred)
         mae_ori = np.mean(np.abs(label_pred - label_test), axis=0)
         rsme_ori = np.sqrt(np.mean((label_pred - label_test) ** 2, axis=0))
-        return [mae, rsme, mae_ori, rsme_ori]
+        return np.array([mae, rsme, mae_ori, rsme_ori]).tolist()
     else:
-        return [mae, rsme]
+        return np.array([mae, rsme]).tolist()
     #     label_space = []
     #     for w in wv:
     #         label_space.append(clf.predict(wv[w]))
