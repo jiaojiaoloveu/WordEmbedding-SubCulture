@@ -55,7 +55,8 @@ def baseline_model(dtype='lr', uniform=False):
 def kfold_test(feature, label, dtype, uniform, epoch, batch_size):
     seed = 10
     np.random.seed(seed)
-    estimator = KerasRegressor(build_fn=baseline_model(dtype, uniform), epochs=epoch, batch_size=batch_size, verbose=0)
+    estimator = KerasRegressor(build_fn=baseline_model, dtype=dtype, uniform=uniform,
+                               epochs=epoch, batch_size=batch_size, verbose=0)
     kfold = KFold(n_splits=5, random_state=seed)
     results = cross_val_score(estimator, feature, label, cv=kfold)
     print("Results: %.2f (%.2f) MSE" % (results.mean(), results.std()))
@@ -226,7 +227,7 @@ def main():
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser('keras deep learning method')
-    ap.add_argument('--generate', type=int, required=False)
+    ap.add_argument('--generate', type=int, required=True)
     ap.add_argument('--model', type=str, required=True)
     ap.add_argument('--uniform', type=int, required=True)
     ap.add_argument('--align', type=str, required=True)
