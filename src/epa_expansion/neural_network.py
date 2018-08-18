@@ -212,7 +212,7 @@ def main():
 
             for seed in range(500, 5001, 500):
                 # generate_data(3, 5000, 8000, 2)
-                model, metrics = train(2, seed, 8000, 2, epoch, batch)
+                model, metrics = train(2, seed, 8000, 2.0, epoch, batch)
                 logging.append({
                     'epoch': epoch,
                     'batch': batch,
