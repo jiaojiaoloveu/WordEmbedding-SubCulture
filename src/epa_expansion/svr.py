@@ -1,7 +1,5 @@
 from sklearn.svm import SVR
 from neural_network import generate_data
-from propagate_labels import word_dataset_base
-from gen_data import wv_map
 from sample_seeds import __uni2norm, __norm2uni
 import os
 import json
@@ -9,12 +7,11 @@ import numpy as np
 import argparse
 
 
-def train():
-    generate = args.get('generate')
-    seed_size = args.get('seed')
-    eval_size = args.get('eval')
-    epa = args.get('epa')
-    uniform = (args.get('uniform') == 1)
+word_dataset_base = '../result/epa_expansion/svr'
+os.makedirs(word_dataset_base, exist_ok=True)
+
+
+def train(seed_size, eval_size, epa, uniform):
     feature_train, label_train, feature_test, label_test = generate_data(2, seed_size, eval_size, epa)
 
     clf = SVR(kernel='rbf', epsilon=0.05, C=10)
@@ -29,14 +26,15 @@ def train():
         label_pred.append(clf.predict(feature_test))
     label_pred = np.transpose(label_pred)
     mae = np.mean(np.abs(label_pred - label_test), axis=0)
-    print('mae')
-    print(mae)
+    rsme = np.sqrt(np.mean((label_pred - label_test) ** 2, axis=0))
     if uniform:
         label_test = __uni2norm(label_test)
         label_pred = __uni2norm(label_pred)
         mae_ori = np.mean(np.abs(label_pred - label_test), axis=0)
-        print('mae ori')
-        print(mae_ori)
+        rsme_ori = np.sqrt(np.mean((label_pred - label_test) ** 2, axis=0))
+        return [mae, rsme, mae_ori, rsme_ori]
+    else:
+        return [mae, rsme]
     #     label_space = []
     #     for w in wv:
     #         label_space.append(clf.predict(wv[w]))
@@ -68,6 +66,36 @@ def train():
     # print(np.std(gh_label_pred, axis=0))
 
 
+def main():
+    seed_size = args.get('seed')
+    eval_size = args.get('eval')
+    epa = args.get('epa')
+    uniform = (args.get('uniform') == 1)
+    logging = []
+
+    for uniform in [True, False]:
+        for epa in range(30, -1, -5):
+            metrics = train(600, 1000, 0.1 * epa, uniform)
+            logging.append({
+                'seed': 600,
+                'eval': 1000,
+                'epa': 0.1 * epa,
+                'uniform': int(uniform),
+                'mae': metrics
+            })
+        for seed in range(500, 5001, 500):
+            metrics = train(seed, 8000, 2.0, uniform)
+            logging.append({
+                'seed': seed,
+                'eval': 8000,
+                'epa': 2,
+                'uniform': int(uniform),
+                'mae': metrics
+            })
+    with open(os.path.join(word_dataset_base, 'result'), 'w') as fp:
+        json.dump(logging, fp)
+
+
 if __name__ == '__main__':
     ap = argparse.ArgumentParser('keras deep learning method')
     ap.add_argument('--generate', type=int, required=False)
@@ -76,4 +104,6 @@ if __name__ == '__main__':
     ap.add_argument('--eval', type=int, required=True)
     ap.add_argument('--epa', type=float, required=True)
     args = vars(ap.parse_args())
-    train()
+
+    main()
+
