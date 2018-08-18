@@ -195,6 +195,7 @@ def train():
         return {
             'it': it,
             'mae': np.mean(np.abs(pred - eval), axis=0).tolist(),
+            'rsme': np.sqrt(np.mean((pred - eval) ** 2, axis=0)).tolist(),
             'corr': [pearsonr(pred[:, 0], eval[:, 0]),
                      pearsonr(pred[:, 1], eval[:, 1]),
                      pearsonr(pred[:, 2], eval[:, 2])

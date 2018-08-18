@@ -83,15 +83,19 @@ def fit_model(feature_train, label_train, feature_test, label_test, dtype, unifo
     label_pred = model.predict(feature_test)
     mae = np.mean(np.abs(label_pred - label_test), axis=0)
     print('mae %s' % mae)
+    rsme = np.sqrt(np.mean((label_pred - label_test) ** 2, axis=0))
+    print('rsme %s' % rsme)
 
     if uniform:
         label_test = __uni2norm(label_test)
         label_pred = __uni2norm(label_pred)
         mae_ori = np.mean(np.abs(label_pred - label_test), axis=0)
         print('mae ori %s' % mae_ori)
-        return model, [mae, mae_ori]
+        rsme_ori = np.sqrt(np.mean((label_pred - label_test) ** 2, axis=0))
+        print('rsme ori %s' % rsme_ori)
+        return model, [mae, rsme, mae_ori, rsme_ori]
     else:
-        return model, [mae]
+        return model, [mae, rsme]
 
 
 def train(generate, seed_size, eval_size, epa, epochs, batch_size):
@@ -193,26 +197,26 @@ def main():
         for batch in range(10, 120, 20):
             for epa in range(30, -1, -5):
                 # generate_data(3, 600, 1000, 0.1 * epa)
-                model, mae = train(2, 600, 1000, 0.1 * epa, epoch, batch)
+                model, metrics = train(2, 600, 1000, 0.1 * epa, epoch, batch)
                 logging.append({
                     'epoch': epoch,
                     'batch': batch,
                     'seed': 600,
                     'eval': 1000,
                     'epa': epa,
-                    'mae': mae
+                    'mae': metrics
                 })
 
             for seed in range(500, 5001, 500):
                 # generate_data(3, 5000, 8000, 2)
-                model, mae = train(2, seed, 8000, 2, epoch, batch)
+                model, metrics = train(2, seed, 8000, 2, epoch, batch)
                 logging.append({
                     'epoch': epoch,
                     'batch': batch,
                     'seed': seed,
                     'eval': 8000,
                     'epa': 2,
-                    'mae': mae
+                    'mae': metrics
                 })
     with open(os.path.join(word_dataset_base, 'result'), 'w') as fp:
         json.dump(logging, fp)
@@ -240,6 +244,8 @@ if __name__ == '__main__':
     uniform = (args.get('uniform') == 1)
 
     align = args.get('align')
+
+    main()
 
     # for epa in range(30, -1, -5):
     #     generate_data(3, 600, 1000, 0.1 * epa)
