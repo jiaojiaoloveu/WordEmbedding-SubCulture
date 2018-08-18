@@ -109,7 +109,7 @@ def train(generate, seed_size, eval_size, epa, epochs, batch_size):
     #     ]
     #     fp.writelines('%s\n' % line for line in out)
 
-    return model
+    return model, mae
 
 
 def expansion(model, dic, culture):
@@ -204,15 +204,34 @@ def main():
 
 
 def main2():
+    logging = []
     for epoch in range(5, 120, 20):
         for batch in range(10, 120, 20):
             for epa in range(30, -1, -5):
                 # generate_data(3, 600, 1000, 0.1 * epa)
-                model = train(2, 600, 1000, 0.1 * epa, epoch, batch)
+                model, mae = train(2, 600, 1000, 0.1 * epa, epoch, batch)
+                logging.append({
+                    'epoch': epoch,
+                    'batch': batch,
+                    'seed': 600,
+                    'eval': 1000,
+                    'epa': epa,
+                    'mae': mae
+                })
 
             for seed in range(500, 5001, 500):
                 # generate_data(3, 5000, 8000, 2)
-                model = train(2, 5000, 8000, 2, epoch, batch)
+                model, mae = train(2, 5000, 8000, 2, epoch, batch)
+                logging.append({
+                    'epoch': epoch,
+                    'batch': batch,
+                    'seed': 5000,
+                    'eval': 8000,
+                    'epa': 2,
+                    'mae': mae
+                })
+    with open(os.path.join(word_dataset_base, 'result'), 'w') as fp:
+        json.dump(logging, fp)
 
     # validate(model)
 
@@ -238,8 +257,8 @@ if __name__ == '__main__':
     uniform = (args.get('uniform') == 1)
     align = args.get('align')
 
-    for epa in range(30, -1, -5):
-        generate_data(3, 600, 1000, 0.1 * epa)
+    # for epa in range(30, -1, -5):
+    #     generate_data(3, 600, 1000, 0.1 * epa)
 
-    for seed in range(500, 5001, 500):
-        generate_data(3, 5000, 8000, 2)
+    for seed in range(500, 5000, 500):
+        generate_data(3, seed, 8000, 2)
