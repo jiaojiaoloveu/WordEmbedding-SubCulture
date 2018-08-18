@@ -9,9 +9,12 @@ from keras.layers import Dense, Conv1D, Activation, Dropout, Embedding
 from keras.layers import GlobalMaxPooling1D, MaxPooling1D
 from keras.wrappers.scikit_learn import KerasRegressor
 from sklearn.model_selection import cross_val_score, KFold
-from gen_data import wv_map, generate_data, word_dataset_base, get_tokens, get_rand_tokens, get_token_wv
+from gen_data import wv_map, generate_data, get_tokens, get_rand_tokens, get_token_wv
 from sample_seeds import __uni2norm, __norm2uni
 from align_wv_space import __comparison
+
+word_dataset_base = '../result/epa_expansion/nn'
+os.makedirs(word_dataset_base, exist_ok=True)
 
 
 def baseline_model(dtype='lr', uniform=False):
@@ -92,11 +95,14 @@ def fit_model(feature_train, label_train, feature_test, label_test, dtype, unifo
 
 
 def train():
-    generate = args.get('generate')
-    uniform = args.get('uniform') == 0
-    feature_train, label_train, feature_test, label_test = generate_data(generate)
-    epochs = 10
-    batch_size = 100
+    seed_size = args.get('seed')
+    eval_size = args.get('eval')
+    epa = args.get('epa')
+    feature_train, label_train, feature_test, label_test = generate_data(generate, seed_size, eval_size, epa)
+    # param tuning
+    epochs = epoch
+    batch_size = batch
+
     model, mae = fit_model(feature_train, label_train, feature_test, label_test,
                            dtype, uniform, epochs, batch_size)
 
@@ -123,9 +129,23 @@ def expansion(model, dic, culture):
         json.dump(res, fp)
 
 
+def validate(model):
+    extreme_tokens_wv = get_token_wv(get_tokens())
+    neutral_tokens_wv = get_token_wv(get_rand_tokens())
+    extreme_pred = model.predict(extreme_tokens_wv, batch_size=5)
+    neutral_pred = model.predict(neutral_tokens_wv, batch_size=5)
+    print('extreme')
+    print(np.mean(extreme_pred, axis=0))
+    print(np.mean(np.abs(extreme_pred), axis=0))
+    print(np.std(extreme_pred, axis=0))
+
+    print('neutral')
+    print(np.mean(neutral_pred, axis=0))
+    print(np.mean(np.abs(neutral_pred), axis=0))
+    print(np.std(neutral_pred, axis=0))
+
+
 def evaluate(model, culture):
-    uniform = args.get('uniform') == 0
-    align = args.get('align')
     dic, s_dic, epa = wv_map(method=align, culture=culture)
     print('evaluate tokens size on two corpus %s' % len(dic.keys()))
     w_eval = []
@@ -180,30 +200,14 @@ def evaluate(model, culture):
     return s_dic
 
 
-def validate(model):
-    extreme_tokens_wv = get_token_wv(get_tokens())
-    neutral_tokens_wv = get_token_wv(get_rand_tokens())
-    extreme_pred = model.predict(extreme_tokens_wv, batch_size=5)
-    neutral_pred = model.predict(neutral_tokens_wv, batch_size=5)
-    print('extreme')
-    print(np.mean(extreme_pred, axis=0))
-    print(np.mean(np.abs(extreme_pred), axis=0))
-    print(np.std(extreme_pred, axis=0))
-
-    print('neutral')
-    print(np.mean(neutral_pred, axis=0))
-    print(np.mean(np.abs(neutral_pred), axis=0))
-    print(np.std(neutral_pred, axis=0))
-
-
 def main():
     model = train()
 
     validate(model)
 
-    for culture in ['github', 'twitter']:
-        s_dic = evaluate(model, culture)
-        expansion(model, s_dic, culture)
+    #for culture in ['github', 'twitter']:
+    #    s_dic = evaluate(model, culture)
+    #    expansion(model, s_dic, culture)
 
 
 def main2():
@@ -217,7 +221,22 @@ if __name__ == '__main__':
     ap.add_argument('--model', type=str, required=True)
     ap.add_argument('--uniform', type=int, required=True)
     ap.add_argument('--align', type=str, required=True)
-    args = vars(ap.parse_args())
-    dtype = args.get('model')
 
-    main()
+    ap.add_argument('--seed', type=int, required=True)
+    ap.add_argument('--eval', type=int, required=True)
+    ap.add_argument('--epa', type=float, required=True)
+
+    ap.add_argument('--epoch', type=int, required=True)
+    ap.add_argument('--batch', type=int, required=True)
+
+    args = vars(ap.parse_args())
+
+    dtype = args.get('model')
+    generate = args.get('generate')
+    uniform = (args.get('uniform') == 1)
+    align = args.get('align')
+    epoch = args.get('epoch')
+    batch = args.get('batch')
+
+
+    main2()

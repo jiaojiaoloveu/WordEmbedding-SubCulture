@@ -9,12 +9,21 @@ from scipy import spatial
 from gensim.models import KeyedVectors
 from gensim.models.word2vec import Word2Vec
 from scipy.stats.stats import pearsonr
-from gen_data import word_dataset_base, load_github_word_vectors, load_google_word_vectors
-from gen_data import wv_map
 from sample_seeds import __norm2uni, __uni2norm, get_rand_seeds
 
 
-log_name = 'log_exp%s_enn%s_it%s_uni%s'
+word_dataset_base = '../result/epa_expansion/graph'
+os.makedirs(word_dataset_base, exist_ok=True)
+
+
+def load_google_word_vectors(model_path):
+    word_vectors = KeyedVectors.load_word2vec_format(model_path, binary=True)
+    return word_vectors
+
+
+def load_github_word_vectors(model_path):
+    github_model = Word2Vec.load(model_path)
+    return github_model
 
 
 def log_json(path, arr):
@@ -25,40 +34,30 @@ def log_json(path, arr):
 def log_np(path, arr):
     np.save(path, arr)
 
-
-def log_data(token_words, comparing_words, seed_words, eval_words, token_label, eval_label, weight_matrix):
-    os.makedirs(word_dataset_base, exist_ok=True)
-    log_json(os.path.join(word_dataset_base, 'token'), token_words)
-    log_json(os.path.join(word_dataset_base, 'compare'), comparing_words)
-    log_json(os.path.join(word_dataset_base, 'seed'), seed_words)
-    log_json(os.path.join(word_dataset_base, 'eval'), eval_words)
-    log_np(os.path.join(word_dataset_base, 'token_label'), token_label)
-    log_np(os.path.join(word_dataset_base, 'eval_label'), eval_label)
-    log_np(os.path.join(word_dataset_base, 'matrix'), weight_matrix)
-
-
-def reload_data():
-    with open(os.path.join(word_dataset_base, 'token'), 'r') as fp:
-        token_words = json.load(fp)
-    with open(os.path.join(word_dataset_base, 'compare'), 'r') as fp:
-        compare_words = json.load(fp)
-    with open(os.path.join(word_dataset_base, 'seed'), 'r') as fp:
-        seed_words = json.load(fp)
-    with open(os.path.join(word_dataset_base, 'eval'), 'r') as fp:
-        eval_words = json.load(fp)
-    token_label = np.load(os.path.join(word_dataset_base, 'token_label.npy'))
-    eval_label = np.load(os.path.join(word_dataset_base, 'eval_label.npy'))
-    weight_matrix = np.load(os.path.join(word_dataset_base, 'matrix.npy'))
-    return token_words, compare_words, seed_words, eval_words, token_label, eval_label, weight_matrix
-
-
-def get_comparing_tokens():
-    # dic: str -> np.ndarray
-    github_voc = {}
-    token_dic, _, _ = wv_map(method='nn', culture='github')
-    for word in token_dic.keys():
-        github_voc[word] = token_dic[word][0]
-    return github_voc
+# def log_data(token_words, comparing_words, seed_words, eval_words, token_label, eval_label, weight_matrix):
+#     os.makedirs(word_dataset_base, exist_ok=True)
+#     log_json(os.path.join(word_dataset_base, 'token'), token_words)
+#     log_json(os.path.join(word_dataset_base, 'compare'), comparing_words)
+#     log_json(os.path.join(word_dataset_base, 'seed'), seed_words)
+#     log_json(os.path.join(word_dataset_base, 'eval'), eval_words)
+#     log_np(os.path.join(word_dataset_base, 'token_label'), token_label)
+#     log_np(os.path.join(word_dataset_base, 'eval_label'), eval_label)
+#     log_np(os.path.join(word_dataset_base, 'matrix'), weight_matrix)
+#
+#
+# def reload_data():
+#     with open(os.path.join(word_dataset_base, 'token'), 'r') as fp:
+#         token_words = json.load(fp)
+#     with open(os.path.join(word_dataset_base, 'compare'), 'r') as fp:
+#         compare_words = json.load(fp)
+#     with open(os.path.join(word_dataset_base, 'seed'), 'r') as fp:
+#         seed_words = json.load(fp)
+#     with open(os.path.join(word_dataset_base, 'eval'), 'r') as fp:
+#         eval_words = json.load(fp)
+#     token_label = np.load(os.path.join(word_dataset_base, 'token_label.npy'))
+#     eval_label = np.load(os.path.join(word_dataset_base, 'eval_label.npy'))
+#     weight_matrix = np.load(os.path.join(word_dataset_base, 'matrix.npy'))
+#     return token_words, compare_words, seed_words, eval_words, token_label, eval_label, weight_matrix
 
 
 def get_github_distance(w1, wlist, wvocab):
@@ -72,187 +71,6 @@ def get_github_distance(w1, wlist, wvocab):
     dot_products = np.dot(w2, w1)
     distances = 1 - dot_products / (norm * all_norms)
     return distances
-
-
-def mean_absolute_error(it, real_label, predict_label, log_mask, eval_num):
-    assert real_label.shape == predict_label.shape
-
-    mae = np.sum(np.absolute(real_label - predict_label), axis=0) / eval_num
-
-    with open(os.path.join(word_dataset_base, log_name), 'a') as fp:
-        out = [
-            'iteration #%s/%s' % (it, Configs.iterations),
-            'real',
-            str(real_label[log_mask]),
-            'predict',
-            str(predict_label[log_mask]),
-            'mae',
-            mae,
-            'corr',
-            str(pearsonr(real_label[:, 0], predict_label[:, 0])),
-            str(pearsonr(real_label[:, 1], predict_label[:, 1])),
-            str(pearsonr(real_label[:, 2], predict_label[:, 2])),
-        ]
-        fp.writelines('%s\n' % line for line in out)
-    return mae
-
-
-def generate2():
-    # seed_words and eval_words as dictionary of word:epa
-    (seed_words, eval_words) = get_rand_seeds(Configs.seed, Configs.eval, Configs.epa)
-
-    # github words word:wv
-    comparing_words = get_comparing_tokens()
-
-    token_words = set(list(seed_words.keys()) + list(eval_words.keys()) + list(comparing_words.keys()))
-
-    # append wikitext words to network
-    with open(os.path.join(word_dataset_base, 'wikitext-wordlist'), 'r') as fp:
-        corpus_words = set(json.load(fp))
-    token_words.update(corpus_words)
-
-    # use trained model to calculate distance
-    google_news_model_path = '../models/embedding/GoogleNews-vectors-negative300.bin'
-    google_news_model = load_google_word_vectors(google_news_model_path)
-    all_token_words = set(google_news_model.vocab.keys())
-    token_words = list(token_words & all_token_words)
-    sub_token_num = len(token_words)
-
-    # add github words to network
-    token_words.extend(list(comparing_words.keys()))
-    token_num = len(token_words)
-
-    # objective matrix
-    token_label = np.zeros((token_num, LabelSpace.Dimension), dtype=np.double)
-    eval_label = np.array(token_label)
-
-    # update label info
-    seeds_in_token, eval_in_token = 0, 0
-    for ind in range(0, sub_token_num):
-        word = token_words[ind]
-        if word in seed_words.keys():
-            token_label[ind] = seed_words[word]
-            seeds_in_token += 1
-        if word in eval_words.keys():
-            eval_label[ind] = eval_words[word]
-            eval_in_token += 1
-
-    print('%s/%s seeds in token words' % (seeds_in_token, Configs.seed))
-    print('%s/%s eval in token words' % (eval_in_token, Configs.eval))
-
-    print('sub token number %s' % sub_token_num)
-    print('token number %s' % token_num)
-
-    time_arr1 = []
-    time_arr2 = []
-
-    # update weight info
-    weight_matrix = np.zeros((token_num, token_num), dtype=np.double)
-    for ind in range(0, sub_token_num - 1):
-        # fully connected graph
-        # weight between nodes positive
-        # distance = 1 - cosine-dis
-        time1 = time.time()
-        distance_matrix = google_news_model.distances(token_words[ind], token_words[ind + 1: sub_token_num])
-        weight_matrix[ind, ind + 1: sub_token_num] = distance_matrix
-        time2 = time.time()
-        weight_matrix[ind, sub_token_num: token_num] = get_github_distance(
-            google_news_model.wv[token_words[ind]],
-            token_words[sub_token_num: token_num],
-            comparing_words)
-        time3 = time.time()
-        time_arr1.append((time2 - time1) / (sub_token_num - ind - 1))
-        time_arr2.append((time3 - time2) / (token_num - sub_token_num))
-    print(np.mean(time_arr1))
-    print(np.mean(time_arr2))
-
-    for ind in range(sub_token_num, token_num - 1):
-        weight_matrix[ind, ind + 1: token_num] = get_github_distance(
-            comparing_words[token_words[ind]],
-            token_words[ind + 1: token_num],
-            comparing_words)
-
-    del google_news_model
-
-    log_data(token_words, list(comparing_words.keys()), seed_words, eval_words, token_label, eval_label, weight_matrix)
-
-
-def train2():
-    print('start training')
-    token_words, compare_words, seed_words, eval_words, token_label, eval_label, weight_matrix = reload_data()
-
-    token_label_mask = np.any(token_label, axis=1)
-    token_label_ori = token_label[token_label_mask]
-
-    eval_label_mask = np.any(eval_label, axis=1)
-    eval_label_ori = eval_label[eval_label_mask]
-
-    print(token_label[token_label_mask])
-
-    token_label[token_label_mask] = __norm2uni(token_label_ori)
-    eval_label[eval_label_mask] = __norm2uni(eval_label_ori)
-
-    token_num = len(token_words)
-
-    print('calculate matrix')
-    weight_matrix = weight_matrix + np.transpose(weight_matrix)
-    weight_matrix_mask = weight_matrix < Configs.enn
-    np.fill_diagonal(weight_matrix_mask, False)
-    weight_matrix = np.exp(weight_matrix * -Configs.exp) * weight_matrix_mask
-    degree_matrix = np.sum(weight_matrix, axis=1)
-    inverse_degree_matrix = np.divide(1, degree_matrix, where=degree_matrix != 0)
-    laplacian_matrix = weight_matrix * np.reshape(inverse_degree_matrix, (token_num, 1))
-
-    np.save(os.path.join(word_dataset_base, 'lap'), laplacian_matrix)
-
-    print('generate eval mat')
-
-    label_mask = np.array(token_label_mask)
-    label_mask_inv = np.logical_not(label_mask)
-    label_mask_all = (1 - Configs.alpha) * label_mask + label_mask_inv
-
-    eval_mask = np.array(eval_label_mask)
-    eval_num = np.sum(eval_mask)
-    log_window_size = 20
-    log_mask = np.random.rand(eval_num) < (1.0 * log_window_size / eval_num)
-
-    mean_absolute_error(-1, eval_label[eval_mask], token_label[eval_mask], log_mask, eval_num)
-    original_token_label = np.array(token_label)
-    for it in range(0, Configs.iterations):
-        if it % 10 == 0:
-            print('round %s/%s' % (it, Configs.iterations))
-        transient_token_label = np.matmul(laplacian_matrix, token_label)
-        token_label = transient_token_label * np.reshape(label_mask_all, (token_num, 1)) + \
-                      Configs.alpha * original_token_label * np.reshape(label_mask, (token_num, 1))
-        mean_absolute_error(it, eval_label[eval_mask], token_label[eval_mask], log_mask, eval_num)
-
-    token_label = __uni2norm(token_label)
-    np.save(os.path.join(word_dataset_base, 'token_label_pre'), token_label)
-
-    predict_label = list(zip(token_words, token_label.tolist()))
-    with open(os.path.join(word_dataset_base, 'result'), 'w') as fp:
-        json.dump(predict_label, fp)
-    result = {}
-    gg, gh = [], []
-    for (word, label) in predict_label:
-        if word in compare_words:
-            if word in result.keys():
-                result[word].append(label)
-                gh.append(label)
-            else:
-                result[word] = [label]
-                gg.append(label)
-    gg = np.array(gg)
-    gh = np.array(gh)
-    print(result)
-    print('google')
-    print(np.mean(gg, axis=0))
-    print(np.mean(np.abs(gg), axis=0))
-    print(np.std(gg, axis=0))
-    print('github')
-    print(np.mean(gh, axis=0))
-    print(np.mean(np.abs(gh), axis=0))
-    print(np.std(gh, axis=0))
 
 
 def generate():
@@ -405,33 +223,30 @@ def train():
 
     result_file_path = os.path.join(file_path,
                                     'it_%s_enn_%s_exp_%s_alpha_%s_uni_%s' %
-                                    (Configs.iterations, Configs.enn, Configs.exp, Configs.alpha, Configs.uni)
+                                    (Configs.iterations, Configs.enn, Configs.exp, Configs.alpha, int(Configs.uni))
                                     )
     os.makedirs(result_file_path, exist_ok=True)
-    with open(os.path.join(result_file_path, log_name), 'w') as fp:
-        json.dump(logging_info, fp)
 
-    with open(os.path.join(result_file_path, log_name + '_' + 'lexicon'), 'w') as fp:
-        predict_label = list(zip(token_words, train_label.tolist()))
-        json.dump(predict_label, fp)
-
+    log_json(logging_info, os.path.join(result_file_path, 'log'))
+    log_json(os.path.join(result_file_path, 'lexicon'),
+             list(zip(token_words, train_label.tolist())))
     np.save(os.path.join(result_file_path, 'train_label_expanded'), train_label)
 
 
-def predict():
-    with open(os.path.join(word_dataset_base, 'token'), 'r') as fp:
-        token_words = json.load(fp)
-    with open(os.path.join(word_dataset_base, 'seed'), 'r') as fp:
-        seed_words = json.load(fp)
-    with open(os.path.join(word_dataset_base, 'eval'), 'r') as fp:
-        eval_words = json.load(fp)
-    with open(os.path.join(word_dataset_base, 'gh_token'), 'r') as fp:
-        github_token_words = json.load(fp)
-    train_label = np.load(os.path.join(word_dataset_base, 'train_label.npy'))
-    train_label_2 = np.load(os.path.join(word_dataset_base, 'train_label_2.npy'))
-    eval_label = np.load(os.path.join(word_dataset_base, 'eval_label.npy'))
-    weight_matrix = np.load(os.path.join(word_dataset_base, 'matrix.npy'))
-    github_weight_matrix = np.load(os.path.join(word_dataset_base, 'gh_matrix.npy'))
+# def predict():
+#     with open(os.path.join(word_dataset_base, 'token'), 'r') as fp:
+#         token_words = json.load(fp)
+#     with open(os.path.join(word_dataset_base, 'seed'), 'r') as fp:
+#         seed_words = json.load(fp)
+#     with open(os.path.join(word_dataset_base, 'eval'), 'r') as fp:
+#         eval_words = json.load(fp)
+#     with open(os.path.join(word_dataset_base, 'gh_token'), 'r') as fp:
+#         github_token_words = json.load(fp)
+#     train_label = np.load(os.path.join(word_dataset_base, 'train_label.npy'))
+#     train_label_2 = np.load(os.path.join(word_dataset_base, 'train_label_2.npy'))
+#     eval_label = np.load(os.path.join(word_dataset_base, 'eval_label.npy'))
+#     weight_matrix = np.load(os.path.join(word_dataset_base, 'matrix.npy'))
+#     github_weight_matrix = np.load(os.path.join(word_dataset_base, 'gh_matrix.npy'))
 
 
 if __name__ == '__main__':
@@ -443,40 +258,35 @@ if __name__ == '__main__':
     ap.add_argument('--epa', type=float, required=True)
 
     ap.add_argument('--alpha', type=float, required=True)
+    ap.add_argument('--exp', type=float, required=True)
+
     ap.add_argument('--iteration', type=int, required=True)
     ap.add_argument('--enn', type=float, required=True)
-    ap.add_argument('--exp', type=float, required=True)
+
     ap.add_argument('--uni', type=int, required=True)
 
     args = vars(ap.parse_args())
-    if args.get("alpha") is not None:
-        Configs.alpha = args.get("alpha")
 
-    if args.get("iteration") is not None:
-        Configs.iterations = args.get("iteration")
+    Configs.alpha = args.get("alpha")
+    Configs.iterations = args.get("iteration")
+    Configs.enn = args.get('enn')
+    Configs.exp = args.get('exp')
+    Configs.seed = args.get('seed')
+    Configs.eval = args.get('eval')
+    Configs.epa = args.get('epa')
+    Configs.uni = (args.get('uni') == 1)
 
-    if args.get('enn') is not None:
-        Configs.enn = args.get('enn')
+    if args.get("generate") == 1:
+        for epa in range(30, -1, -5):
+            Configs.seed = 3000
+            Configs.epa = epa * 0.1
+            generate()
+            # train()
 
-    if args.get('exp') is not None:
-        Configs.exp = args.get('exp')
+        for seed in range(3000, 5001, 500):
+            Configs.epa = 2
+            Configs.seed = seed
+            generate()
+            # train()
 
-    if args.get('seed') is not None:
-        Configs.seed = args.get('seed')
-
-    if args.get('eval') is not None:
-        Configs.eval = args.get('eval')
-
-    if args.get('epa') is not None:
-        Configs.epa = args.get('epa')
-
-    if args.get('uni') is not None:
-        Configs.uni = (args.get('uni') == 1)
-
-    if args.get("generate") == 0:
-        generate()
-
-    log_name = log_name % (Configs.exp, Configs.enn, Configs.iterations, int(Configs.uni))
-
-    train()
-    # generate_github()
+    # train()

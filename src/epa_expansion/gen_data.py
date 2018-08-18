@@ -2,7 +2,6 @@ from align_wv_space import get_aligned_wv
 from sample_seeds import read_warriner_ratings, read_bayesact_epa, get_rand_seeds
 from gensim.models import KeyedVectors
 from gensim.models.word2vec import Word2Vec
-from sample_seeds import __norm2uni
 import numpy as np
 import os
 import json
@@ -10,10 +9,10 @@ import random
 import argparse
 
 
-word_dataset_base = '../result/epa_expansion'
+word_dataset_base = '../result/epa_expansion/nn'
 os.makedirs(word_dataset_base, exist_ok=True)
 google_model_path = '../models/embedding/GoogleNews-vectors-negative300.bin'
-compare_model_path = '../models/embedding/%s/fasttext_sg_0_size_300_mincount_5'
+compare_model_path = '../models/embedding/%s_aligned/word2vec_sg_0_size_300_mincount_5'
 
 
 def load_google_word_vectors(model_path):
@@ -134,13 +133,13 @@ def preprocess_data(word_epa_dataset, suffix):
     return wv_feature, epa_label
 
 
-def generate_data(generate):
+def generate_data(generate, seed_size=4000, eval_size=8000, epa=2):
     if generate < 2:
         # random sample from datasets
         if generate == 0:
-            feature, label = load_feature_label('all')
+            feature, label = load_feature_label('random')
         else:
-            feature, label = preprocess_data(load_all(), 'all')
+            feature, label = preprocess_data(load_all(), 'random')
         (items, dimensions) = feature.shape
         mask = np.random.random_sample(items)
         train_test_split = 0.7
@@ -149,12 +148,12 @@ def generate_data(generate):
     elif generate < 4:
         # select items with large EPA values as training
         if generate == 2:
-            feature_train, label_train = load_feature_label('train')
-            feature_test, label_test = load_feature_label('test')
+            feature_train, label_train = load_feature_label('train_size_%s_epa_%s' % (seed_size, epa))
+            feature_test, label_test = load_feature_label('test_size_%s' % eval_size)
         else:
-            (seed_words, eval_words) = get_rand_seeds(seed_size=8000, eval_size=4000, threshold=1.5)
-            feature_train, label_train = preprocess_data(seed_words, 'train')
-            feature_test, label_test = preprocess_data(eval_words, 'test')
+            (seed_words, eval_words) = get_rand_seeds(seed_size=seed_size, eval_size=eval_size, threshold=epa)
+            feature_train, label_train = preprocess_data(seed_words, 'train_size_%s_epa_%s' % (seed_size, epa))
+            feature_test, label_test = preprocess_data(eval_words, 'test_size_%s' % eval_size)
     else:
         print('generate = %s not supported' % generate)
         raise Exception('generate not supported yet')
