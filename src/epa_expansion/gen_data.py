@@ -102,13 +102,14 @@ def load_all():
     # return read_bayesact_epa()
 
 
-def load_feature_label(suffix):
-    feature = np.load(os.path.join(word_dataset_base, 'feature_' + suffix + '.npy'))
-    label = np.load(os.path.join(word_dataset_base, 'label_' + suffix + '.npy'))
+def load_feature_label(path, suffix):
+    dataset_path = os.path.join(word_dataset_base, path)
+    feature = np.load(os.path.join(dataset_path, '%s_feature.npy' % suffix))
+    label = np.load(os.path.join(dataset_path, '%s_label.npy' % suffix))
     return feature, label
 
 
-def preprocess_data(word_epa_dataset, suffix):
+def preprocess_data(word_epa_dataset, path, suffix):
     wv_feature = []
     epa_label = []
     google_model = load_google_word_vectors(google_model_path)
@@ -127,8 +128,12 @@ def preprocess_data(word_epa_dataset, suffix):
     epa_label = np.array(epa_label)
     print(wv_feature.shape)
     print(epa_label.shape)
-    np.save(os.path.join(word_dataset_base, 'feature_' + suffix), wv_feature)
-    np.save(os.path.join(word_dataset_base, 'label_' + suffix), epa_label)
+
+    dataset_path = os.path.join(word_dataset_base, path)
+    os.makedirs(dataset_path, exist_ok=True)
+
+    np.save(os.path.join(dataset_path, '%s_feature' % suffix), wv_feature)
+    np.save(os.path.join(dataset_path, '%s_label' % suffix), epa_label)
     del google_model
     return wv_feature, epa_label
 
@@ -146,14 +151,15 @@ def generate_data(generate, seed_size=4000, eval_size=8000, epa=2):
         feature_train, label_train = feature[mask < train_test_split], label[mask < train_test_split]
         feature_test, label_test = feature[mask >= train_test_split], label[mask >= train_test_split]
     elif generate < 4:
+        path = 'seed_%s_eval_%s_epa_%s' % (seed_size, eval_size, epa)
         # select items with large EPA values as training
         if generate == 2:
-            feature_train, label_train = load_feature_label('train_size_%s_epa_%s' % (seed_size, epa))
-            feature_test, label_test = load_feature_label('test_size_%s' % eval_size)
+            feature_train, label_train = load_feature_label(path, 'train')
+            feature_test, label_test = load_feature_label(path, 'test')
         else:
             (seed_words, eval_words) = get_rand_seeds(seed_size=seed_size, eval_size=eval_size, threshold=epa)
-            feature_train, label_train = preprocess_data(seed_words, 'train_size_%s_epa_%s' % (seed_size, epa))
-            feature_test, label_test = preprocess_data(eval_words, 'test_size_%s' % eval_size)
+            feature_train, label_train = preprocess_data(seed_words, path, 'train')
+            feature_test, label_test = preprocess_data(eval_words, path, 'test')
     else:
         print('generate = %s not supported' % generate)
         raise Exception('generate not supported yet')

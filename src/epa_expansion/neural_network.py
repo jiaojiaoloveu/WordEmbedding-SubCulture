@@ -204,7 +204,16 @@ def main():
 
 
 def main2():
-    model = train()
+    for epoch in range(5, 120, 20):
+        for batch in range(10, 120, 20):
+            for epa in range(30, -1, -5):
+                # generate_data(3, 600, 1000, 0.1 * epa)
+                model = train(2, 600, 1000, 0.1 * epa, epoch, batch)
+
+            for seed in range(500, 5001, 500):
+                # generate_data(3, 5000, 8000, 2)
+                model = train(2, 5000, 8000, 2, epoch, batch)
+
     # validate(model)
 
 
