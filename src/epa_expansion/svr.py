@@ -34,9 +34,9 @@ def train():
     if uniform:
         label_test = __uni2norm(label_test)
         label_pred = __uni2norm(label_pred)
-    mae_ori = np.mean(np.abs(label_pred - label_test), axis=0)
-    print('mae ori')
-    print(mae_ori)
+        mae_ori = np.mean(np.abs(label_pred - label_test), axis=0)
+        print('mae ori')
+        print(mae_ori)
     #     label_space = []
     #     for w in wv:
     #         label_space.append(clf.predict(wv[w]))

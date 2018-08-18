@@ -94,6 +94,7 @@ def __norm2uni(x, mu=label_mean, sigma=label_std):
 
 def __uni2norm(x, mu=label_mean, sigma=label_std):
     print('uni2norm called')
+    x = np.clip(x, -1, 1)
     y = -np.sqrt(2) * special.erfcinv(1 + x)
     return y * sigma + mu
 
