@@ -58,7 +58,6 @@ def kfold_test(feature, label, epoch, batch_size):
     estimator = KerasRegressor(build_fn=baseline_model, epochs=epoch, batch_size=batch_size, verbose=0)
     kfold = KFold(n_splits=5, random_state=seed)
     results = cross_val_score(estimator, feature, label, cv=kfold)
-    print(results)
     print("Results: %.2f (%.2f) MSE" % (results.mean(), results.std()))
     estimator.fit(feature, label)
     return estimator
@@ -90,24 +89,19 @@ def fit_model(feature_train, label_train, feature_test, label_test, dtype, unifo
         label_pred = __uni2norm(label_pred)
         mae_ori = np.mean(np.abs(label_pred - label_test), axis=0)
         print('mae ori %s' % mae_ori)
-    return model, [mae, mae_ori]
+        return model, [mae, mae_ori]
+    else:
+        return model, [mae]
 
 
 def train(generate, seed_size, eval_size, epa, epochs, batch_size):
+    print('type %s uniform %s' % (dtype, uniform))
+    print('seed %s eval %s epa %s epoch %s batch %s' % (seed_size, eval_size, epa, epochs, batch_size))
+
     feature_train, label_train, feature_test, label_test = generate_data(generate, seed_size, eval_size, epa)
 
     model, mae = fit_model(feature_train, label_train, feature_test, label_test,
                            dtype, uniform, epochs, batch_size)
-
-    # file_name = os.path.join(word_dataset_base, 'parameter_tuning_model%s_uniform%s_%s'
-    #                         % (dtype, uniform, int(time.time())))
-    #
-    # with open(file_name, 'a') as fp:
-    #     out = [
-    #         'epochs %s batch %s' % (epochs, batch_size),
-    #         'mae %s' % mae,
-    #     ]
-    #     fp.writelines('%s\n' % line for line in out)
 
     return model, mae
 
@@ -194,16 +188,6 @@ def evaluate(model, culture):
 
 
 def main():
-    model = train()
-
-    validate(model)
-
-    #for culture in ['github', 'twitter']:
-    #    s_dic = evaluate(model, culture)
-    #    expansion(model, s_dic, culture)
-
-
-def main2():
     logging = []
     for epoch in range(5, 120, 20):
         for batch in range(10, 120, 20):
@@ -221,11 +205,11 @@ def main2():
 
             for seed in range(500, 5001, 500):
                 # generate_data(3, 5000, 8000, 2)
-                model, mae = train(2, 5000, 8000, 2, epoch, batch)
+                model, mae = train(2, seed, 8000, 2, epoch, batch)
                 logging.append({
                     'epoch': epoch,
                     'batch': batch,
-                    'seed': 5000,
+                    'seed': seed,
                     'eval': 8000,
                     'epa': 2,
                     'mae': mae
@@ -233,12 +217,10 @@ def main2():
     with open(os.path.join(word_dataset_base, 'result'), 'w') as fp:
         json.dump(logging, fp)
 
-    # validate(model)
-
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser('keras deep learning method')
-    ap.add_argument('--generate', type=int, required=True)
+    ap.add_argument('--generate', type=int, required=False)
     ap.add_argument('--model', type=str, required=True)
     ap.add_argument('--uniform', type=int, required=True)
     ap.add_argument('--align', type=str, required=True)
@@ -252,13 +234,15 @@ if __name__ == '__main__':
 
     args = vars(ap.parse_args())
 
-    dtype = args.get('model')
     gen = args.get('generate')
+
+    dtype = args.get('model')
     uniform = (args.get('uniform') == 1)
+
     align = args.get('align')
 
     # for epa in range(30, -1, -5):
     #     generate_data(3, 600, 1000, 0.1 * epa)
 
-    for seed in range(500, 5000, 500):
-        generate_data(3, seed, 8000, 2)
+    # for seed in range(500, 5000, 500):
+    #     generate_data(3, seed, 8000, 2)
