@@ -36,6 +36,7 @@ def train():
         label_pred = __uni2norm(label_pred)
         print(label_pred)
         print(label_test)
+        print(np.sum(np.isinf(label_pred)))
         mae_ori = np.mean(np.abs(label_pred - label_test), axis=0)
         print('mae ori')
         print(mae_ori)
