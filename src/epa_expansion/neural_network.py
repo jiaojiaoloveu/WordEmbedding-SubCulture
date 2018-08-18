@@ -245,4 +245,4 @@ if __name__ == '__main__':
     #     generate_data(3, 600, 1000, 0.1 * epa)
 
     # for seed in range(500, 5000, 500):
-    #     generate_data(3, seed, 8000, 2)
+    #     generate_data(3, seed, 8000, 2.0)

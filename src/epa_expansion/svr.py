@@ -27,8 +27,16 @@ def train():
         print('start training')
         clf.fit(feature_train, label_train_axis)
         label_pred.append(clf.predict(feature_test))
-    label_pred = np.array(label_pred)
-    print(label_pred.shape)
+    label_pred = np.transpose(label_pred)
+    mae = np.mean(np.abs(label_pred - label_test), axis=0)
+    print('mae')
+    print(mae)
+    if uniform:
+        label_test = __uni2norm(label_test)
+        label_pred = __uni2norm(label_pred)
+    mae_ori = np.mean(np.abs(label_pred - label_test), axis=0)
+    print('mae ori')
+    print(mae_ori)
     #     label_space = []
     #     for w in wv:
     #         label_space.append(clf.predict(wv[w]))
