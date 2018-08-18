@@ -52,10 +52,10 @@ def baseline_model(dtype='lr', uniform=False):
     return model
 
 
-def kfold_test(feature, label, epoch, batch_size):
+def kfold_test(feature, label, dtype, uniform, epoch, batch_size):
     seed = 10
     np.random.seed(seed)
-    estimator = KerasRegressor(build_fn=baseline_model, epochs=epoch, batch_size=batch_size, verbose=0)
+    estimator = KerasRegressor(build_fn=baseline_model(dtype, uniform), epochs=epoch, batch_size=batch_size, verbose=0)
     kfold = KFold(n_splits=5, random_state=seed)
     results = cross_val_score(estimator, feature, label, cv=kfold)
     print("Results: %.2f (%.2f) MSE" % (results.mean(), results.std()))
@@ -79,7 +79,7 @@ def fit_model(feature_train, label_train, feature_test, label_test, dtype, unifo
     # score = model.evaluate(feature_test, label_test, batch_size=batch_size)
     # print(score)
 
-    model = kfold_test(feature_train, label_train, epochs, batch_size)
+    model = kfold_test(feature_train, label_train, dtype, uniform, epochs, batch_size)
     label_pred = model.predict(feature_test)
     mae = np.mean(np.abs(label_pred - label_test), axis=0)
     print('mae %s' % mae)
@@ -99,6 +99,8 @@ def fit_model(feature_train, label_train, feature_test, label_test, dtype, unifo
 
 
 def train(generate, seed_size, eval_size, epa, epochs, batch_size):
+    dtype = args.get('model')
+    uniform = (args.get('uniform') == 1)
     print('type %s uniform %s' % (dtype, uniform))
     print('seed %s eval %s epa %s epoch %s batch %s' % (seed_size, eval_size, epa, epochs, batch_size))
 
@@ -239,10 +241,6 @@ if __name__ == '__main__':
     args = vars(ap.parse_args())
 
     gen = args.get('generate')
-
-    dtype = args.get('model')
-    uniform = (args.get('uniform') == 1)
-
     align = args.get('align')
 
     main()
