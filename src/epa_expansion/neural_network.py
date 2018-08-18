@@ -138,59 +138,59 @@ def validate(model):
     print(np.std(neutral_pred, axis=0))
 
 
-def evaluate(model, culture):
-    dic, s_dic, epa = wv_map(method=align, culture=culture)
-    print('evaluate tokens size on two corpus %s' % len(dic.keys()))
-    w_eval = []
-    gg_eval = []
-    gh_eval = []
-    epa_eval = []
-    for w in dic:
-        w_eval.append(w)
-        gh_eval.append(dic[w][0])
-        gg_eval.append(dic[w][1])
-        epa_eval.append(epa[w])
-    gh_eval = np.array(gh_eval)
-    gg_eval = np.array(gg_eval)
-    epa_eval = np.array(epa_eval)
-    gh_pred = model.predict(gh_eval, batch_size=5)
-    gg_pred = model.predict(gg_eval, batch_size=5)
+# def evaluate(model, culture):
+#     dic, s_dic, epa = wv_map(method=align, culture=culture)
+#     print('evaluate tokens size on two corpus %s' % len(dic.keys()))
+#     w_eval = []
+#     gg_eval = []
+#     gh_eval = []
+#     epa_eval = []
+#     for w in dic:
+#         w_eval.append(w)
+#         gh_eval.append(dic[w][0])
+#         gg_eval.append(dic[w][1])
+#         epa_eval.append(epa[w])
+#     gh_eval = np.array(gh_eval)
+#     gg_eval = np.array(gg_eval)
+#     epa_eval = np.array(epa_eval)
+#     gh_pred = model.predict(gh_eval, batch_size=5)
+#     gg_pred = model.predict(gg_eval, batch_size=5)
+#
+#     if uniform:
+#         gh_pred = __uni2norm(gh_pred)
+#         gg_pred = __uni2norm(gg_pred)
+#
+#     print('nn eval epa')
+#
+#     epa_mask = np.any(epa_eval, axis=1)
+#     print('number of words in epa datasets')
+#     print(np.sum(epa_mask))
+#
+#     print('diff gg && %s' % culture)
+#     __comparison(gg_pred[epa_mask], gh_pred[epa_mask])
+#
+#     print('diff gg && epa')
+#     __comparison(gg_pred[epa_mask], epa_eval[epa_mask])
+#
+#     print('diff %s && epa' % culture)
+#     __comparison(gh_pred[epa_mask], epa_eval[epa_mask])
+#
+#     print('google')
+#     print(np.mean(gg_pred, axis=0))
+#     print(np.mean(np.abs(gg_pred), axis=0))
+#     print(np.std(gg_pred, axis=0))
+#
+#     print(culture)
+#     print(np.mean(gh_pred, axis=0))
+#     print(np.mean(np.abs(gh_pred), axis=0))
+#     print(np.std(gh_pred, axis=0))
+#
+#     with open(os.path.join(word_dataset_base, 'nn_result_%s_google_%s' % (dtype, culture)), 'w') as fp:
+#         res = list(zip(w_eval, epa_eval.tolist(), gg_pred.tolist(), gh_pred.tolist()))
+#         res = dict((line[0], line[1:]) for line in res)
+#         json.dump(res, fp)
 
-    if uniform:
-        gh_pred = __uni2norm(gh_pred)
-        gg_pred = __uni2norm(gg_pred)
-
-    print('nn eval epa')
-
-    epa_mask = np.any(epa_eval, axis=1)
-    print('number of words in epa datasets')
-    print(np.sum(epa_mask))
-
-    print('diff gg && %s' % culture)
-    __comparison(gg_pred[epa_mask], gh_pred[epa_mask])
-
-    print('diff gg && epa')
-    __comparison(gg_pred[epa_mask], epa_eval[epa_mask])
-
-    print('diff %s && epa' % culture)
-    __comparison(gh_pred[epa_mask], epa_eval[epa_mask])
-
-    print('google')
-    print(np.mean(gg_pred, axis=0))
-    print(np.mean(np.abs(gg_pred), axis=0))
-    print(np.std(gg_pred, axis=0))
-
-    print(culture)
-    print(np.mean(gh_pred, axis=0))
-    print(np.mean(np.abs(gh_pred), axis=0))
-    print(np.std(gh_pred, axis=0))
-
-    with open(os.path.join(word_dataset_base, 'nn_result_%s_google_%s' % (dtype, culture)), 'w') as fp:
-        res = list(zip(w_eval, epa_eval.tolist(), gg_pred.tolist(), gh_pred.tolist()))
-        res = dict((line[0], line[1:]) for line in res)
-        json.dump(res, fp)
-
-    return s_dic
+#     return s_dic
 
 
 def main():
