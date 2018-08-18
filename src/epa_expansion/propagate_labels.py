@@ -278,12 +278,12 @@ if __name__ == '__main__':
 
     if args.get("generate") == 1:
         for epa in range(30, -1, -5):
-            Configs.seed = 1500
+            Configs.seed = 600
             Configs.epa = epa * 0.1
             generate()
             # train()
 
-        for seed in range(3000, 5001, 500):
+        for seed in range(500, 5001, 500):
             Configs.epa = 2
             Configs.seed = seed
             generate()
