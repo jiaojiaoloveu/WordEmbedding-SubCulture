@@ -52,8 +52,8 @@ def __get_rand_seeds(vocabulary, seed_size, eval_size, threshold):
     word_seeds = []
     print('eval size %s' % seed_size)
     for axis in range(0, 3):
-        word_seeds.extend(random.sample(seeds_poll[axis], int(seed_size / 3)))
         print('axis %s size %s' % (axis, len(seeds_poll[axis])))
+        word_seeds.extend(random.sample(seeds_poll[axis], int(seed_size / 3)))
         print('current size %s' % len(word_seeds))
     word_seeds.extend(_fixed_seeds())
     word_seeds = list(set(word_seeds))

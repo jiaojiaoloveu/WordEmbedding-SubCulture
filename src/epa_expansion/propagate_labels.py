@@ -278,7 +278,7 @@ if __name__ == '__main__':
 
     if args.get("generate") == 1:
         for epa in range(30, -1, -5):
-            Configs.seed = 3000
+            Configs.seed = 1500
             Configs.epa = epa * 0.1
             generate()
             # train()
