@@ -244,7 +244,10 @@ if __name__ == '__main__':
     gen = args.get('generate')
     align = args.get('align')
 
-    main()
+    model, metrics = train(3, 8000, 4000, 1.5, 10, 150)
+    print(metrics)
+
+    # main()
 
     # for epa in range(30, -1, -5):
     #     generate_data(3, 600, 1000, 0.1 * epa)
