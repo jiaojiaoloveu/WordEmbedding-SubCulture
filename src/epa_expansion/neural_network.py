@@ -210,6 +210,7 @@ def main():
                     'mae': metrics
                 })
 
+            # changed
             for seed in range(500, 5001, 500):
                 # generate_data(3, 5000, 8000, 2)
                 model, metrics = train(2, seed, 8000, 2.0, epoch, batch)
@@ -244,13 +245,13 @@ if __name__ == '__main__':
     gen = args.get('generate')
     align = args.get('align')
 
-    model, metrics = train(3, 8000, 4000, 1.5, 10, 150)
-    print(metrics)
+    # model, metrics = train(3, 8000, 4000, 1.5, 10, 150)
+    # print(metrics)
 
     # main()
 
     # for epa in range(30, -1, -5):
     #     generate_data(3, 600, 1000, 0.1 * epa)
 
-    # for seed in range(500, 5000, 500):
-    #     generate_data(3, seed, 8000, 2.0)
+    for seed in range(8500, 499, -1000):
+        generate_data(3, seed, 1000, 1.0)
