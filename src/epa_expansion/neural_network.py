@@ -227,6 +227,10 @@ def main():
 
 
 if __name__ == '__main__':
+    import os
+    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+    os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
     ap = argparse.ArgumentParser('keras deep learning method')
     ap.add_argument('--generate', type=int, required=True)
     ap.add_argument('--model', type=str, required=True)
