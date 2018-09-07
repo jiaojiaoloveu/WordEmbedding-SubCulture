@@ -99,9 +99,7 @@ def fit_model(feature_train, label_train, feature_test, label_test, dtype, unifo
         return model, np.array([mae, rsme]).tolist()
 
 
-def train(generate, seed_size, eval_size, epa, epochs, batch_size):
-    dtype = args.get('model')
-    uniform = (args.get('uniform') == 1)
+def train(generate, seed_size, eval_size, epa, epochs, batch_size, dtype, uniform):
     print('type %s uniform %s' % (dtype, uniform))
     print('seed %s eval %s epa %s epoch %s batch %s' % (seed_size, eval_size, epa, epochs, batch_size))
 
@@ -196,11 +194,13 @@ def validate(model):
 
 def main():
     logging = []
+    dtype = args.get('model')
+    uniform = (args.get('uniform') == 1)
     for epoch in range(5, 120, 20):
         for batch in range(10, 120, 20):
             for epa in range(30, -1, -5):
                 # generate_data(3, 600, 1000, 0.1 * epa)
-                model, metrics = train(2, 600, 1000, 0.1 * epa, epoch, batch)
+                model, metrics = train(2, 600, 1000, 0.1 * epa, epoch, batch, dtype, uniform)
                 logging.append({
                     'epoch': epoch,
                     'batch': batch,
@@ -210,19 +210,19 @@ def main():
                     'mae': metrics
                 })
 
-            # changed
-            for seed in range(500, 5001, 500):
-                # generate_data(3, 5000, 8000, 2)
-                model, metrics = train(2, seed, 8000, 2.0, epoch, batch)
-                logging.append({
-                    'epoch': epoch,
-                    'batch': batch,
-                    'seed': seed,
-                    'eval': 8000,
-                    'epa': 2,
-                    'mae': metrics
-                })
-    with open(os.path.join(word_dataset_base, 'result'), 'w') as fp:
+            # # changed
+            # for seed in range(500, 5001, 500):
+            #     # generate_data(3, 5000, 8000, 2)
+            #     model, metrics = train(2, seed, 8000, 2.0, epoch, batch)
+            #     logging.append({
+            #         'epoch': epoch,
+            #         'batch': batch,
+            #         'seed': seed,
+            #         'eval': 8000,
+            #         'epa': 2,
+            #         'mae': metrics
+            #     })
+    with open(os.path.join(word_dataset_base, 'result_epa_uni_%s' % uniform), 'w') as fp:
         json.dump(logging, fp)
 
 
