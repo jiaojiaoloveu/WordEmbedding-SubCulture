@@ -222,7 +222,7 @@ def train():
         # logging_info.append(log_item(Configs.iterations + 1,
         #                              eval_label[eval_label_mask], train_label[eval_label_mask]))
 
-    return log_item(Configs.iterations, eval_label[eval_label_mask], train_label[train_label_mask])
+    return log_item(Configs.iterations, eval_label[eval_label_mask], train_label[eval_label_mask])
 
     # result_file_path = os.path.join(file_path,
     #                                 'it_%s_alpha_%s_enn_%s_exp_%s_uni_%s' %
