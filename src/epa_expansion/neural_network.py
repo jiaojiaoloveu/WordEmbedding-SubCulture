@@ -196,8 +196,9 @@ def main():
     logging = []
     dtype = args.get('model')
     uniform = (args.get('uniform') == 1)
-    for epoch in range(5, 120, 20):
-        for batch in range(10, 120, 20):
+    for epoch in [5, 50, 100]:
+        for batch in [10, 50, 100]:
+            # 3 * 3 * 10
             for epa in range(30, -1, -5):
                 # generate_data(3, 600, 1000, 0.1 * epa)
                 model, metrics = train(2, 600, 1000, 0.1 * epa, epoch, batch, dtype, uniform)
