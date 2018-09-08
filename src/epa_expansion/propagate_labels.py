@@ -281,26 +281,30 @@ if __name__ == '__main__':
 #     Configs.uni = (args.get('uni') == 1)
 
     logging = []
-    # for enn in [0.4, 0.5, 0.6, 0.7, 0.8]:
-    #     for exp in [0.5, 1, 2]:
-    #         Configs.enn = enn
-    #         Configs.exp = exp
-    #         metrics = train()
-    #         logging.append({
-    #             'enn': enn,
-    #             'exp': exp,
-    #             'metrics': metrics
-    #         })
-    for alpha in [0.2, 0.5, 0.8, 1]:
-        Configs.alpha = alpha
-        metrics = train()
-        logging.append({
-            'alpha': alpha,
-            'metrics': metrics
-        })
+    for enn in [0.4, 0.5, 0.6, 0.7, 0.8]:
+        for exp in [0.5, 1, 2]:
+            Configs.enn = enn
+            Configs.exp = exp
+            metrics = train()
+            logging.append({
+                'enn': enn,
+                'exp': exp,
+                'metrics': metrics
+            })
 
-    with open(os.path.join(word_dataset_base, 'result_alpha_seed_8500_eval_1000_epa_1.0'), 'w') as fp:
+    with open(os.path.join(word_dataset_base, 'result_grid_search_seed_8500_eval_1000_epa_1.0'), 'w') as fp:
         json.dump(logging, fp)
+
+    # for alpha in [0.2, 0.5, 0.8, 1]:
+    #     Configs.alpha = alpha
+    #     metrics = train()
+    #     logging.append({
+    #         'alpha': alpha,
+    #         'metrics': metrics
+    #     })
+
+    # with open(os.path.join(word_dataset_base, 'result_alpha_seed_8500_eval_1000_epa_1.0'), 'w') as fp:
+    #     json.dump(logging, fp)
 
     # if args.get("generate") == 1:
     #     # for epa in range(30, -1, -5):
