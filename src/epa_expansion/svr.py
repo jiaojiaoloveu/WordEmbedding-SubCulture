@@ -92,13 +92,24 @@ def main():
     #             'uniform': int(uniform),
     #             'mae': metrics
     #         })
-    for epsilon in [0.01, 0.05, 0.1, 0.2, 0.5]:
-        metrics = train(8500, 1000, 1.0, False, epsilon)
-        logging.append({
-            'epsilon': epsilon,
-            'metrics': metrics
-        })
-    with open(os.path.join(word_dataset_base, 'result_grid_search_seed_8500_eval_1000_epa_1.0'), 'w') as fp:
+    # for epsilon in [0.01, 0.05, 0.1, 0.2, 0.5]:
+    #     metrics = train(8500, 1000, 1.0, False, epsilon)
+    #     logging.append({
+    #         'epsilon': epsilon,
+    #         'metrics': metrics
+    #     })
+    # with open(os.path.join(word_dataset_base, 'result_grid_search_seed_8500_eval_1000_epa_1.0'), 'w') as fp:
+    #     json.dump(logging, fp)
+
+    for uni in [False, True]:
+        for seed in range(8500, 499, -1000):
+            metrics = train(seed, 1000, 1.0, uni, 0.05)
+            logging.append({
+                'uniform': uni,
+                'seed': seed,
+                'mae': metrics
+            })
+    with open(os.path.join(word_dataset_base, 'result_seed_uni'), 'w') as fp:
         json.dump(logging, fp)
 
 
