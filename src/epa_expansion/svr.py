@@ -11,10 +11,10 @@ word_dataset_base = '../result/epa_expansion/svr'
 os.makedirs(word_dataset_base, exist_ok=True)
 
 
-def train(seed_size, eval_size, epa, uniform):
+def train(seed_size, eval_size, epa, uniform, epsilon=0.05):
     feature_train, label_train, feature_test, label_test = generate_data(2, seed_size, eval_size, epa)
 
-    clf = SVR(kernel='rbf', epsilon=0.05, C=10)
+    clf = SVR(kernel='rbf', epsilon=epsilon, C=10)
     if uniform:
         label_train = __norm2uni(label_train)
         label_test = __norm2uni(label_test)
@@ -73,26 +73,32 @@ def main():
     uniform = (args.get('uniform') == 1)
     logging = []
 
-    for uniform in [True, False]:
-        for epa in range(30, -1, -5):
-            metrics = train(600, 1000, 0.1 * epa, uniform)
-            logging.append({
-                'seed': 600,
-                'eval': 1000,
-                'epa': 0.1 * epa,
-                'uniform': int(uniform),
-                'mae': metrics
-            })
-        for seed in range(500, 5001, 500):
-            metrics = train(seed, 8000, 2.0, uniform)
-            logging.append({
-                'seed': seed,
-                'eval': 8000,
-                'epa': 2,
-                'uniform': int(uniform),
-                'mae': metrics
-            })
-    with open(os.path.join(word_dataset_base, 'result'), 'w') as fp:
+    # for uniform in [True, False]:
+    #     for epa in range(30, -1, -5):
+    #         metrics = train(600, 1000, 0.1 * epa, uniform)
+    #         logging.append({
+    #             'seed': 600,
+    #             'eval': 1000,
+    #             'epa': 0.1 * epa,
+    #             'uniform': int(uniform),
+    #             'mae': metrics
+    #         })
+    #     for seed in range(500, 5001, 500):
+    #         metrics = train(seed, 8000, 2.0, uniform)
+    #         logging.append({
+    #             'seed': seed,
+    #             'eval': 8000,
+    #             'epa': 2,
+    #             'uniform': int(uniform),
+    #             'mae': metrics
+    #         })
+    for epsilon in [0.01, 0.05, 0.1, 0.2, 0.5]:
+        metrics = train(8500, 1000, 1.0, False, epsilon)
+        logging.append({
+            'epsilon': epsilon,
+            'metrics': metrics
+        })
+    with open(os.path.join(word_dataset_base, 'result_grid_search_seed_8500_eval_1000_epa_1.0'), 'w') as fp:
         json.dump(logging, fp)
 
 
