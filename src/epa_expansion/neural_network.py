@@ -194,39 +194,50 @@ def validate(model):
 
 def main():
     logging = []
-    for epoch in [5, 10, 50, 100, 200]:
-        for batch in [5, 10, 50, 100]:
-            model, metrics = train(2, 8500, 1000, 1.0, epoch, batch, 'lr', False)
-            logging.append({
-                'epoch': epoch,
-                'batch': batch,
-                'mae': metrics,
-            })
-            # for epa in range(30, -1, -5):
-            #     # generate_data(3, 600, 1000, 0.1 * epa)
-            #     model, metrics = train(2, 600, 1000, 0.1 * epa, epoch, batch, dtype, uniform)
-            #     logging.append({
-            #         'epoch': epoch,
-            #         'batch': batch,
-            #         'seed': 600,
-            #         'eval': 1000,
-            #         'epa': epa,
-            #         'mae': metrics
-            #     })
+    # for epoch in [5, 10, 50, 100, 200]:
+    #     for batch in [5, 10, 50, 100]:
+    #         model, metrics = train(2, 8500, 1000, 1.0, epoch, batch, 'lr', False)
+    #         logging.append({
+    #             'epoch': epoch,
+    #             'batch': batch,
+    #             'mae': metrics,
+    #         })
+    #         # for epa in range(30, -1, -5):
+    #         #     # generate_data(3, 600, 1000, 0.1 * epa)
+    #         #     model, metrics = train(2, 600, 1000, 0.1 * epa, epoch, batch, dtype, uniform)
+    #         #     logging.append({
+    #         #         'epoch': epoch,
+    #         #         'batch': batch,
+    #         #         'seed': 600,
+    #         #         'eval': 1000,
+    #         #         'epa': epa,
+    #         #         'mae': metrics
+    #         #     })
 
-            # # changed
-            # for seed in range(500, 5001, 500):
-            #     # generate_data(3, 5000, 8000, 2)
-            #     model, metrics = train(2, seed, 8000, 2.0, epoch, batch)
-            #     logging.append({
-            #         'epoch': epoch,
-            #         'batch': batch,
-            #         'seed': seed,
-            #         'eval': 8000,
-            #         'epa': 2,
-            #         'mae': metrics
-            #     })
-    with open(os.path.join(word_dataset_base, 'result_grid_search_seed_8500_eval_1000_epa_1.0'), 'w') as fp:
+    #         # # changed
+    #         # for seed in range(500, 5001, 500):
+    #         #     # generate_data(3, 5000, 8000, 2)
+    #         #     model, metrics = train(2, seed, 8000, 2.0, epoch, batch)
+    #         #     logging.append({
+    #         #         'epoch': epoch,
+    #         #         'batch': batch,
+    #         #         'seed': seed,
+    #         #         'eval': 8000,
+    #         #         'epa': 2,
+    #         #         'mae': metrics
+    #         #     })
+    # with open(os.path.join(word_dataset_base, 'result_grid_search_seed_8500_eval_1000_epa_1.0'), 'w') as fp:
+    #     json.dump(logging, fp)
+
+    for uni in [False, True]:
+        for seed in range(8500, 499, -1000):
+            model, metrics = train(2, seed, 1000, 1.0, 10, 10, 'lr', uni)
+            logging.append({
+                'uniform': uni,
+                'seed': seed,
+                'mae': metrics
+            })
+    with open(os.path.join(word_dataset_base, 'result_seed_uni'), 'w') as fp:
         json.dump(logging, fp)
 
 
