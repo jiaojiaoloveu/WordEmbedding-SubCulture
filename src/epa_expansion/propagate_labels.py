@@ -202,8 +202,8 @@ def train():
                      ]
         }
 
-    logging_info = list()
-    logging_info.append(log_item(-1, eval_label[eval_label_mask], train_label[eval_label_mask]))
+    # logging_info = list()
+    # logging_info.append(log_item(-1, eval_label[eval_label_mask], train_label[eval_label_mask]))
 
     original_train_label = np.array(train_label)
 
@@ -213,25 +213,27 @@ def train():
         transient_token_label = np.matmul(laplacian_matrix, train_label)
         train_label = transient_token_label * np.reshape(label_mask_all, (token_num, 1)) + \
                       Configs.alpha * original_train_label * np.reshape(label_mask, (token_num, 1))
-        logging_info.append(log_item(it, eval_label[eval_label_mask], train_label[eval_label_mask]))
+        # logging_info.append(log_item(it, eval_label[eval_label_mask], train_label[eval_label_mask]))
 
     if Configs.uni:
         train_label_mask_new = np.any(train_label, axis=1)
         train_label[train_label_mask_new] = __uni2norm(train_label[train_label_mask_new])
         eval_label[eval_label_mask] = __uni2norm(eval_label[eval_label_mask])
-        logging_info.append(log_item(Configs.iterations + 1,
-                                     eval_label[eval_label_mask], train_label[eval_label_mask]))
+        # logging_info.append(log_item(Configs.iterations + 1,
+        #                              eval_label[eval_label_mask], train_label[eval_label_mask]))
 
-    result_file_path = os.path.join(file_path,
-                                    'it_%s_enn_%s_exp_%s_alpha_%s_uni_%s' %
-                                    (Configs.iterations, Configs.enn, Configs.exp, Configs.alpha, int(Configs.uni))
-                                    )
-    os.makedirs(result_file_path, exist_ok=True)
+    return log_item(Configs.iterations, eval_label[eval_label_mask], train_label[train_label_mask])
 
-    log_json(logging_info, os.path.join(result_file_path, 'log'))
-    log_json(os.path.join(result_file_path, 'lexicon'),
-             list(zip(token_words, train_label.tolist())))
-    np.save(os.path.join(result_file_path, 'train_label_expanded'), train_label)
+    # result_file_path = os.path.join(file_path,
+    #                                 'it_%s_alpha_%s_enn_%s_exp_%s_uni_%s' %
+    #                                 (Configs.iterations, Configs.alpha, Configs.enn, Configs.exp, int(Configs.uni))
+    #                                 )
+    # os.makedirs(result_file_path, exist_ok=True)
+
+    # log_json(logging_info, os.path.join(result_file_path, 'log'))
+    # log_json(os.path.join(result_file_path, 'lexicon'),
+    #          list(zip(token_words, train_label.tolist())))
+    # np.save(os.path.join(result_file_path, 'train_label_expanded'), train_label)
 
 
 # def predict():
@@ -258,38 +260,54 @@ if __name__ == '__main__':
     ap.add_argument('--eval', type=int, required=True)
     ap.add_argument('--epa', type=float, required=True)
 
-    ap.add_argument('--alpha', type=float, required=True)
     ap.add_argument('--exp', type=float, required=True)
+    ap.add_argument('--enn', type=float, required=True)
 
     ap.add_argument('--iteration', type=int, required=True)
-    ap.add_argument('--enn', type=float, required=True)
+
+    ap.add_argument('--alpha', type=float, required=True)
 
     ap.add_argument('--uni', type=int, required=True)
 
     args = vars(ap.parse_args())
 
-    Configs.alpha = args.get("alpha")
-    Configs.iterations = args.get("iteration")
-    Configs.enn = args.get('enn')
-    Configs.exp = args.get('exp')
-    Configs.seed = args.get('seed')
-    Configs.eval = args.get('eval')
-    Configs.epa = args.get('epa')
-    Configs.uni = (args.get('uni') == 1)
+#     Configs.alpha = args.get("alpha")
+#     Configs.iterations = args.get("iteration")
+#     Configs.enn = args.get('enn')
+#     Configs.exp = args.get('exp')
+#     Configs.seed = args.get('seed')
+#     Configs.eval = args.get('eval')
+#     Configs.epa = args.get('epa')
+#     Configs.uni = (args.get('uni') == 1)
 
-    if args.get("generate") == 1:
-        # for epa in range(30, -1, -5):
-        #     Configs.seed = 600
-        #     Configs.epa = epa * 0.1
-        #     Configs.eval = 1000
-            # generate()
-            # train()
+    logging = []
+    for enn in [0.4, 0.5, 0.6, 0.7, 0.8]:
+        for exp in [0.5, 1, 2]:
+            Configs.enn = enn
+            Configs.exp = exp
+            metrics = train()
+            logging.append({
+                'enn': enn,
+                'exp': exp,
+                'metrics': metrics
+            })
 
-        for seed in range(8500, 499, -1000):
-            Configs.epa = 1.0
-            Configs.seed = seed
-            Configs.eval = 1000
-            generate()
+    with open(os.path.join(word_dataset_base, 'result_grid_search_seed_8500_eval_1000_epa_1.0'), 'w') as fp:
+        json.dump(logging, fp)
+
+    # if args.get("generate") == 1:
+    #     # for epa in range(30, -1, -5):
+    #     #     Configs.seed = 600
+    #     #     Configs.epa = epa * 0.1
+    #     #     Configs.eval = 1000
+    #         # generate()
+    #         # train()
+
+    #     for seed in range(8500, 499, -1000):
+    #         Configs.epa = 1.0
+    #         Configs.seed = seed
+    #         Configs.eval = 1000
+    #         generate()
             # train()
 
     # train()

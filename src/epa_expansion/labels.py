@@ -36,12 +36,12 @@ class WarrinerColumn:
 
 class Configs:
     alpha = 1
-    iterations = 100
+    iterations = 50
     enn = 0.6
     exp = 1
 
     uni = False
 
-    seed = 5000
-    eval = 8000
-    epa = 2
+    seed = 8000
+    eval = 1000
+    epa = 1.0
