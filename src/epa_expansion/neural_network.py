@@ -194,22 +194,25 @@ def validate(model):
 
 def main():
     logging = []
-    dtype = args.get('model')
-    uniform = (args.get('uniform') == 1)
-    for epoch in [5, 50, 100]:
-        for batch in [10, 50, 100]:
-            # 3 * 3 * 10
-            for epa in range(30, -1, -5):
-                # generate_data(3, 600, 1000, 0.1 * epa)
-                model, metrics = train(2, 600, 1000, 0.1 * epa, epoch, batch, dtype, uniform)
-                logging.append({
-                    'epoch': epoch,
-                    'batch': batch,
-                    'seed': 600,
-                    'eval': 1000,
-                    'epa': epa,
-                    'mae': metrics
-                })
+    for epoch in [5, 10, 50, 100, 200]:
+        for batch in [5, 10, 50, 100]:
+            model, metrics = train(2, 8500, 1000, 1.0, epoch, batch, 'lr', False)
+            logging.append({
+                'epoch': epoch,
+                'batch': batch,
+                'mae': metrics,
+            })
+            # for epa in range(30, -1, -5):
+            #     # generate_data(3, 600, 1000, 0.1 * epa)
+            #     model, metrics = train(2, 600, 1000, 0.1 * epa, epoch, batch, dtype, uniform)
+            #     logging.append({
+            #         'epoch': epoch,
+            #         'batch': batch,
+            #         'seed': 600,
+            #         'eval': 1000,
+            #         'epa': epa,
+            #         'mae': metrics
+            #     })
 
             # # changed
             # for seed in range(500, 5001, 500):
@@ -223,7 +226,7 @@ def main():
             #         'epa': 2,
             #         'mae': metrics
             #     })
-    with open(os.path.join(word_dataset_base, 'result_epa_uni_%s' % uniform), 'w') as fp:
+    with open(os.path.join(word_dataset_base, 'result_grid_search_seed_8500_eval_1000_epa_1.0'), 'w') as fp:
         json.dump(logging, fp)
 
 
