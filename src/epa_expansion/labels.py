@@ -42,6 +42,6 @@ class Configs:
 
     uni = False
 
-    seed = 8000
+    seed = 8500
     eval = 1000
     epa = 1.0
