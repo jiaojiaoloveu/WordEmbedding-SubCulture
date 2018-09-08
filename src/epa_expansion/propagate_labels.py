@@ -281,19 +281,19 @@ if __name__ == '__main__':
 #     Configs.uni = (args.get('uni') == 1)
 
     logging = []
-    for enn in [0.4, 0.5, 0.6, 0.7, 0.8]:
-        for exp in [0.5, 1, 2]:
-            Configs.enn = enn
-            Configs.exp = exp
-            metrics = train()
-            logging.append({
-                'enn': enn,
-                'exp': exp,
-                'metrics': metrics
-            })
+    # for enn in [0.4, 0.5, 0.6, 0.7, 0.8]:
+    #     for exp in [0.5, 1, 2]:
+    #         Configs.enn = enn
+    #         Configs.exp = exp
+    #         metrics = train()
+    #         logging.append({
+    #             'enn': enn,
+    #             'exp': exp,
+    #             'metrics': metrics
+    #         })
 
-    with open(os.path.join(word_dataset_base, 'result_grid_search_seed_8500_eval_1000_epa_1.0'), 'w') as fp:
-        json.dump(logging, fp)
+    # with open(os.path.join(word_dataset_base, 'result_grid_search_seed_8500_eval_1000_epa_1.0'), 'w') as fp:
+    #     json.dump(logging, fp)
 
     # for alpha in [0.2, 0.5, 0.8, 1]:
     #     Configs.alpha = alpha
@@ -305,6 +305,16 @@ if __name__ == '__main__':
 
     # with open(os.path.join(word_dataset_base, 'result_alpha_seed_8500_eval_1000_epa_1.0'), 'w') as fp:
     #     json.dump(logging, fp)
+
+    for it in [10, 30, 50, 100, 200]:
+        Configs.iterations = it
+        metrics = train()
+        logging.append({
+            'it': it,
+            'metrics': metrics
+        })
+    with open(os.path.join(word_dataset_base, 'result_iteration_seed_8500_eval_1000_epa_1.0'), 'w') as fp:
+        json.dump(logging, fp)
 
     # if args.get("generate") == 1:
     #     # for epa in range(30, -1, -5):
