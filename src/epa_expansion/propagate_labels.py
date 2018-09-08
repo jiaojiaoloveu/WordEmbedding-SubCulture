@@ -306,14 +306,27 @@ if __name__ == '__main__':
     # with open(os.path.join(word_dataset_base, 'result_alpha_seed_8500_eval_1000_epa_1.0'), 'w') as fp:
     #     json.dump(logging, fp)
 
-    for it in [10, 30, 50, 100, 200]:
-        Configs.iterations = it
-        metrics = train()
-        logging.append({
-            'it': it,
-            'metrics': metrics
-        })
-    with open(os.path.join(word_dataset_base, 'result_iteration_seed_8500_eval_1000_epa_1.0'), 'w') as fp:
+    # for it in [10, 30, 50, 100, 200]:
+    #     Configs.iterations = it
+    #     metrics = train()
+    #     logging.append({
+    #         'it': it,
+    #         'metrics': metrics
+    #     })
+    # with open(os.path.join(word_dataset_base, 'result_iteration_seed_8500_eval_1000_epa_1.0'), 'w') as fp:
+    #     json.dump(logging, fp)
+
+    for uni in [False, True]:
+        Configs.uni = uni
+        for seed in range(8500, 499, -1000):
+            Configs.seed = seed
+            metrics = train()
+            logging.append({
+                'seed': seed,
+                'uni': uni,
+                'metrics': metrics
+            })
+    with open(os.path.join(word_dataset_base, 'result_seed_uni'), 'w') as fp:
         json.dump(logging, fp)
 
     # if args.get("generate") == 1:
