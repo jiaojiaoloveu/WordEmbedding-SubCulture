@@ -316,18 +316,33 @@ if __name__ == '__main__':
     # with open(os.path.join(word_dataset_base, 'result_iteration_seed_8500_eval_1000_epa_1.0'), 'w') as fp:
     #     json.dump(logging, fp)
 
+    # for uni in [False, True]:
+    #     Configs.uni = uni
+    #     for seed in range(8500, 499, -1000):
+    #         Configs.seed = seed
+    #         metrics = train()
+    #         logging.append({
+    #             'seed': seed,
+    #             'uni': uni,
+    #             'metrics': metrics
+    #         })
+    # with open(os.path.join(word_dataset_base, 'result_seed_uni'), 'w') as fp:
+    #     json.dump(logging, fp)
+
     for uni in [False, True]:
         Configs.uni = uni
-        for seed in range(8500, 499, -1000):
-            Configs.seed = seed
+        for epa in range(30, -1, -5):
+            Configs.epa = 0.1 * epa
+            Configs.seed = 600
             metrics = train()
             logging.append({
-                'seed': seed,
-                'uni': uni,
-                'metrics': metrics
+                'uniform': uni,
+                'epa': 0.1 * epa,
+                'mae': metrics
             })
-    with open(os.path.join(word_dataset_base, 'result_seed_uni'), 'w') as fp:
+    with open(os.path.join(word_dataset_base, 'result_epa_uni'), 'w') as fp:
         json.dump(logging, fp)
+
 
     # if args.get("generate") == 1:
     #     # for epa in range(30, -1, -5):
