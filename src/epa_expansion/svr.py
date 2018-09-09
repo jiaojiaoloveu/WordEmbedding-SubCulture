@@ -113,7 +113,7 @@ def main():
     #     json.dump(logging, fp)
 
     for uni in [False, True]:
-        for epa in range(30, -1, 5):
+        for epa in range(30, -1, -5):
             metrics = train(600, 1000, 0.1 * epa, uni, 0.05)
             logging.append({
                 'uniform': uni,
