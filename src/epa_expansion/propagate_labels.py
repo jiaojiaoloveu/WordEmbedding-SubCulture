@@ -329,6 +329,12 @@ if __name__ == '__main__':
     # with open(os.path.join(word_dataset_base, 'result_seed_uni'), 'w') as fp:
     #     json.dump(logging, fp)
 
+    for epa in range(30, -1, -5):
+        Configs.seed = 600
+        Configs.epa = epa * 0.1
+        Configs.eval = 1000
+        generate()
+
     for uni in [False, True]:
         Configs.uni = uni
         for epa in range(30, -1, -5):
