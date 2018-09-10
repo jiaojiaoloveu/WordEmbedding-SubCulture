@@ -12,6 +12,8 @@ from sklearn.model_selection import cross_val_score, KFold
 from gen_data import wv_map, generate_data, get_tokens, get_rand_tokens, get_token_wv
 from sample_seeds import __uni2norm, __norm2uni
 from align_wv_space import __comparison
+from gensim.models.word2vec import Word2Vec
+
 
 word_dataset_base = '../result/epa_expansion/nn'
 os.makedirs(word_dataset_base, exist_ok=True)
@@ -112,9 +114,12 @@ def train(generate, seed_size, eval_size, epa, epochs, batch_size, dtype, unifor
 
 
 def expansion(model, dic, culture):
-    tokens = dic.keys()
+    tokens = list(dic.vocab.keys())
     token_wv = np.array([dic[w] for w in tokens])
     token_epa = model.predict(token_wv, batch_size=5)
+    print(len(tokens))
+    print(token_wv.shape)
+    print(token_epa.shape)
 
     with open(os.path.join(word_dataset_base, 'nn_result_%s_all' % culture), 'w') as fp:
         res = dict(list(zip(tokens, token_epa.tolist())))
@@ -193,7 +198,11 @@ def validate(model):
 
 
 def main():
-    logging = []
+    model, metrics = train(2, 8500, 1000, 1.0, 10, 10, 'lr', False)
+    github_model = Word2Vec.load('../models/embedding/github_aligned/word2vec_sg_0_size_300_mincount_5')
+    expansion(model, github_model.wv, 'github')
+
+    # logging = []
     # for epoch in [5, 10, 50, 100, 200]:
     #     for batch in [5, 10, 50, 100]:
     #         model, metrics = train(2, 8500, 1000, 1.0, epoch, batch, 'lr', False)
@@ -240,16 +249,16 @@ def main():
     # with open(os.path.join(word_dataset_base, 'result_seed_uni'), 'w') as fp:
     #     json.dump(logging, fp)
 
-    for uni in [False, True]:
-        for epa in range(30, -1, -5):
-            model, metrics = train(2, 600, 1000, 0.1 * epa, 10, 10, 'lr', uni)
-            logging.append({
-                'uniform': uni,
-                'epa': 0.1 * epa,
-                'mae': metrics
-            })
-    with open(os.path.join(word_dataset_base, 'result_epa_uni'), 'w') as fp:
-        json.dump(logging, fp)
+    # for uni in [False, True]:
+    #     for epa in range(30, -1, -5):
+    #         model, metrics = train(2, 600, 1000, 0.1 * epa, 10, 10, 'lr', uni)
+    #         logging.append({
+    #             'uniform': uni,
+    #             'epa': 0.1 * epa,
+    #             'mae': metrics
+    #         })
+    # with open(os.path.join(word_dataset_base, 'result_epa_uni'), 'w') as fp:
+    #     json.dump(logging, fp)
 
 
 if __name__ == '__main__':
