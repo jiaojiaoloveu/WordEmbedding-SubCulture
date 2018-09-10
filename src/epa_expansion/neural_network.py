@@ -266,23 +266,23 @@ if __name__ == '__main__':
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
-    ap = argparse.ArgumentParser('keras deep learning method')
-    ap.add_argument('--generate', type=int, required=True)
-    ap.add_argument('--model', type=str, required=True)
-    ap.add_argument('--uniform', type=int, required=True)
-    ap.add_argument('--align', type=str, required=True)
+    # ap = argparse.ArgumentParser('keras deep learning method')
+    # ap.add_argument('--generate', type=int, required=True)
+    # ap.add_argument('--model', type=str, required=True)
+    # ap.add_argument('--uniform', type=int, required=True)
+    # ap.add_argument('--align', type=str, required=True)
 
-    ap.add_argument('--seed', type=int, required=True)
-    ap.add_argument('--eval', type=int, required=True)
-    ap.add_argument('--epa', type=float, required=True)
+    # ap.add_argument('--seed', type=int, required=True)
+    # ap.add_argument('--eval', type=int, required=True)
+    # ap.add_argument('--epa', type=float, required=True)
 
-    ap.add_argument('--epoch', type=int, required=True)
-    ap.add_argument('--batch', type=int, required=True)
+    # ap.add_argument('--epoch', type=int, required=True)
+    # ap.add_argument('--batch', type=int, required=True)
 
-    args = vars(ap.parse_args())
+    # args = vars(ap.parse_args())
 
-    gen = args.get('generate')
-    align = args.get('align')
+    # gen = args.get('generate')
+    # align = args.get('align')
 
     # model, metrics = train(3, 8000, 4000, 1.5, 10, 150)
     # print(metrics)
