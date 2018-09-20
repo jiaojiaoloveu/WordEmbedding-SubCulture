@@ -59,13 +59,13 @@ def train():
         print('axis %s, rmse %s' % (axis, rmse))
         models.append(model)
 
-    # evaluate(models, svo, svo_wv, 'general', epa_mean, epa_std)
+    evaluate(models, svo, svo_wv, 'general', epa_mean, epa_std)
     # evaluate(models, svo, np.array(get_comp_word_vector(svo, 'github')), 'github', epa_mean, epa_std)
     # evaluate(models, svo, np.array(get_comp_word_vector(svo, 'twitter')), 'twitter', epa_mean, epa_std)
 
-    gh_svo = read_gh_comments()
+    # gh_svo = read_gh_comments()
 
-    evaluate(models, gh_svo, np.array(get_comp_word_vector(gh_svo, 'github')), 'gh_comments', epa_mean, epa_std)
+    # evaluate(models, gh_svo, np.array(get_comp_word_vector(gh_svo, 'github')), 'gh_comments', epa_mean, epa_std)
 
 
 def evaluate(model_list, svo, wv, name, epa_mean, epa_std):

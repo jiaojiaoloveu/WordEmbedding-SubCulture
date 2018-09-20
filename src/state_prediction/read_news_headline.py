@@ -12,7 +12,7 @@ data_epa_svo_pred_path = '../data/NH_dataset/NewsHeadlines_SVO_pred.csv'
 
 data_valence_path = '../data/NH_dataset/NewsHeadlines_Valence.csv'
 google_news_model_path = '../models/embedding/GoogleNews-vectors-negative300.bin'
-compare_model_path = '../models/embedding/%s/fasttext_sg_0_size_300_mincount_5'
+github_model_path = '../models/embedding/%s/fasttext_sg_0_size_300_mincount_5'
 
 
 def get_word_vector(tokens):
@@ -31,21 +31,17 @@ def get_word_vector(tokens):
     return wv
 
 
-def get_comp_word_vector(tokens, culture):
-    comp_model = Word2Vec.load(compare_model_path % culture)
-    base_model = KeyedVectors.load_word2vec_format(google_news_model_path, binary=True)
-    _, comp_vocab = get_aligned_wv(comp_model.wv, base_model, [], 'nn')
+def get_comp_word_vector(tokens):
     wv = list()
+    model = Word2Vec.load(github_model_path)
     for line in tokens:
         wv_svo = list()
         for w in line:
-            if w in comp_vocab.keys():
-                wv_svo.append(comp_vocab[w])
+            if w in model.wv.vocab.keys():
+                wv_svo.append(model.wv[w])
             else:
                 wv_svo.append(np.zeros(300))
         wv.append(wv_svo)
-    del comp_model
-    del base_model
     return wv
 
 
