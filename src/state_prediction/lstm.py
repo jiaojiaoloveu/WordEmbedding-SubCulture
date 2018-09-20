@@ -92,6 +92,11 @@ def evaluate(model_list, svo, wv, name, epa_mean, epa_std):
 
 
 if __name__ == '__main__':
+    import os
+
+    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+    os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
     ap = argparse.ArgumentParser("sentence epa lstm")
     ap.add_argument('--svo', type=int, required=True)
     args = vars(ap)
