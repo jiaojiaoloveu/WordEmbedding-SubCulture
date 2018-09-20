@@ -201,7 +201,7 @@ def validate(model):
 def main():
     model, metrics = train(2, 8500, 1000, 1.0, 10, 10, 'lr', False)
 
-    github_model = Word2Vec.load('../models/embedding/github_aligned/word2vec_sg_0_size_300_mincount_20')
+    github_model = Word2Vec.load('../models/embedding/github_aligned/word2vec_sg_0_size_300_mincount_5')
     expansion(model, github_model.wv, 'github')
 
     gg_model = KeyedVectors.load_word2vec_format('../models/embedding/GoogleNews-vectors-negative300.bin', binary=True)
