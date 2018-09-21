@@ -50,6 +50,12 @@ def main():
             json.dump(svo_senti, fp)
 
 
+def main2():
+    svo_epa_sent = {}
+    with open('../result/state_prediction/github_comment', 'r') as fp:
+        svo_epa_senti = dict((str(item[0]), [item[1]]) for item in json.load(fp))
+
+
 if __name__ == '__main__':
     main()
 

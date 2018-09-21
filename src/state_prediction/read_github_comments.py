@@ -33,7 +33,7 @@ def read_gh_comments():
     # senti_vec = np.array(senti_vec)
     # print(svo.shape)
     # print(senti_vec.shape)
-    print(svo)
+    # print(svo)
     return svo, senti_vec
 
 
