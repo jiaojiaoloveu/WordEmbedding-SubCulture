@@ -27,13 +27,14 @@ def read_gh_comments():
             if sent in svo_pred.keys() and len(svo_pred[sent]) > 0:
                 for item in svo_pred[sent]:
                     if len(item) > 0:
-                        svo.append([item['subject'], item['predicate'], item['object']])
+                        svo.append([item['subject'][0].lower(), item['predicate'][0].lower(), item['object'][0].lower()])
                         senti_vec.append([row[sent.capitalize()] for sent in basic_sentiment])
-    svo = np.array(svo)
-    senti_vec = np.array(senti_vec)
-    print(svo.shape)
-    print(senti_vec.shape)
-    return svo
+    # svo = np.array(svo)
+    # senti_vec = np.array(senti_vec)
+    # print(svo.shape)
+    # print(senti_vec.shape)
+    print(svo)
+    return svo, senti_vec
 
 
 def pred_github_svo():
@@ -55,5 +56,5 @@ def pred_github_svo():
 
 if __name__ == '__main__':
     # pred_github_svo()
-    read_gh_comments()
+    svo, senti = read_gh_comments()
 
