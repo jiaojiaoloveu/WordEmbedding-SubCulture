@@ -49,7 +49,7 @@ def train():
 
     models = []
 
-    for axis in range(0, 4):
+    for axis in range(0, 1):
         label = epa[:, axis, :]
         model = kfold_test(svo_wv, label, epoch=10, batch_size=50)
         pred = model.predict(svo_wv)
@@ -59,13 +59,27 @@ def train():
         print('axis %s, rmse %s' % (axis, rmse))
         models.append(model)
 
-    evaluate(models, svo, svo_wv, 'general', epa_mean, epa_std)
+    # evaluate(models, svo, svo_wv, 'general', epa_mean, epa_std)
     # evaluate(models, svo, np.array(get_comp_word_vector(svo, 'github')), 'github', epa_mean, epa_std)
     # evaluate(models, svo, np.array(get_comp_word_vector(svo, 'twitter')), 'twitter', epa_mean, epa_std)
 
-    # gh_svo = read_gh_comments()
+    gh_svo, gh_senti = read_gh_comments()
+    gh_wv = np.array(get_comp_word_vector(gh_svo))
+    gh_svo = np.array(gh_svo)
+    gh_senti = np.array(gh_senti)
+    predict(models[0], gh_svo, gh_wv, gh_senti, epa_mean, epa_std)
 
-    # evaluate(models, gh_svo, np.array(get_comp_word_vector(gh_svo, 'github')), 'gh_comments', epa_mean, epa_std)
+
+def predict(model, svo, wv, senti, epa_mean, epa_std):
+    wv_mask = np.all(np.all(wv, axis=2), axis=1)
+    wv = wv[wv_mask]
+    svo = svo[wv_mask]
+    senti = senti[wv_mask]
+    pred = model.predict(wv) * epa_std[0, :] + epa_mean[0, :]
+    print(pred.shape)
+    with open('../result/state_prediction/github_comment', 'w') as fp:
+        zipped = zip(svo.tolist(), zip(pred.tolist(), senti.tolist()))
+        json.dump(list(zipped), fp)
 
 
 def evaluate(model_list, svo, wv, name, epa_mean, epa_std):
