@@ -51,9 +51,15 @@ def main():
 
 
 def main2():
-    svo_epa_sent = {}
     with open('../result/state_prediction/github_comment', 'r') as fp:
-        svo_epa_senti = dict((str(item[0]), [item[1]]) for item in json.load(fp))
+        svo_epa_senti = dict((str(item[0]), item[1]) for item in json.load(fp))
+    senti_epa = get_senti_epa('github')
+    svo_senti = {}
+    for svo in svo_epa_senti:
+        senti_pred = get_closest_senti(senti_epa, np.array(svo_epa_senti[svo][0]))
+        svo_senti[svo] = [senti_pred, svo_epa_senti[svo][1]]
+    with open('../result/state_prediction/svo_senti_github_comment', 'w') as fp:
+        json.dump(svo_senti, fp)
 
 
 if __name__ == '__main__':
