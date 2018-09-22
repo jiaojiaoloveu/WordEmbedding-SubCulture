@@ -49,7 +49,7 @@ def train():
 
     models = []
 
-    for axis in range(0, 1):
+    for axis in range(0, 4):
         label = epa[:, axis, :]
         model = kfold_test(svo_wv, label, epoch=10, batch_size=50)
         pred = model.predict(svo_wv)
