@@ -20,6 +20,7 @@ def read_gh_comments():
         svo_pred = json.load(fp)
     svo = list()
     senti_vec = list()
+    svo_sent = dict()
     with open(github_comments_path, 'r') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
@@ -27,13 +28,17 @@ def read_gh_comments():
             if sent in svo_pred.keys() and len(svo_pred[sent]) > 0:
                 for item in svo_pred[sent]:
                     if len(item) > 0:
-                        svo.append([item['subject'][0].lower(), item['predicate'][0].lower(), item['object'][0].lower()])
+                        key = [item['subject'][0].lower(), item['predicate'][0].lower(), item['object'][0].lower()]
+                        svo_sent[str(key)] = sent
+                        svo.append(key)
                         senti_vec.append([row[sent.capitalize()] for sent in basic_sentiment])
     # svo = np.array(svo)
     # senti_vec = np.array(senti_vec)
     # print(svo.shape)
     # print(senti_vec.shape)
     # print(svo)
+    with open('../result/state_prediction/gh_sent_svo', 'w') as fp:
+        json.dump(svo_sent, fp)
     return svo, senti_vec
 
 

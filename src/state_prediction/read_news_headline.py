@@ -61,27 +61,32 @@ def read_epa(use_pred):
     svo = list()
     epa = list()
     svo_pred = load_predict_svo()
+    sentences = dict()
     with open(data_epa_path) as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             sent = row['NewsHeadline']
             if use_pred and sent in svo_pred.keys() and len(svo_pred[sent]) > 0:
-                svo.append([svo_pred[sent]['subject'][0], svo_pred[sent]['predicate'][0], svo_pred[sent]['object'][0]])
+                key = [svo_pred[sent]['subject'][0], svo_pred[sent]['predicate'][0], svo_pred[sent]['object'][0]]
             else:
-                svo.append([row['Subject'], row['Verb'], row['Object']])
+                key = [row['Subject'], row['Verb'], row['Object']]
+            sentences[str(key)] = sent
+            svo.append(key)
             event_epa = [row['E_e'], row['E_p'], row['E_a']]
             subject_epa = [row['S_e'], row['S_p'], row['S_a']]
             verb_epa = [row['V_e'], row['V_p'], row['V_a']]
             object_epa = [row['O_e'], row['O_p'], row['O_a']]
             epa.append([event_epa, subject_epa, verb_epa, object_epa])
-    svo_wv = np.array(get_word_vector(svo))
-    svo_mask = np.all(np.all(svo_wv, axis=2), axis=1)
-    svo_wv = svo_wv[svo_mask]
-    svo, epa = np.array(svo)[svo_mask], np.array(epa)[svo_mask].astype(np.float)
-    print('svo shape %s' % str(svo.shape))
-    print('svo wv shape %s' % str(svo_wv.shape))
-    print('epa shape %s' % str(epa.shape))
-    return svo, svo_wv, epa
+    with open('../result/state_prediction/news_sent_svo', 'w') as fp:
+        json.dump(sentences, fp)
+    # svo_wv = np.array(get_word_vector(svo))
+    # svo_mask = np.all(np.all(svo_wv, axis=2), axis=1)
+    # svo_wv = svo_wv[svo_mask]
+    # svo, epa = np.array(svo)[svo_mask], np.array(epa)[svo_mask].astype(np.float)
+    # print('svo shape %s' % str(svo.shape))
+    # print('svo wv shape %s' % str(svo_wv.shape))
+    # print('epa shape %s' % str(epa.shape))
+    # return svo, svo_wv, epa
 
 
 def read_valence():
@@ -119,6 +124,6 @@ def load_predict_svo():
 
 
 if __name__ == '__main__':
-    # read_epa()
+    read_epa(False)
     # read_valence()
-    predict_svo()
+    # predict_svo()
