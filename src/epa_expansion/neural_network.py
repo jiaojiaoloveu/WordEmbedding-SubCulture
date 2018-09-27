@@ -200,12 +200,14 @@ def validate(model):
 
 def main():
     model, metrics = train(2, 8500, 1000, 1.0, 10, 10, 'lr', False)
+    from keras.utils import plot_model
+    plot_model(model, to_file='model.png')
 
-    github_model = Word2Vec.load('../models/embedding/github_aligned/word2vec_sg_0_size_300_mincount_20')
-    expansion(model, github_model.wv, 'github')
+    # github_model = Word2Vec.load('../models/embedding/github_aligned/word2vec_sg_0_size_300_mincount_20')
+    # expansion(model, github_model.wv, 'github')
 
-    gg_model = KeyedVectors.load_word2vec_format('../models/embedding/GoogleNews-vectors-negative300.bin', binary=True)
-    expansion(model, gg_model, 'google')
+    # gg_model = KeyedVectors.load_word2vec_format('../models/embedding/GoogleNews-vectors-negative300.bin', binary=True)
+    # expansion(model, gg_model, 'google')
 
     # logging = []
     # for epoch in [5, 10, 50, 100, 200]:
