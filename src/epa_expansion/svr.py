@@ -5,6 +5,9 @@ import os
 import json
 import numpy as np
 import argparse
+import csv
+import random
+from gen_data import load_github_word_vectors, compare_model_path
 
 
 word_dataset_base = '../result/epa_expansion/svr'
@@ -124,14 +127,59 @@ def main():
         json.dump(logging, fp)
 
 
+def main2():
+    github_label = {}
+    with open('../data/GitHub_Aggregated.csv') as fp:
+        reader = csv.DictReader(fp)
+        for row in reader:
+            concept = row['Concept']
+            e, p, a = float(row['Evaluation_mean']), float(row['Potency_mean']), float(row['Activity_mean'])
+            github_label[concept] = [round(d, 3) for d in [e, p, a]]
+    word_seeds = list(github_label.keys())
+    word_seeds_train = random.sample(word_seeds, int(0.7 * len(word_seeds)))
+    words_seeds_test = [w for w in word_seeds if w not in word_seeds_train]
+
+    github_model = load_github_word_vectors(compare_model_path % 'github')
+    github_vocab = set(github_model.wv.vocab.keys())
+
+    def wv_epa(word_list):
+        feature, label = [], []
+        for w in word_list:
+            if w in github_vocab:
+                feature.append(github_model.wv[w])
+                label.append(github_label[w])
+        return np.array(feature), np.array(label)
+
+    feature_train, label_train = wv_epa(word_seeds_train)
+    feature_test, label_test = wv_epa(words_seeds_test)
+
+    print(feature_train.shape)
+    print(feature_test.shape)
+
+    clf = SVR(kernel='rbf', epsilon=0.05, C=10)
+    label_pred = []
+    for axis in range(0, 3):
+        label_train_axis = label_train[:, axis]
+        print('start training')
+        clf.fit(feature_train, label_train_axis)
+        label_pred.append(clf.predict(feature_test))
+    label_pred = np.transpose(label_pred)
+    mae = np.mean(np.abs(label_pred - label_test), axis=0)
+    rsme = np.sqrt(np.mean((label_pred - label_test) ** 2, axis=0))
+
+    print(mae)
+    print(rsme)
+
+
 if __name__ == '__main__':
-    ap = argparse.ArgumentParser('keras deep learning method')
-    ap.add_argument('--generate', type=int, required=False)
-    ap.add_argument('--uniform', type=int, required=True)
-    ap.add_argument('--seed', type=int, required=True)
-    ap.add_argument('--eval', type=int, required=True)
-    ap.add_argument('--epa', type=float, required=True)
-    args = vars(ap.parse_args())
+    # ap = argparse.ArgumentParser('keras deep learning method')
+    # ap.add_argument('--generate', type=int, required=False)
+    # ap.add_argument('--uniform', type=int, required=True)
+    # ap.add_argument('--seed', type=int, required=True)
+    # ap.add_argument('--eval', type=int, required=True)
+    # ap.add_argument('--epa', type=float, required=True)
+    # args = vars(ap.parse_args())
 
-    main()
+    # main()
 
+    main2()

@@ -3,6 +3,8 @@ import os
 import argparse
 import numpy as np
 import time
+import csv
+import random
 from labels import LabelSpace
 from labels import Configs
 from scipy import spatial
@@ -136,6 +138,81 @@ def generate():
     log_np(os.path.join(file_path, 'matrix'), weight_matrix)
 
 
+def generate2():
+    github_label = {}
+    with open('../data/GitHub_Aggregated.csv') as fp:
+        reader = csv.DictReader(fp)
+        for row in reader:
+            concept = row['Concept']
+            e, p, a = float(row['Evaluation_mean']), float(row['Potency_mean']), float(row['Activity_mean'])
+            github_label[concept] = [round(d, 3) for d in [e, p, a]]
+    word_seeds = list(github_label.keys())
+    word_seeds_train = random.sample(word_seeds, int(0.7 * len(word_seeds)))
+    words_seeds_test = [w for w in word_seeds if w not in word_seeds_train]
+    seed_words = {k: github_label[k] for k in word_seeds_train}
+    eval_words = {k: github_label[k] for k in words_seeds_test}
+
+    Configs.seed = len(word_seeds_train)
+    Configs.eval = len(words_seeds_test)
+
+    token_words = set(list(seed_words.keys()) + list(eval_words.keys()))
+
+    # append wikitext words to enlarge the network size
+    with open('../result/epa_expansion/wikitext-wordlist', 'r') as fp:
+        corpus_words = set(json.load(fp))
+    token_words.update(corpus_words)
+
+    # use trained model to calculate distance
+    github_model_path = '../models/embedding/github_aligned/word2vec_sg_0_size_300_mincount_5'
+    github_model = load_github_word_vectors(github_model_path)
+    all_token_words = set(github_model.wv.vocab.keys())
+    token_words = list(token_words & all_token_words)
+    token_num = len(token_words)
+
+    # training matrix
+    train_label = np.zeros((token_num, LabelSpace.Dimension), dtype=np.double)
+    # eval matrix
+    eval_label = np.array(train_label)
+
+    # update label info
+    seeds_in_token, eval_in_token = 0, 0
+    for ind in range(0, token_num):
+        word = token_words[ind]
+        if word in seed_words.keys():
+            train_label[ind] = seed_words[word]
+            seeds_in_token += 1
+        if word in eval_words.keys():
+            eval_label[ind] = eval_words[word]
+            eval_in_token += 1
+
+    print('%s/%s seeds in token words' % (seeds_in_token, Configs.seed))
+    print('%s/%s eval in token words' % (eval_in_token, Configs.eval))
+    print('token number %s' % token_num)
+
+    start_time = time.time()
+    # update weight info
+    weight_matrix = np.zeros((token_num, token_num), dtype=np.double)
+    for ind in range(0, token_num - 1):
+        # fully connected graph
+        # weight between nodes positive
+        # distance = 1 - cosine-dis
+        distance_matrix = github_model.wv.distances(token_words[ind], token_words[ind + 1: token_num])
+        weight_matrix[ind, ind + 1: token_num] = distance_matrix
+    del github_model
+
+    print('time cost %s' % (time.time() - start_time))
+
+    file_path = os.path.join(word_dataset_base, 'github_seed_%s_eval_%s_epa_%s' % (Configs.seed, Configs.eval, Configs.epa))
+    os.makedirs(file_path, exist_ok=True)
+
+    log_json(os.path.join(file_path, 'token'), token_words)
+    log_json(os.path.join(file_path, 'seed'), seed_words)
+    log_json(os.path.join(file_path, 'eval'), eval_words)
+    log_np(os.path.join(file_path, 'train_label'), train_label)
+    log_np(os.path.join(file_path, 'eval_label'), eval_label)
+    log_np(os.path.join(file_path, 'matrix'), weight_matrix)
+
+
 def generate_github():
     aligned_github_model_path = '../models/embedding/github_aligned/word2vec_sg_0_size_300_mincount_5'
     github_model = load_github_word_vectors(aligned_github_model_path)
@@ -158,7 +235,7 @@ def generate_github():
 def train():
     print('start training')
 
-    file_path = os.path.join(word_dataset_base, 'seed_%s_eval_%s_epa_%s' % (Configs.seed, Configs.eval, Configs.epa))
+    file_path = os.path.join(word_dataset_base, 'github_seed_%s_eval_%s_epa_%s' % (Configs.seed, Configs.eval, Configs.epa))
     with open(os.path.join(file_path, 'token'), 'r') as fp:
         token_words = json.load(fp)
     train_label = np.load(os.path.join(file_path, 'train_label.npy'))
@@ -271,16 +348,20 @@ if __name__ == '__main__':
 
     args = vars(ap.parse_args())
 
-#     Configs.alpha = args.get("alpha")
-#     Configs.iterations = args.get("iteration")
-#     Configs.enn = args.get('enn')
-#     Configs.exp = args.get('exp')
-#     Configs.seed = args.get('seed')
-#     Configs.eval = args.get('eval')
-#     Configs.epa = args.get('epa')
-#     Configs.uni = (args.get('uni') == 1)
+    Configs.alpha = args.get("alpha")
+    Configs.iterations = args.get("iteration")
+    Configs.enn = args.get('enn')
+    Configs.exp = args.get('exp')
+    Configs.seed = args.get('seed')
+    Configs.eval = args.get('eval')
+    Configs.epa = args.get('epa')
+    Configs.uni = (args.get('uni') == 1)
 
-    logging = []
+    mae = train()
+    print(mae)
+
+
+    # logging = []
     # for enn in [0.4, 0.5, 0.6, 0.7, 0.8]:
     #     for exp in [0.5, 1, 2]:
     #         Configs.enn = enn
@@ -329,25 +410,25 @@ if __name__ == '__main__':
     # with open(os.path.join(word_dataset_base, 'result_seed_uni'), 'w') as fp:
     #     json.dump(logging, fp)
 
-    for epa in range(30, -1, -5):
-        Configs.seed = 600
-        Configs.epa = epa * 0.1
-        Configs.eval = 1000
-        generate()
+    # for epa in range(30, -1, -5):
+    #     Configs.seed = 600
+    #     Configs.epa = epa * 0.1
+    #     Configs.eval = 1000
+    #     generate()
 
-    for uni in [False, True]:
-        Configs.uni = uni
-        for epa in range(30, -1, -5):
-            Configs.epa = 0.1 * epa
-            Configs.seed = 600
-            metrics = train()
-            logging.append({
-                'uniform': uni,
-                'epa': 0.1 * epa,
-                'mae': metrics
-            })
-    with open(os.path.join(word_dataset_base, 'result_epa_uni'), 'w') as fp:
-        json.dump(logging, fp)
+    # for uni in [False, True]:
+    #     Configs.uni = uni
+    #     for epa in range(30, -1, -5):
+    #         Configs.epa = 0.1 * epa
+    #         Configs.seed = 600
+    #         metrics = train()
+    #         logging.append({
+    #             'uniform': uni,
+    #             'epa': 0.1 * epa,
+    #             'mae': metrics
+    #         })
+    # with open(os.path.join(word_dataset_base, 'result_epa_uni'), 'w') as fp:
+    #    json.dump(logging, fp)
 
 
     # if args.get("generate") == 1:
