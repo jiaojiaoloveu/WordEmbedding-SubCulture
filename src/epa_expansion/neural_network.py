@@ -50,8 +50,12 @@ def baseline_model(dtype='lr', uniform=False):
         model.add(GlobalMaxPooling1D())
         model.add(Dense(3))
 
+    from keras.utils import plot_model
+    plot_model(model, to_file='epa-nn.png', show_shapes=True, show_layer_names=True)
+
     model.compile(loss='mean_absolute_error', optimizer='adam', metrics=['accuracy'])
     model.summary()
+
     return model
 
 
@@ -200,8 +204,6 @@ def validate(model):
 
 def main():
     model, metrics = train(2, 8500, 1000, 1.0, 10, 10, 'lr', False)
-    from keras.utils import plot_model
-    plot_model(model, to_file='model.png')
 
     # github_model = Word2Vec.load('../models/embedding/github_aligned/word2vec_sg_0_size_300_mincount_20')
     # expansion(model, github_model.wv, 'github')
@@ -294,7 +296,17 @@ if __name__ == '__main__':
     # model, metrics = train(3, 8000, 4000, 1.5, 10, 150)
     # print(metrics)
 
-    main()
+    # main()
+    # baseline_model()
+
+    from keras.models import Sequential
+    from keras.layers import Dense
+    from keras.utils.vis_utils import plot_model
+
+    model = Sequential()
+    model.add(Dense(2, input_dim=1, activation='relu'))
+    model.add(Dense(1, activation='sigmoid'))
+    plot_model(model, to_file='model_plot.png', show_shapes=True, show_layer_names=True)
 
     # for epa in range(30, -1, -5):
     #     generate_data(3, 600, 1000, 0.1 * epa)

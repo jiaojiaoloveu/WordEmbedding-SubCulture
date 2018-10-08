@@ -25,6 +25,8 @@ def clean_and_tokenize(sentence):
 
 def read_single_repo(path):
     word_list = []
+    pull_request, issue_comment, commit_msg = 0, 0, 0
+
     if os.path.isfile(path):
         db = TinyDB(path)
         try:
@@ -36,10 +38,12 @@ def read_single_repo(path):
                         word_list.append(clean_and_tokenize(value['body']))
                     elif value['title'] is not None:
                         word_list.append(clean_and_tokenize(value['title']))
+                    issue_comment += 1
 
                 for value in entry['issue_comments']:
                     if value['body'] is not None:
                         word_list.append(clean_and_tokenize(value['body']))
+                    issue_comment += 1
 
                 for value in entry['pull_requests']:
                     if value['title'] is not None and value['body'] is not None:
@@ -48,21 +52,25 @@ def read_single_repo(path):
                         word_list.append(clean_and_tokenize(value['body']))
                     elif value['title'] is not None:
                         word_list.append(clean_and_tokenize(value['title']))
+                    pull_request += 1
 
                 for value in entry['review_comments']:
                     if value['body'] is not None:
                         word_list.append(clean_and_tokenize(value['body']))
+                    commit_msg += 1
 
                 for value in entry['commits']:
                     if value['commit']['message'] is not None:
                         word_list.append(clean_and_tokenize(value['commit']['message']))
+                    commit_msg += 1
 
                 for value in entry['commit_comments']:
                     if value['body'] is not None:
                         word_list.append(clean_and_tokenize(value['body']))
+                    commit_msg += 1
         except:
             print(path)
-    return word_list
+    return word_list, pull_request, issue_comment, commit_msg
 
 
 def read_single_wiki(path):
@@ -140,6 +148,9 @@ def read_single_onebillion(path):
 
 
 def read_all_files(path, corpus_type):
+
+    pull_request, issue_comment, commit_msg = 0, 0, 0
+
     if os.path.isdir(path):
         for root, dirs, files in os.walk(path):
             # print("Processing %s" % root)
@@ -147,9 +158,15 @@ def read_all_files(path, corpus_type):
                 file_full_path = os.path.join(root, file)
                 dump_file_path = os.path.join('../data/%s-wordlist-all' % corpus_type.value,
                                               os.path.relpath(file_full_path, path))
-                os.makedirs(os.path.dirname(dump_file_path), exist_ok=True)
+                # os.makedirs(os.path.dirname(dump_file_path), exist_ok=True)
+
                 if corpus_type == CorpusType.GITHUB:
-                    word_list = read_single_repo(path=file_full_path)
+                    word_list, add_pull_request, add_issue_comment, add_commit_msg = \
+                        read_single_repo(path=file_full_path)
+                    pull_request += add_pull_request
+                    issue_comment += add_issue_comment
+                    commit_msg += add_commit_msg
+
                 elif corpus_type == CorpusType.WIKIPEDIA:
                     word_list = read_single_wiki(path=file_full_path)
                 elif corpus_type == CorpusType.COHA:
@@ -164,8 +181,12 @@ def read_all_files(path, corpus_type):
                     word_list = read_single_onebillion(path=file_full_path)
                 else:
                     raise Exception("wrong file type")
-                with open(dump_file_path, 'w') as fp:
-                    json.dump(word_list, fp)
+                # with open(dump_file_path, 'w') as fp:
+                #     json.dump(word_list, fp)
+
+    print(pull_request)
+    print(issue_comment)
+    print(commit_msg)
 
 
 def read_all_wordlist(path):

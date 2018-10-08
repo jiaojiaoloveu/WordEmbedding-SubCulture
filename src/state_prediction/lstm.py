@@ -15,6 +15,8 @@ def baseline_model():
     model.add(Dense(300, activation='tanh'))
     model.add(Dense(3))
     model.compile(loss='mean_absolute_error', optimizer='adam', metrics=['accuracy'])
+    from keras.utils import plot_model
+    plot_model(model, to_file='state-lstm.png', show_shapes=True, show_layer_names=True)
     return model
 
 
@@ -63,11 +65,11 @@ def train():
     # evaluate(models, svo, np.array(get_comp_word_vector(svo, 'github')), 'github', epa_mean, epa_std)
     # evaluate(models, svo, np.array(get_comp_word_vector(svo, 'twitter')), 'twitter', epa_mean, epa_std)
 
-    gh_svo, gh_senti = read_gh_comments()
-    gh_wv = np.array(get_comp_word_vector(gh_svo))
-    gh_svo = np.array(gh_svo)
-    gh_senti = np.array(gh_senti)
-    predict(models[0], gh_svo, gh_wv, gh_senti, epa_mean, epa_std)
+    # gh_svo, gh_senti = read_gh_comments()
+    # gh_wv = np.array(get_comp_word_vector(gh_svo))
+    # gh_svo = np.array(gh_svo)
+    # gh_senti = np.array(gh_senti)
+    # predict(models[0], gh_svo, gh_wv, gh_senti, epa_mean, epa_std)
 
 
 def predict(model, svo, wv, senti, epa_mean, epa_std):
@@ -114,4 +116,5 @@ if __name__ == '__main__':
     ap = argparse.ArgumentParser("sentence epa lstm")
     ap.add_argument('--svo', type=int, required=True)
     args = vars(ap)
-    train()
+    # train()
+    baseline_model()
