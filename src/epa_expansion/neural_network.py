@@ -130,7 +130,7 @@ def train2():
             e, p, a = float(row['Evaluation_mean']), float(row['Potency_mean']), float(row['Activity_mean'])
             github_label[concept] = [round(d, 3) for d in [e, p, a]]
     word_seeds = list(github_label.keys())
-    word_seeds_train = random.sample(word_seeds, 0.7 * len(word_seeds))
+    word_seeds_train = random.sample(word_seeds, int(0.7 * len(word_seeds)))
     words_seeds_test = [w for w in word_seeds if w not in word_seeds_train]
 
     github_model = load_github_word_vectors(compare_model_path % 'github')
