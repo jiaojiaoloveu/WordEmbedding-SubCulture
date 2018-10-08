@@ -2,6 +2,8 @@ import json
 import os
 import time
 import argparse
+import csv
+import random
 import numpy as np
 from sample_seeds import __uni2norm
 from keras.models import Sequential
@@ -11,6 +13,7 @@ from keras.wrappers.scikit_learn import KerasRegressor
 from sklearn.model_selection import cross_val_score, KFold
 from gen_data import wv_map, generate_data, get_tokens, get_rand_tokens, get_token_wv
 from sample_seeds import __uni2norm, __norm2uni
+from gen_data import load_github_word_vectors, compare_model_path
 from align_wv_space import __comparison
 from gensim.models.word2vec import Word2Vec
 from gensim.models import KeyedVectors
@@ -116,6 +119,39 @@ def train(generate, seed_size, eval_size, epa, epochs, batch_size, dtype, unifor
                            dtype, uniform, epochs, batch_size)
 
     return model, mae
+
+
+def train2():
+    github_label = {}
+    with open('../data/GitHub_Aggregated.csv') as fp:
+        reader = csv.DictReader(fp)
+        for row in reader:
+            concept = row['Concept']
+            e, p, a = float(row['Evaluation_mean']), float(row['Potency_mean']), float(row['Activity_mean'])
+            github_label[concept] = [round(d, 3) for d in [e, p, a]]
+    word_seeds = list(github_label.keys())
+    word_seeds_train = random.sample(word_seeds, 0.7 * len(word_seeds))
+    words_seeds_test = [w for w in word_seeds if w not in word_seeds_train]
+
+    github_model = load_github_word_vectors(compare_model_path % 'github')
+    github_vocab = set(github_model.wv.vocab.keys())
+
+    def wv_epa(word_list):
+        feature, label = [], []
+        for w in word_list:
+            if w in github_vocab:
+                feature.append(github_model.wv[w])
+                label.append(github_label[w])
+        return np.array(feature), np.array(label)
+
+    feature_train, label_train = wv_epa(word_seeds_train)
+    feature_test, label_test = wv_epa(words_seeds_test)
+
+    print(feature_train.shape)
+    print(feature_test.shape)
+
+    model, mae = fit_model(feature_train, label_train, feature_test, label_test,
+                           'lr', False, 10, 10)
 
 
 def expansion(model, dic, culture):
@@ -299,14 +335,7 @@ if __name__ == '__main__':
     # main()
     # baseline_model()
 
-    from keras.models import Sequential
-    from keras.layers import Dense
-    from keras.utils.vis_utils import plot_model
-
-    model = Sequential()
-    model.add(Dense(2, input_dim=1, activation='relu'))
-    model.add(Dense(1, activation='sigmoid'))
-    plot_model(model, to_file='model_plot.png', show_shapes=True, show_layer_names=True)
+    train2()
 
     # for epa in range(30, -1, -5):
     #     generate_data(3, 600, 1000, 0.1 * epa)
